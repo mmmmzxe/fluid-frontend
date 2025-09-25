@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Search, User, ShoppingBag, Menu, X } from "lucide-react";
+import { Search, User, ShoppingBag, Menu, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useAppSelector } from "@/hooks/useRedux";
 
 const navigationItems = [
   { name: "Jewelry & Accessories", href: "/products?category=jewelry" },
@@ -15,6 +17,10 @@ const navigationItems = [
 ];
 
 export function Navbar() {
+  const cartItems = useAppSelector((state) => state.cart.items);
+  const favoritesItems = useAppSelector((state) => state.favorites.items);
+  const { isAuthenticated } = useAppSelector((state) => state.user);
+  const cartItemsCount = cartItems.reduce((total, item) => total + item.quantity, 0);
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
@@ -45,11 +51,30 @@ export function Navbar() {
 
           {/* Account & Shopping - right */}
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-              <User className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" asChild>
+              <Link to="/favorites" className="relative">
+                <Heart className="h-5 w-5" />
+                {favoritesItems.length > 0 && (
+                  <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs">
+                    {favoritesItems.length}
+                  </Badge>
+                )}
+              </Link>
             </Button>
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-              <ShoppingBag className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" asChild>
+              <Link to={isAuthenticated ? "/profile" : "/login"}>
+                <User className="h-5 w-5" />
+              </Link>
+            </Button>
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" asChild>
+              <Link to="/cart" className="relative">
+                <ShoppingBag className="h-5 w-5" />
+                {cartItemsCount > 0 && (
+                  <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs">
+                    {cartItemsCount}
+                  </Badge>
+                )}
+              </Link>
             </Button>
             
             {/* Mobile menu button */}

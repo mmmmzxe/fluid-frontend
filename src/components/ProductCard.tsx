@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Star } from "lucide-react";
+import { Heart, Star, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
+import { addToCart } from "@/store/slices/cartSlice";
+import { addToFavorites, removeFromFavorites } from "@/store/slices/favoritesSlice";
+import { toast } from "react-toastify";
 
 export interface Product {
   id: string;
@@ -25,8 +29,28 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, className }: ProductCardProps) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const dispatch = useAppDispatch();
+  const favorites = useAppSelector((state) => state.favorites.items);
   const [hoveredImage, setHoveredImage] = useState(product.image);
+  
+  const isWishlisted = favorites.some(item => item.id === product.id);
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    dispatch(addToCart(product));
+    toast.success("Added to cart!");
+  };
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isWishlisted) {
+      dispatch(removeFromFavorites(product.id));
+      toast.success("Removed from favorites");
+    } else {
+      dispatch(addToFavorites(product));
+      toast.success("Added to favorites");
+    }
+  };
 
   const isOnSale = product.originalPrice && product.originalPrice > product.price;
   const discountPercentage = isOnSale 
@@ -55,10 +79,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           variant="ghost"
           size="icon"
           className="absolute top-3 right-3 z-10 bg-white/80 hover:bg-white"
-          onClick={(e) => {
-            e.preventDefault();
-            setIsWishlisted(!isWishlisted);
-          }}
+          onClick={handleToggleFavorite}
         >
           <Heart 
             className={cn(
@@ -85,7 +106,11 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
         {/* Quick Actions */}
         <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <Button className="w-full bg-navy hover:bg-navy/90 text-white">
+          <Button 
+            className="w-full bg-navy hover:bg-navy/90 text-white"
+            onClick={handleAddToCart}
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
             Add to Cart
           </Button>
         </div>

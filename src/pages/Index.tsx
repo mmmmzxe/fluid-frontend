@@ -116,6 +116,33 @@ const Index = () => {
         </div>
       </section>
 
+      {/* ZARA-style Hero Section */}
+      <section className="py-16 bg-navy text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <h2 className="text-4xl lg:text-5xl font-bold">
+                CORAL
+              </h2>
+              <p className="text-lg text-gray-300">
+                Luxurious Yet Understated. The New Evening
+                Wear Collection Exclusively Offered At The
+                Reopened Giorgio Armani Boutique In Los
+                Angeles.
+              </p>
+              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-navy">
+                See Collection
+              </Button>
+            </div>
+            <div className="relative">
+              <div className="text-6xl lg:text-8xl font-bold text-white/10 absolute inset-0 flex items-center justify-center">
+                CORAL
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Best Sellers */}
       <section className="py-16 bg-gray-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -128,6 +155,42 @@ const Index = () => {
             {bestSellers.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Instagram Follow Section */}
+      <section className="py-16 bg-background">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold text-navy mb-8">
+            Follow Products And Discounts On Instagram
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-12">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="aspect-square bg-gray-light rounded-lg overflow-hidden">
+                <img
+                  src={`https://images.unsplash.com/photo-${1500000000000 + i}?w=200&h=200&fit=crop`}
+                  alt={`Instagram post ${i}`}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+            ))}
+          </div>
+          
+          <div className="max-w-2xl mx-auto">
+            <h3 className="text-2xl font-bold text-navy mb-4">
+              Or Subscribe To The Newsletter
+            </h3>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <input
+                type="email"
+                placeholder="Email Address..."
+                className="flex-1 px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <Button className="bg-navy hover:bg-navy/90 text-white px-8">
+                SUBMIT
+              </Button>
+            </div>
           </div>
         </div>
       </section>
