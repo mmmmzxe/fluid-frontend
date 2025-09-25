@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { ProductCard } from "@/components/ProductCard";
 import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
+import Footer  from "@/components/Footer";
 import { products, categories, priceRanges, sortOptions } from "@/data/products";
 import { cn } from "@/lib/utils";
 

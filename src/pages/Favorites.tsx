@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
+import  Footer from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { useAppSelector } from "@/hooks/useRedux";
 

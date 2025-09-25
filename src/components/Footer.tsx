@@ -1,107 +1,71 @@
-import { Link } from "react-router-dom";
-import { Instagram, Facebook, Twitter, Youtube } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram } from "react-icons/fa";
 
-const footerSections = [
-  {
-    title: "Shop",
-    links: [
-      { name: "All Products", href: "/products" },
-      { name: "New Arrivals", href: "/products?filter=new" },
-      { name: "Best Sellers", href: "/products?filter=bestsellers" },
-      { name: "Sale", href: "/products?filter=sale" },
-    ],
-  },
-  {
-    title: "Customer Care",
-    links: [
-      { name: "Contact Us", href: "/contact" },
-      { name: "Size Guide", href: "/size-guide" },
-      { name: "Shipping Info", href: "/shipping" },
-      { name: "Returns", href: "/returns" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { name: "About Us", href: "/about" },
-      { name: "Careers", href: "/careers" },
-      { name: "Press", href: "/press" },
-      { name: "Sustainability", href: "/sustainability" },
-    ],
-  },
-];
-
-export function Footer() {
+export default function Footer() {
   return (
-    <footer className="bg-navy text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Newsletter Section */}
-        <div className="mb-12 text-center">
-          <h3 className="text-2xl font-semibold mb-4">Or Subscribe To The Newsletter</h3>
-          <div className="max-w-md mx-auto flex gap-2">
-            <Input
-              type="email"
-              placeholder="Email Address..."
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-            />
-            <Button variant="outline" className="border-white text-white hover:bg-white hover:text-navy">
-              Submit
-            </Button>
+    <footer className="bg-white border-t border-gray-200">
+      <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+        {/* Logo & Description */}
+        <div>
+          <h2 className="text-2xl font-semibold tracking-wide">CORAL</h2>
+          <p className="mt-4 text-gray-600 text-sm">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+            tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+          <div className="flex space-x-4 mt-4 text-gray-600">
+            <a href="#" className="hover:text-gray-900"><FaFacebookF /></a>
+            <a href="#" className="hover:text-gray-900"><FaTwitter /></a>
+            <a href="#" className="hover:text-gray-900"><FaLinkedinIn /></a>
+            <a href="#" className="hover:text-gray-900"><FaInstagram /></a>
           </div>
         </div>
 
-        {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          {/* Brand */}
-          <div>
-            <Link to="/" className="text-2xl font-bold tracking-wider mb-4 block">
-              CORAL
-            </Link>
-            <p className="text-white/80 text-sm mb-4">
-              Discover unique style with our curated collection of fashion, accessories, and lifestyle products.
-            </p>
-            <div className="flex space-x-4">
-              <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10">
-                <Instagram className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10">
-                <Facebook className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10">
-                <Twitter className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10">
-                <Youtube className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Footer Links */}
-          {footerSections.map((section) => (
-            <div key={section.title}>
-              <h4 className="font-semibold mb-4">{section.title}</h4>
-              <ul className="space-y-2">
-                {section.links.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      to={link.href}
-                      className="text-white/80 hover:text-white text-sm transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+        {/* Catalog */}
+        <div>
+          <h3 className="font-semibold mb-4">CATALOG</h3>
+          <ul className="space-y-2 text-sm text-gray-600">
+            <li><a href="#" className="hover:text-gray-900">Necklaces</a></li>
+            <li><a href="#" className="hover:text-gray-900">Hoodies</a></li>
+            <li><a href="#" className="hover:text-gray-900">Jewelry Box</a></li>
+            <li><a href="#" className="hover:text-gray-900">T-Shirt</a></li>
+            <li><a href="#" className="hover:text-gray-900">Jacket</a></li>
+          </ul>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-8 border-t border-white/20 text-center text-white/60 text-sm">
-          <p>&copy; 2024 CORAL. All rights reserved.</p>
+        {/* About Us */}
+        <div>
+          <h3 className="font-semibold mb-4">ABOUT US</h3>
+          <ul className="space-y-2 text-sm text-gray-600">
+            <li><a href="#" className="hover:text-gray-900">Our Producers</a></li>
+            <li><a href="#" className="hover:text-gray-900">Sitemap</a></li>
+            <li><a href="#" className="hover:text-gray-900">FAQ</a></li>
+            <li><a href="#" className="hover:text-gray-900">About Us</a></li>
+            <li><a href="#" className="hover:text-gray-900">Terms & Conditions</a></li>
+          </ul>
         </div>
+
+        {/* Customer Services */}
+        <div>
+          <h3 className="font-semibold mb-4">CUSTOMER SERVICES</h3>
+          <ul className="space-y-2 text-sm text-gray-600">
+            <li><a href="#" className="hover:text-gray-900">Contact Us</a></li>
+            <li><a href="#" className="hover:text-gray-900">Track Your Order</a></li>
+            <li><a href="#" className="hover:text-gray-900">Product Care & Repair</a></li>
+            <li><a href="#" className="hover:text-gray-900">Book An Appointment</a></li>
+            <li><a href="#" className="hover:text-gray-900">Shipping & Returns</a></li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div className="bg-gray-900 text-gray-400 text-sm py-4 px-6 flex flex-col md:flex-row justify-between items-center">
+        <p>© 2022 Coral, Inc.</p>
+        <div className="flex space-x-2 mt-2 md:mt-0">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa" className="h-6" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Mastercard-logo.png" alt="Mastercard" className="h-6" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="Paypal" className="h-6" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/American_Express_logo_%282018%29.svg" alt="Amex" className="h-6" />
+        </div>
+        <a href="#" className="mt-2 md:mt-0 hover:text-white">Scroll To Top ↑</a>
       </div>
     </footer>
   );

@@ -3,7 +3,7 @@ import { Minus, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
+import Footer from "@/components/Footer";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import { removeFromCart, updateQuantity } from "@/store/slices/cartSlice";
 import { toast } from "react-toastify";

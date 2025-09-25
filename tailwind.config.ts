@@ -52,6 +52,7 @@ export default {
           light: "hsl(var(--coral-light))",
           medium: "hsl(var(--coral-medium))",
           dark: "hsl(var(--coral-dark))",
+          charcoal: "hsl(var(--coral-charcoal))",
         },
         navy: "hsl(var(--navy))",
         gray: {

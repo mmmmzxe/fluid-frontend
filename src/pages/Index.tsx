@@ -3,8 +3,13 @@ import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ProductCard";
 import { products } from "@/data/products";
 import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
+
 import heroImage from "@/assets/hero-image.jpg";
+import brandBanner from "@/assets/brand-banner.png";
+import ExploreStyles from "./ExploreStyles";
+import CollectionsHero from "./CollectionsHero";
+import InstagramNewsletter from "./InstagramNewsletter";
+import Footer from "@/components/Footer";
 
 const brandLogos = [
   { name: "GRAPHIC STUDIO", logo: "GS" },
@@ -23,33 +28,7 @@ const Index = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative bg-gray-light">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <h1 className="text-4xl lg:text-5xl font-bold text-navy leading-tight">
-                Collections
-              </h1>
-              <p className="text-lg text-muted-foreground">
-                You Can Explore And Shop Many Different Collection
-                From Various Brands Here.
-              </p>
-              <Button asChild size="lg" className="bg-navy hover:bg-navy/90 text-white">
-                <Link to="/products">
-                  Shop Now
-                </Link>
-              </Button>
-            </div>
-            <div className="relative">
-              <img
-                src={heroImage}
-                alt="Fashion collection hero"
-                className="w-full h-auto rounded-2xl shadow-lg"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+  <CollectionsHero/>
 
       {/* Brand Logos */}
       <section className="py-16 bg-background">
@@ -70,7 +49,7 @@ const Index = () => {
           </div>
         </div>
       </section>
-
+      <ExploreStyles/>
       {/* Featured Products */}
       <section className="py-16 bg-gray-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -94,54 +73,50 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Newsletter Signup */}
-      <section className="py-16 bg-background">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-navy mb-4">
-            Or Subscribe To The Newsletter
-          </h2>
-          <p className="text-muted-foreground mb-8">
-            Get the latest updates on new collections, sales, and exclusive offers.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Email Address..."
-              className="flex-1 px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-            <Button className="bg-navy hover:bg-navy/90 text-white px-8">
-              Submit
-            </Button>
-          </div>
-        </div>
-      </section>
 
       {/* ZARA-style Hero Section */}
-      <section className="py-16 bg-navy text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <h2 className="text-4xl lg:text-5xl font-bold">
-                CORAL
-              </h2>
-              <p className="text-lg text-gray-300">
-                Luxurious Yet Understated. The New Evening
-                Wear Collection Exclusively Offered At The
-                Reopened Giorgio Armani Boutique In Los
-                Angeles.
-              </p>
-              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-navy">
-                See Collection
-              </Button>
-            </div>
-            <div className="relative">
-              <div className="text-6xl lg:text-8xl font-bold text-white/10 absolute inset-0 flex items-center justify-center">
-                CORAL
-              </div>
-            </div>
+      <section
+      className="relative h-[80vh] text-white"
+      style={{
+        backgroundImage: `url('${brandBanner}')`, // 👈 left side image background
+        backgroundSize: "cover",
+        backgroundPosition: "left center",
+      }}
+    >
+      {/* Dark overlay for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-black/60 to-black/50"></div>
+
+      <div className="relative max-w-7xl mx-auto h-full flex items-center px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 w-full">
+          {/* Left side (kept empty for image alignment) */}
+          <div></div>
+
+          {/* Right side text content */}
+          <div className="relative z-10 flex flex-col justify-center space-y-6">
+            {/* Big faded ZARA in background */}
+            <h1 className="absolute -top-16 -right-10 text-[8rem] lg:text-[12rem] font-bold text-white/10 leading-none z-0 select-none">
+              ZARA
+            </h1>
+
+            {/* Foreground small ZARA */}
+            <h2 className="text-3xl lg:text-4xl font-bold">ZARA</h2>
+
+            {/* Description */}
+            <p className="text-base lg:text-lg text-gray-300 max-w-md leading-relaxed">
+              Lustrous Yet Understated. The New Evening Wear Collection
+              Exclusively Offered At The Reopened Giorgio Armani Boutique In Los
+              Angeles.
+            </p>
+
+            {/* Button */}
+            <button className="px-6 py-3 w-fit border border-white text-white font-medium hover:bg-white hover:text-black transition">
+              See Collection
+            </button>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+
 
       {/* Best Sellers */}
       <section className="py-16 bg-gray-light">
@@ -158,42 +133,8 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      {/* Instagram Follow Section */}
-      <section className="py-16 bg-background">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-navy mb-8">
-            Follow Products And Discounts On Instagram
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-12">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="aspect-square bg-gray-light rounded-lg overflow-hidden">
-                <img
-                  src={`https://images.unsplash.com/photo-${1500000000000 + i}?w=200&h=200&fit=crop`}
-                  alt={`Instagram post ${i}`}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-            ))}
-          </div>
-          
-          <div className="max-w-2xl mx-auto">
-            <h3 className="text-2xl font-bold text-navy mb-4">
-              Or Subscribe To The Newsletter
-            </h3>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <input
-                type="email"
-                placeholder="Email Address..."
-                className="flex-1 px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <Button className="bg-navy hover:bg-navy/90 text-white px-8">
-                SUBMIT
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+<InstagramNewsletter/>
+  
 
       <Footer />
     </div>

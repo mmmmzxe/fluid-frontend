@@ -55,7 +55,7 @@ export function Navbar() {
               <Link to="/favorites" className="relative">
                 <Heart className="h-5 w-5" />
                 {favoritesItems.length > 0 && (
-                  <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs">
+                  <Badge className="absolute  text-center flex justify-center -top-2 -right-2 h-5 w-5 p-0 text-xs">
                     {favoritesItems.length}
                   </Badge>
                 )}
@@ -70,7 +70,7 @@ export function Navbar() {
               <Link to="/cart" className="relative">
                 <ShoppingBag className="h-5 w-5" />
                 {cartItemsCount > 0 && (
-                  <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs">
+                  <Badge className="absolute -top-2 text-center flex justify-center -right-2 h-5 w-5 p-0 text-xs">
                     {cartItemsCount}
                   </Badge>
                 )}
