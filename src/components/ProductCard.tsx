@@ -2,12 +2,22 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, Star, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
-import { addToCart } from "@/store/slices/cartSlice";
 import { addToFavorites, removeFromFavorites } from "@/store/slices/favoritesSlice";
+import { userApi } from '@/services/adminApi';
+import { useCart } from "@/hooks/useCart";
 import { toast } from "react-toastify";
+import { useProduct } from "@/hooks/useProduct";
 
 export interface Product {
   id: string;
@@ -15,6 +25,7 @@ export interface Product {
   price: number;
   originalPrice?: number;
   category: string;
+  subCategory?: string;
   image: string;
   rating: number;
   reviewCount: number;
@@ -22,6 +33,81 @@ export interface Product {
   isSale?: boolean;
   colors?: string[];
 }
+
+// API Product interface for backend data
+export interface ApiProduct {
+  _id: string;
+  titleEnglish: string;
+  titleArabic: string;
+  descriptionEnglish: string;
+  descriptionArabic: string;
+  price: number;
+  finalPrice: number;
+  discount?: number;
+  discountType?: string;
+  stock?: number;
+  category: string;
+  subCategory?: string;
+  mainImage?: {
+    secure_url: string;
+    public_id: string;
+    _id: string;
+  };
+  subImages?: Array<{
+    secure_url: string;
+    public_id: string;
+    _id: string;
+  }>;
+  variants?: Array<{
+    color: string;
+    size: Array<{
+      size?: string;
+      stock: number;
+      _id: string;
+    }>;
+    stock: number;
+    _id: string;
+  }>;
+  slugEnglish: string;
+  slugArabic: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Transform API product to frontend Product interface
+export const transformApiProduct = (apiProduct: ApiProduct): Product => {
+  if (!apiProduct || !apiProduct._id) {
+    throw new Error('Invalid product data');
+  }
+  
+  const isOnSale = apiProduct.discount && apiProduct.discount > 0;
+  const originalPrice = isOnSale ? apiProduct.price : undefined;
+  
+  // Extract colors from variants
+  const colors = apiProduct.variants?.map(variant => variant.color) || [];
+  
+  // Calculate if product is new (created within last 30 days)
+  const createdAt = new Date(apiProduct.createdAt);
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const isNew = createdAt > thirtyDaysAgo;
+  
+  return {
+    id: apiProduct._id,
+    name: apiProduct.titleEnglish || 'Unnamed Product',
+    price: apiProduct.finalPrice || 0,
+    originalPrice: originalPrice,
+    category: apiProduct.category || 'uncategorized',
+    subCategory: apiProduct.subCategory,
+    image: apiProduct.mainImage?.secure_url || 
+           (apiProduct.subImages && apiProduct.subImages.length > 0 ? apiProduct.subImages[0].secure_url : '/placeholder.svg'),
+    rating: 4.5, // Default rating since not provided in API
+    reviewCount: Math.floor(Math.random() * 200) + 10, // Mock review count
+    isNew: isNew,
+    isSale: isOnSale,
+    colors: colors
+  };
+};
 
 interface ProductCardProps {
   product: Product;
@@ -31,24 +117,96 @@ interface ProductCardProps {
 export function ProductCard({ product, className }: ProductCardProps) {
   const dispatch = useAppDispatch();
   const favorites = useAppSelector((state) => state.favorites.items);
+  const { isAuthenticated } = useAppSelector((state) => state.user);
+  const { addItemToCart, loading } = useCart();
   const [hoveredImage, setHoveredImage] = useState(product.image);
+  const { fetchProductById } = useProduct();
+
+  // Variant selection dialog state
+  const [showVariantDialog, setShowVariantDialog] = useState(false);
+  const [detail, setDetail] = useState<any | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string>("");
+  const [selectedSize, setSelectedSize] = useState<string>("");
   
   const isWishlisted = favorites.some(item => item.id === product.id);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const openVariantDialog = async (e: React.MouseEvent) => {
     e.preventDefault();
-    dispatch(addToCart(product));
-    toast.success("Added to cart!");
+    try {
+      const data = await fetchProductById(product.id);
+      setDetail(data);
+      if (data?.variants && data.variants.length > 0) {
+        const firstColor = data.variants[0].color;
+        setSelectedColor(firstColor);
+        const firstSize = data.variants[0].size?.[0];
+        if (firstSize) {
+          if (firstSize.size) setSelectedSize(String(firstSize.size));
+          else {
+            const keys = Object.keys(firstSize).filter(k => k !== 'stock' && k !== '_id');
+            setSelectedSize(keys.length ? String(firstSize[keys[0]]) : "M");
+          }
+        }
+      }
+      setShowVariantDialog(true);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to load product variants");
+    }
   };
 
-  const handleToggleFavorite = (e: React.MouseEvent) => {
+  const confirmAddToCart = async () => {
+    try {
+      if (!selectedColor || !selectedSize || !detail) {
+        toast.error("Please choose color and size");
+        return;
+      }
+      const selectedVariant = detail.variants?.find((v: any) => v.color === selectedColor);
+      const variantId = selectedVariant?._id || detail._id;
+      const sizeObj = selectedVariant?.size?.find((s: any) => {
+        if (s.size) return s.size === selectedSize;
+        const keys = Object.keys(s).filter((k) => k !== 'stock' && k !== '_id');
+        return keys.length > 0 && s[keys[0]] === selectedSize;
+      });
+      const sizeId = sizeObj?._id || detail._id;
+
+      await addItemToCart({
+        productId: detail._id,
+        variantId,
+        sizeId,
+        quantity: 1,
+        variant: {
+          size: selectedSize,
+          color: selectedColor,
+        },
+      });
+      toast.success("Added to cart!");
+      setShowVariantDialog(false);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to add to cart");
+    }
+  };
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (isWishlisted) {
-      dispatch(removeFromFavorites(product.id));
-      toast.success("Removed from favorites");
-    } else {
-      dispatch(addToFavorites(product));
-      toast.success("Added to favorites");
+
+    if (!isAuthenticated) {
+      toast.error('Please log in to manage favorites');
+      return;
+    }
+
+    try {
+      // Call backend to add/remove favorite depending on current state
+      if (isWishlisted) {
+        await userApi.removeFromFavorites(product.id);
+        dispatch(removeFromFavorites(product.id));
+        toast.success('Removed from favorites');
+      } else {
+        await userApi.addToFavorites(product.id);
+        dispatch(addToFavorites(product));
+        toast.success('Added to favorites');
+      }
+    } catch (err: any) {
+      console.error('Failed to toggle favorite', err);
+      toast.error(err?.response?.data?.message || 'Failed to update favorites');
     }
   };
 
@@ -58,6 +216,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
     : 0;
 
   return (
+    <>
     <div className={cn("group relative", className)}>
       <div className="relative bg-gray-light rounded-lg overflow-hidden">
         {/* Badges */}
@@ -107,11 +266,13 @@ export function ProductCard({ product, className }: ProductCardProps) {
         {/* Quick Actions */}
         <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <Button 
-            className="w-full bg-navy hover:bg-navy/90 text-white"
-            onClick={handleAddToCart}
+            variant="shop"
+            className="w-full"
+            onClick={openVariantDialog}
+            disabled={loading}
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
-            Add to Cart
+            {loading ? "Adding..." : "Add to Cart"}
           </Button>
         </div>
       </div>
@@ -175,5 +336,83 @@ export function ProductCard({ product, className }: ProductCardProps) {
         )}
       </div>
     </div>
+
+    {/* Variant Selection Dialog */}
+    <Dialog open={showVariantDialog} onOpenChange={setShowVariantDialog}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Choose Size and Color</DialogTitle>
+          <DialogDescription>
+            Please select your preferred color and size before adding to cart.
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* Colors */}
+        {detail?.variants?.length > 0 && (
+          <div className="space-y-2">
+            <div className="text-sm font-medium">Color</div>
+            <div className="flex flex-wrap gap-2">
+              {detail.variants.map((v: any, idx: number) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setSelectedColor(v.color);
+                    const firstSize = v.size?.[0];
+                    if (firstSize) {
+                      if (firstSize.size) setSelectedSize(String(firstSize.size));
+                      else {
+                        const keys = Object.keys(firstSize).filter(k => k !== 'stock' && k !== '_id');
+                        setSelectedSize(keys.length ? String(firstSize[keys[0]]) : "M");
+                      }
+                    }
+                  }}
+                  className={cn(
+                    "px-3 py-1 rounded border text-sm",
+                    selectedColor === v.color ? "border-navy" : "border-border hover:border-gray-400"
+                  )}
+                  style={{ backgroundColor: String(v.color) }}
+                  title={v.color}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Sizes */}
+        {detail && (
+          <div className="space-y-2">
+            <div className="text-sm font-medium">Size</div>
+            <div className="flex flex-wrap gap-2">
+              {(detail.variants?.find((v: any) => v.color === selectedColor)?.size || []).map((s: any, i: number) => {
+                const display = s.size ? s.size : (() => {
+                  const keys = Object.keys(s).filter(k => k !== 'stock' && k !== '_id');
+                  return keys.length ? String(s[keys[0]]) : 'M';
+                })();
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedSize(display)}
+                    className={cn(
+                      "px-3 py-1 rounded border text-sm",
+                      selectedSize === display ? "border-navy" : "border-border hover:border-gray-400"
+                    )}
+                  >
+                    {display}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setShowVariantDialog(false)}>Cancel</Button>
+          <Button onClick={confirmAddToCart} disabled={!selectedColor || !selectedSize || loading}>
+            {loading ? "Adding..." : "Add to Cart"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

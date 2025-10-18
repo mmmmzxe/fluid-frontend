@@ -1,13 +1,14 @@
 import { FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram } from "react-icons/fa";
-
+import logo from "@/assets/Logo.png";
+import { Link } from "react-router-dom";
 export default function Footer() {
   return (
     <footer className="bg-white border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Logo & Description */}
         <div>
-          <h2 className="text-2xl font-semibold tracking-wide">CORAL</h2>
-          <p className="mt-4 text-gray-600 text-sm">
+         <img src={logo} alt="logo" className=" h-40" />
+          <p className=" text-gray-600 text-sm">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
             tempor incididunt ut labore et dolore magna aliqua.
           </p>
@@ -47,7 +48,7 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold mb-4">CUSTOMER SERVICES</h3>
           <ul className="space-y-2 text-sm text-gray-600">
-            <li><a href="#" className="hover:text-gray-900">Contact Us</a></li>
+            <li><Link to="/contact" className="hover:text-gray-900">Contact Us</Link></li>
             <li><a href="#" className="hover:text-gray-900">Track Your Order</a></li>
             <li><a href="#" className="hover:text-gray-900">Product Care & Repair</a></li>
             <li><a href="#" className="hover:text-gray-900">Book An Appointment</a></li>
@@ -57,13 +58,11 @@ export default function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="bg-gray-900 text-gray-400 text-sm py-4 px-6 flex flex-col md:flex-row justify-between items-center">
-        <p>© 2022 Coral, Inc.</p>
+      <div className="bg-primary text-gray-200 text-sm py-4 px-6 flex flex-col md:flex-row justify-between items-center">
+        <p>© 2018 Extrachic, Inc.</p>
         <div className="flex space-x-2 mt-2 md:mt-0">
           <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa" className="h-6" />
-          <img src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Mastercard-logo.png" alt="Mastercard" className="h-6" />
           <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="Paypal" className="h-6" />
-          <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/American_Express_logo_%282018%29.svg" alt="Amex" className="h-6" />
         </div>
         <a href="#" className="mt-2 md:mt-0 hover:text-white">Scroll To Top ↑</a>
       </div>

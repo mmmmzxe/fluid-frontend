@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,8 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import Footer  from "@/components/Footer";
-import { useAppDispatch } from "@/hooks/useRedux";
-import { login } from "@/store/slices/userSlice";
+import { useSignUp } from "@/hooks/useAuth";
 import { toast } from "react-toastify";
 
 const Signup = () => {
@@ -17,13 +16,12 @@ const Signup = () => {
     email: "",
     phone: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    address: ""
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
+  const { signUp, loading } = useSignUp();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -34,34 +32,30 @@ const Signup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
-    // Basic validation
     if (formData.password !== formData.confirmPassword) {
       toast.error("Passwords don't match");
-      setIsLoading(false);
       return;
     }
 
     if (formData.password.length < 6) {
       toast.error("Password must be at least 6 characters");
-      setIsLoading(false);
       return;
     }
 
-    // Simulate signup - replace with actual authentication
-    setTimeout(() => {
-      const user = {
-        id: Math.random().toString(36).substr(2, 9),
+    try {
+      await signUp({
         name: formData.name,
         email: formData.email,
-        phone: formData.phone
-      };
-      dispatch(login(user));
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        phone: formData.phone,
+        address: formData.address,
+      });
       toast.success("Account created successfully!");
-      navigate("/profile");
-      setIsLoading(false);
-    }, 1000);
+    } catch (err: any) {
+      toast.error(err?.message || "Signup failed");
+    }
   };
 
   return (
@@ -110,6 +104,19 @@ const Signup = () => {
                   type="tel"
                   placeholder="Enter your phone number"
                   value={formData.phone}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  name="address"
+                  type="text"
+                  placeholder="Enter your address"
+                  value={formData.address}
                   onChange={handleChange}
                   required
                 />
@@ -171,8 +178,8 @@ const Signup = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating Account..." : "Create Account"}
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
 

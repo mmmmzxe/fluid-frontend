@@ -1,0 +1,311 @@
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Card } from '@/components/ui/card';
+import { Navbar } from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import { orderApi, shippingApi, Shipping } from '@/services/adminApi';
+import { toast } from 'react-toastify';
+import { useAppSelector } from '@/hooks/useRedux';
+import { useCart } from '@/hooks/useCart';
+import { useProduct } from '@/hooks/useProduct';
+import { Loader2 } from 'lucide-react';
+
+const OrderPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAppSelector((s) => s.user);
+  const { checkoutWithoutLogin, cart, fetchCart } = useCart();
+  const { fetchProductById } = useProduct();
+
+  // Shared fields
+  const [address, setAddress] = useState('nasr city');
+  const [phone, setPhone] = useState('01020692878');
+  const [note, setNote] = useState('order note');
+  const [paymentWay, setPaymentWay] = useState('card');
+  const [shippingOptions, setShippingOptions] = useState<Shipping[]>([]);
+  const [shippingId, setShippingId] = useState<string>('');
+  // Guest-only fields
+  const [firstName, setFirstName] = useState('abdullah');
+  const [lastName, setLastName] = useState('mostafa');
+  const [email, setEmail] = useState('abdullahmostafa737@gmail.com');
+  const [discountPercent, setDiscountPercent] = useState<number>(10);
+  const [loading, setLoading] = useState(false);
+  
+  // States for guest cart details
+  const [detailedCart, setDetailedCart] = useState<any[]>([]);
+  const [isGuestDetailsLoading, setIsGuestDetailsLoading] = useState(false);
+
+
+  // Load base cart and shipping options
+  useEffect(() => {
+    fetchCart().catch(() => {});
+    (async () => {
+      try {
+        const res = await shippingApi.getAll();
+        const list = res.data || [];
+        setShippingOptions(list);
+        if (list.length > 0) setShippingId(list[0]._id);
+      } catch (e: any) {
+        // silent
+      }
+    })();
+  }, [fetchCart]);
+
+  // Fetch full product details for guest users
+  useEffect(() => {
+    const augmentGuestCart = async () => {
+      if (isAuthenticated) {
+        setDetailedCart(cart);
+        return;
+      }
+      if (cart.length > 0) {
+        const needsDetails = cart.some(item => typeof item.productId === 'string');
+        if (needsDetails) {
+          setIsGuestDetailsLoading(true);
+          try {
+            const augmentedItems = await Promise.all(
+              cart.map(async (item: any) => {
+                if (typeof item.productId === 'string') {
+                  const productDetails = await fetchProductById(item.productId);
+                  return { ...item, productId: productDetails };
+                }
+                return item;
+              })
+            );
+            setDetailedCart(augmentedItems);
+          } catch (error) {
+            console.error("Error fetching product details for guest order:", error);
+            toast.error("Could not load order details.");
+          } finally {
+            setIsGuestDetailsLoading(false);
+          }
+        } else {
+          setDetailedCart(cart);
+        }
+      } else {
+        setDetailedCart([]);
+      }
+    };
+    augmentGuestCart();
+  }, [cart, isAuthenticated, fetchProductById]);
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Basic validation
+    if (!address.trim() || !phone.trim()) {
+      return toast.error('Address and Phone are required');
+    }
+    if (!isAuthenticated && (!firstName.trim() || !lastName.trim() || !email.trim())) {
+        return toast.error('First Name, Last Name, and Email are required for guest checkout.');
+    }
+
+    setLoading(true);
+    try {
+      let createOrderResponse;
+      
+      // Step 1: Create the order (for both guests and logged-in users)
+      if (isAuthenticated) {
+        const payload = { address, phone, note, paymentWay, shippingId };
+        createOrderResponse = await orderApi.create(payload);
+      } else {
+        const payload = { firstName, lastName, address, phone, note, paymentWay, shippingId, email, discountPercent };
+        createOrderResponse = await checkoutWithoutLogin(payload);
+      }
+      
+      // Step 2: Handle based on payment method
+      if (paymentWay === 'cash') {
+        toast.success(isAuthenticated ? 'Order created successfully' : 'Order placed successfully');
+        navigate('/');
+        return;
+      }
+      
+      if (paymentWay === 'card') {
+        // Step 3: Extract Order ID from the response robustly
+        let orderId;
+        const responseData = createOrderResponse?.data || createOrderResponse;
+
+        if (responseData?.order?.order?._id) {
+          orderId = responseData.order.order._id;
+        } else if (responseData?.order?._id) {
+          orderId = responseData.order._id;
+        } else if (responseData?._id) {
+          orderId = responseData._id;
+        }
+
+        if (!orderId) {
+          console.error("Failed to parse order ID from response:", createOrderResponse);
+          throw new Error("Could not retrieve Order ID from the server response.");
+        }
+        
+        // Step 4: Get the payment URL based on user authentication status
+        let paymentResponse;
+        if (isAuthenticated) {
+          paymentResponse = await orderApi.getPaymobUrlForUser(orderId);
+        } else {
+          paymentResponse = await orderApi.getPaymobUrlForGuest(orderId);
+        }
+        
+        // Step 5: Redirect to the payment URL in a new tab
+        // The URL is nested inside the 'data' property
+        const paymentUrl = paymentResponse?.data?.url;
+
+        if (paymentUrl) {
+          toast.info("Redirecting to payment gateway...");
+          window.open(paymentUrl, '_blank'); // Open in a new tab
+          navigate('/profile'); // Redirect current page to orders/confirmation page
+        } else {
+          console.error("Payment response did not contain a URL:", paymentResponse);
+          throw new Error("Could not retrieve payment URL.");
+        }
+        return; // Stop further execution
+      }
+
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to create order');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const itemsTotal = detailedCart.reduce((sum, it) => sum + ((it.productId?.finalPrice || 0) * (it.quantity || 1)), 0);
+  const selectedShippingCost = shippingOptions.find(opt => opt._id === shippingId)?.price || 0;
+  const finalTotal = itemsTotal + selectedShippingCost;
+
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <div className="max-w-5xl mx-auto p-6">
+        <h1 className="text-2xl font-semibold mb-4">Checkout</h1>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Order Form */}
+          <Card className="p-6 lg:col-span-2">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {!isAuthenticated && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">First Name</label>
+                    <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Last Name</label>
+                    <Input value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium mb-1">Email</label>
+                    <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium mb-1">Discount Percent</label>
+                    <Input type="number" value={discountPercent} onChange={(e) => setDiscountPercent(Number(e.target.value))} />
+                  </div>
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium mb-1">Address</label>
+                <Input value={address} onChange={(e) => setAddress(e.target.value)} required />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Phone</label>
+                <Input value={phone} onChange={(e) => setPhone(e.target.value)} required />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Note</label>
+                <Textarea value={note} onChange={(e) => setNote(e.target.value)} />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Payment Method</label>
+                <select value={paymentWay} onChange={(e) => setPaymentWay(e.target.value)} className="w-full border rounded-md p-2 bg-background">
+                  <option value="card">Card</option>
+                  <option value="cash">Cash</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Shipping</label>
+                <select
+                  value={shippingId}
+                  onChange={(e) => setShippingId(e.target.value)}
+                  className="w-full border rounded-md p-2 bg-background"
+                  required
+                >
+                  {shippingOptions.length === 0 && <option>Loading options...</option>}
+                  {shippingOptions.map((opt) => (
+                    <option key={opt._id} value={opt._id}>
+                      {opt.government || opt._id} {opt.price ? `- $${opt.price}` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex justify-end">
+                <Button type="submit" disabled={loading || isGuestDetailsLoading}>
+                  {loading 
+                    ? 'Processing...' 
+                    : paymentWay === 'card' 
+                        ? 'Proceed to Payment' 
+                        : 'Create Order'}
+                </Button>
+              </div>
+            </form>
+          </Card>
+
+          {/* Cart Summary */}
+          <Card className="p-6 lg:col-span-1 h-max sticky top-6">
+            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+            <div className="space-y-4 max-h-[50vh] overflow-auto pr-2">
+              {isGuestDetailsLoading ? (
+                <div className="flex justify-center items-center py-10">
+                  <Loader2 className="animate-spin h-6 w-6 text-primary" />
+                </div>
+              ) : (
+                detailedCart.map((item: any) => (
+                  <div key={item._id || `${item.productId}-${item.variantId}-${item.sizeId}`} className="flex gap-3">
+                    <img
+                      src={item.productId?.mainImage?.secure_url || '/placeholder.svg'}
+                      alt={item.productId?.titleEnglish || 'Product'}
+                      className="w-16 h-16 rounded object-cover"
+                    />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium">{item.productId?.titleEnglish || 'Loading...'}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {item.variant?.color || 'color'} - {item.variant?.size || 'size'}
+                      </div>
+                      <div className="text-xs">Qty: {item.quantity || 1}</div>
+                    </div>
+                    <div className="text-sm font-semibold">${(item.productId?.finalPrice || 0).toFixed(2)}</div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="border-t mt-4 pt-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                    <span>Subtotal</span>
+                    <span>${itemsTotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                    <span>Shipping</span>
+                    <span>${selectedShippingCost.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between font-semibold text-lg">
+                    <span>Total</span>
+                    <span>${finalTotal.toFixed(2)}</span>
+                </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+      <Footer />
+    </div>
+  );
+};
+
+export default OrderPage;
+

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,39 +7,27 @@ import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useAppDispatch } from "@/hooks/useRedux";
-import { login } from "@/store/slices/userSlice";
 import { toast } from "react-toastify";
+import { useSignIn } from "@/hooks/useAuth";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
+  const { signIn, loading } = useSignIn();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    // Simulate login - replace with actual authentication
-    setTimeout(() => {
-      if (email && password) {
-        const user = {
-          id: "1",
-          name: "John Doe",
-          email: email,
-          phone: "+1 (555) 123-4567"
-        };
-        dispatch(login(user));
-        toast.success("Login successful!");
-        navigate("/profile");
+    try {
+      const result = await signIn({ email, password });
+      if (result?.user?.role === 'superAdmin' || result?.user?.role === 'admin') {
+        toast.success("Login successful! Redirecting to admin dashboard...");
       } else {
-        toast.error("Please fill in all fields");
+        toast.success("Login successful! Redirecting to profile...");
       }
-      setIsLoading(false);
-    }, 1000);
+    } catch (err: any) {
+      toast.error(err?.message || "Login failed");
+    }
   };
 
   return (
@@ -93,12 +81,17 @@ const Login = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Signing In..." : "Sign In"}
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Signing In..." : "Sign In"}
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
+            <div className="mt-6 text-center space-y-2">
+              <p className="text-sm text-muted-foreground">
+                <Link to="/forgot-password" className="text-primary hover:underline">
+                  Forgot password?
+                </Link>
+              </p>
               <p className="text-sm text-muted-foreground">
                 Don't have an account?{" "}
                 <Link to="/signup" className="text-primary hover:underline">

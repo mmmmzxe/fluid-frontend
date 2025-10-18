@@ -6,9 +6,28 @@ import { Badge } from "@/components/ui/badge";
 import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAppSelector } from "@/hooks/useRedux";
+import { useOrders } from "@/hooks/useOrders";
+import { useSignIn } from "@/hooks/useAuth";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 const Profile = () => {
   const { user, orders, isAuthenticated } = useAppSelector((state) => state.user);
+  const { fetchOrders, loading: ordersLoading } = useOrders();
+  const { signOut } = useSignIn();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchOrders().catch((err) => {
+        console.error("Failed to fetch orders:", err);
+      });
+    }
+  }, [isAuthenticated, fetchOrders]);
+
+  const handleLogout = () => {
+    signOut();
+    toast.success("Logged out successfully");
+  };
 
   if (!isAuthenticated || !user) {
     return (
@@ -74,7 +93,11 @@ const Profile = () => {
                     <Settings className="h-4 w-4 mr-2" />
                     Edit Profile
                   </Button>
-                  <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start text-red-600 hover:text-red-700"
+                    onClick={handleLogout}
+                  >
                     <LogOut className="h-4 w-4 mr-2" />
                     Logout
                   </Button>
@@ -93,7 +116,12 @@ const Profile = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {orders.length === 0 ? (
+                {ordersLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Loading orders...</p>
+                  </div>
+                ) : orders.length === 0 ? (
                   <div className="text-center py-8">
                     <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <p className="text-muted-foreground">No orders yet</p>
@@ -104,12 +132,14 @@ const Profile = () => {
                 ) : (
                   <div className="space-y-4">
                     {orders.map((order) => (
-                      <Card key={order.id} className="border-l-4 border-l-primary">
+                      <Card key={order._id} className="border-l-4 border-l-primary">
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start mb-2">
                             <div>
-                              <p className="font-medium">Order #{order.id}</p>
-                              <p className="text-sm text-muted-foreground">{order.date}</p>
+                              <p className="font-medium">Order #{order._id.slice(-6)}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {new Date(order.createdAt).toLocaleDateString()}
+                              </p>
                             </div>
                             <Badge className={getStatusColor(order.status)}>
                               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
@@ -117,22 +147,41 @@ const Profile = () => {
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                              <p className="text-sm font-medium mb-1">Items ({order.items.length})</p>
-                              <div className="space-y-1">
-                                {order.items.slice(0, 2).map((item) => (
-                                  <p key={item.id} className="text-sm text-muted-foreground">
-                                    {item.name} x{item.quantity}
-                                  </p>
-                                ))}
-                                {order.items.length > 2 && (
-                                  <p className="text-sm text-muted-foreground">
-                                    +{order.items.length - 2} more items
-                                  </p>
-                                )}
-                              </div>
+                              {(() => {
+                                const orderItems: any[] = (order as any).items || (order as any).products || [];
+                                return (
+                                  <>
+                                    <p className="text-sm font-medium mb-1">Items ({orderItems.length})</p>
+                                    <div className="space-y-1">
+                                      {orderItems.slice(0, 2).map((item: any, index: number) => (
+                                  <div key={index} className="flex items-center gap-2">
+                                          {item.product?.mainImage?.secure_url && (
+                                      <img
+                                              src={item.product.mainImage.secure_url}
+                                              alt={item.product.titleEnglish}
+                                        className="w-8 h-8 rounded object-cover"
+                                      />
+                                    )}
+                                    <div>
+                                      <p className="text-sm text-muted-foreground">
+                                              {(item.product?.titleEnglish || item.name || 'Item')} {item.variant ? `(${item.variant.color}, ${item.variant.size})` : ''} x{item.quantity}
+                                      </p>
+                                    </div>
+                                  </div>
+                                      ))}
+                                      {orderItems.length > 2 && (
+                                        <p className="text-sm text-muted-foreground">
+                                          +{orderItems.length - 2} more items
+                                        </p>
+                                      )}
+                                    </div>
+                                  </>
+                                );
+                              })()}
+                              
                             </div>
                             <div className="text-right">
-                              <p className="text-lg font-semibold">${order.total.toFixed(2)}</p>
+                              <p className="text-lg font-semibold">${(order as any).totalAmount ? (order as any).totalAmount.toFixed(2) : (order as any).finalPrice?.toFixed(2)}</p>
                               <Button variant="outline" size="sm" className="mt-2">
                                 View Details
                               </Button>

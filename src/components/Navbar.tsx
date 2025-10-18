@@ -5,35 +5,30 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/hooks/useRedux";
-
-const navigationItems = [
-  { name: "Jewelry & Accessories", href: "/products?category=jewelry" },
-  { name: "Clothing & Shoes", href: "/products?category=clothing" },
-  { name: "Home & Living", href: "/products?category=home" },
-  { name: "Wedding & Party", href: "/products?category=wedding" },
-  { name: "Toys & Entertainment", href: "/products?category=toys" },
-  { name: "Art & Collectibles", href: "/products?category=art" },
-  { name: "Craft Supplies & Tools", href: "/products?category=craft" },
-];
+import { useCategories } from "@/hooks/useApi";
+import logo from "@/assets/LogoText.png";
+import logoNav from "@/assets/LogoaNav.png";
+import { motion } from "framer-motion";
 
 export function Navbar() {
-  const cartItems = useAppSelector((state) => state.cart.items);
   const favoritesItems = useAppSelector((state) => state.favorites.items);
-  const { isAuthenticated } = useAppSelector((state) => state.user);
-  const cartItemsCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const { isAuthenticated, cart } = useAppSelector((state) => state.user);
+  const { categories, loading: categoriesLoading } = useCategories();
+  const cartItemsCount = cart.reduce((total, item) => total + item.quantity, 0);
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
   const isActive = (href: string) => {
     if (href === "/" && location.pathname === "/") return true;
-    if (href !== "/" && location.pathname.startsWith(href.split('?')[0])) return true;
+    if (href !== "/" && location.pathname.startsWith(href.split("?")[0])) return true;
     return false;
   };
 
   return (
     <nav className="bg-background border-b border-border sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto ">
         {/* Top bar */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Search icon - left */}
           <div className="flex items-center">
@@ -43,10 +38,9 @@ export function Navbar() {
           </div>
 
           {/* Logo - center */}
-          <Link to="/" className="flex-shrink-0">
-            <div className="text-2xl font-bold tracking-wider text-navy">
-              CORAL
-            </div>
+          <Link to="/" className="flex-shrink-0 flex justify-center items-center">
+            <img src={logoNav} className="h-16" alt="Logo Nav" />
+            <img src={logo} className="object-cover h-12" alt="Logo" />
           </Link>
 
           {/* Account & Shopping - right */}
@@ -55,7 +49,7 @@ export function Navbar() {
               <Link to="/favorites" className="relative">
                 <Heart className="h-5 w-5" />
                 {favoritesItems.length > 0 && (
-                  <Badge className="absolute  text-center flex justify-center -top-2 -right-2 h-5 w-5 p-0 text-xs">
+                  <Badge className="absolute text-center flex justify-center -top-2 -right-2 h-5 w-5 p-0 text-xs">
                     {favoritesItems.length}
                   </Badge>
                 )}
@@ -76,7 +70,7 @@ export function Navbar() {
                 )}
               </Link>
             </Button>
-            
+
             {/* Mobile menu button */}
             <Button
               variant="ghost"
@@ -87,41 +81,95 @@ export function Navbar() {
               {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
+        </div></div>
+
+        {/* Text marquee before categories */}
+        <div className="overflow-hidden w-full bg-secondary text-primary-foreground border-t border-border py-2">
+          <motion.div
+            className="text-primary-foreground font-medium text-sm whitespace-nowrap"
+            animate={{ x: ["100%", "-100%"] }}
+            transition={{
+              repeat: Infinity,
+           
+              duration: 15,
+              ease: "linear",
+            }}
+          >
+            🌟 Discover our amazing categories and latest products 🌟
+            🌟 Discover our amazing categories and latest products 🌟
+            🌟 Discover our amazing categories and latest products 🌟
+
+          </motion.div>
         </div>
 
         {/* Navigation items - desktop */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="hidden md:flex items-center justify-center space-x-8 py-4 border-t border-border">
-          {navigationItems.map((item) => (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={cn(
-                "text-sm font-medium transition-colors hover:text-primary",
-                isActive(item.href) ? "text-primary" : "text-muted-foreground"
-              )}
-            >
-              {item.name}
-            </Link>
-          ))}
-        </div>
+          {categoriesLoading ? (
+            <div className="text-sm text-muted-foreground">Loading categories...</div>
+          ) : (
+            categories?.map((category) => (
+              <Link
+                key={category._id}
+                to={`/products?category=${category._id}`}
+                className={cn(
+                  "flex items-center space-x-2 text-sm font-medium transition-colors hover:text-primary group",
+                  isActive(`/products?category=${category._id}`) ? "text-primary" : "text-muted-foreground"
+                )}
+              >
+                {category.image?.secure_url && (
+                  <img
+                    src={category.image.secure_url}
+                    alt={category.nameEnglish || category.name}
+                    className="w-6 h-6 rounded-full object-cover"
+                  />
+                )}
+                <span>{category.nameEnglish || category.name}</span>
+              </Link>
+            ))
+          )}
+        </div></div>
 
         {/* Mobile navigation */}
         {isOpen && (
           <div className="md:hidden border-t border-border">
             <div className="py-4 space-y-2">
-              {navigationItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={cn(
-                    "block px-4 py-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent",
-                    isActive(item.href) ? "text-primary bg-accent" : "text-muted-foreground"
-                  )}
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
+              {/* All Products Link */}
+              <Link
+                to="/products"
+                className={cn(
+                  "block px-4 py-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent",
+                  isActive("/products") ? "text-primary bg-accent" : "text-muted-foreground"
+                )}
+                onClick={() => setIsOpen(false)}
+              >
+                All Products
+              </Link>
+
+              {categoriesLoading ? (
+                <div className="px-4 py-2 text-sm text-muted-foreground">Loading categories...</div>
+              ) : (
+                categories?.map((category) => (
+                  <Link
+                    key={category._id}
+                    to={`/products?category=${category._id}`}
+                    className={cn(
+                      "flex items-center space-x-3 px-4 py-2 text-sm font-medium transition-colors hover:text-primary hover:bg-accent",
+                      isActive(`/products?category=${category._id}`) ? "text-primary bg-accent" : "text-muted-foreground"
+                    )}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {category.image?.secure_url && (
+                      <img
+                        src={category.image.secure_url}
+                        alt={category.nameEnglish || category.name}
+                        className="w-6 h-6 rounded-full object-cover"
+                      />
+                    )}
+                    <span>{category.nameEnglish || category.name}</span>
+                  </Link>
+                ))
+              )}
             </div>
           </div>
         )}

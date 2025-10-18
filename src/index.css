@@ -9,18 +9,18 @@
     --background: 0 0% 100%;
     --foreground: 215 25% 15%;
 
-    --card: 0 0% 100%;
+    --card: 30 56% 93%;
     --card-foreground: 215 25% 15%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 15%;
 
     /* Coral brand colors */
-    --primary: 11 85% 70%;
+    --primary: 5 9% 28%;
     --primary-foreground: 0 0% 100%;
     --primary-hover: 11 85% 65%;
 
-    --secondary: 210 16% 98%;
+    --secondary: 20 68% 80%;
     --secondary-foreground: 215 25% 15%;
 
     --muted: 210 40% 96%;
@@ -115,18 +115,18 @@
     --background: 0 0% 99%;
     --foreground: 0 0% 15%;
 
-    --card: 0 0% 100%;
+    --card: 30 56% 93%;
     --card-foreground: 0 0% 15%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 15%;
 
     /* Sophisticated charcoal for primary elements */
-    --primary: 0 0% 20%;
+    --primary: 5 9% 28%;
     --primary-foreground: 0 0% 98%;
 
     /* Warm neutral secondary */
-    --secondary: 30 8% 95%;
+    --secondary: 20 68% 80%;
     --secondary-foreground: 0 0% 20%;
 
     /* Soft muted tones */
@@ -226,7 +226,9 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
-
+html{
+  overflow-x: hidden;
+}
 @layer base {
   * {
     @apply border-border;
