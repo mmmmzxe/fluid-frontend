@@ -127,11 +127,6 @@ export default function ProductDetail() {
   const discountPercentage = isOnSale ? product.discount : 0;
 
   const handleAddToCart = async () => {
-    if (!isAuthenticated) {
-      toast.error("Please log in to add items to cart");
-      return;
-    }
-
     if (!selectedSize) {
       toast.error("Please select a size");
       return;
@@ -145,18 +140,55 @@ export default function ProductDetail() {
         const keys = Object.keys(s).filter(key => key !== 'stock' && key !== '_id');
         return keys.length > 0 && s[keys[0]] === selectedSize;
       })?._id || product._id;
-      
-      await addItemToCart({
+
+      const cartItem = {
         productId: product._id,
         variantId,
         sizeId,
         quantity,
         variant: {
-          // API expects string values
           size: selectedSize,
           color: selectedColor
         }
-      });
+      };
+
+      if (!isAuthenticated) {
+        // Handle guest cart with localStorage
+        const rawCart = localStorage.getItem('guestCart');
+        let guestCart = rawCart ? JSON.parse(rawCart) : [];
+
+        // Generate a unique ID for the cart item
+        const itemId = Date.now().toString();
+        const newItem = {
+          ...cartItem,
+          _id: itemId,
+          productId: {
+            ...product,
+            _id: product._id
+          }
+        };
+
+        // Check if item with same variant and size exists
+        const existingItemIndex = guestCart.findIndex(
+          (item: any) => 
+            item.variantId === variantId && 
+            item.variant.size === selectedSize && 
+            item.variant.color === selectedColor
+        );
+
+        if (existingItemIndex > -1) {
+          // Update quantity if item exists
+          guestCart[existingItemIndex].quantity += quantity;
+        } else {
+          // Add new item if it doesn't exist
+          guestCart.push(newItem);
+        }
+
+        localStorage.setItem('guestCart', JSON.stringify(guestCart));
+      } else {
+        // Handle authenticated user cart
+        await addItemToCart(cartItem);
+      }
       
       toast.success("Added to cart!");
     } catch (err: any) {

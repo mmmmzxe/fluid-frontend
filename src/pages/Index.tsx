@@ -113,7 +113,10 @@ const Index = () => {
           </motion.div>
         </div>
       </motion.section>
-      <motion.div
+   
+      
+      <ExploreStyles/>
+     <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: false, amount: 0.3 }}
@@ -121,9 +124,6 @@ const Index = () => {
       >
         <TextVideoSection/>
       </motion.div>
-      
-      <ExploreStyles/>
-  
       {/* Featured Products */}
       <motion.section 
         className="py-16 bg-gray-light"

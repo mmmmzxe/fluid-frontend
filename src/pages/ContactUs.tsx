@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { supportApi } from '@/services/adminApi';
 import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
-import image from '@/assets/woman-red-floral.jpg';
+import image from '@/assets/6.jpg';
 
 const ContactUs: React.FC = () => {
   const [name, setName] = useState(' ');

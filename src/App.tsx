@@ -31,6 +31,7 @@ import AdminProfile from "./pages/admin/AdminProfile";
 import "react-toastify/dist/ReactToastify.css";
 import ContactUs from "./pages/ContactUs";
 import OrderPage from "./pages/Order";
+import { SearchResults } from "./pages/SearchResults";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/products" element={<Products />} />
             <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/search" element={<SearchResults />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/profile" element={<Profile />} />

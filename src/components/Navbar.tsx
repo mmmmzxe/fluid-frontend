@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Search, User, ShoppingBag, Menu, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,16 @@ export function Navbar() {
   const cartItemsCount = cart.reduce((total, item) => total + item.quantity, 0);
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+    }
+  };
 
   const isActive = (href: string) => {
     if (href === "/" && location.pathname === "/") return true;
@@ -32,9 +42,18 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Search icon - left */}
           <div className="flex items-center">
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-              <Search className="h-5 w-5" />
-            </Button>
+            <form onSubmit={handleSearch} className="flex items-center">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products..."
+                className="h-9 w-[200px] rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              />
+              <Button type="submit" variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground ml-1">
+                <Search className="h-5 w-5" />
+              </Button>
+            </form>
           </div>
 
           {/* Logo - center */}

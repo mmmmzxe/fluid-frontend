@@ -64,11 +64,11 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen ">
       <Navbar />
       
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Profile Sidebar */}
           <div className="lg:col-span-1">
             <Card>
@@ -107,7 +107,7 @@ const Profile = () => {
           </div>
 
           {/* Orders Section */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -130,10 +130,10 @@ const Profile = () => {
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-4 grid grid-cols-2 gap-3 justify-center items-center">
                     {orders.map((order) => (
-                      <Card key={order._id} className="border-l-4 border-l-primary">
-                        <CardContent className="p-4">
+                      <Card key={order._id} className="border-l-4  border-l-primary">
+                        <CardContent className="p-4 ">
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <p className="font-medium">Order #{order._id.slice(-6)}</p>
@@ -145,7 +145,7 @@ const Profile = () => {
                               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                             </Badge>
                           </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                               {(() => {
                                 const orderItems: any[] = (order as any).items || (order as any).products || [];
@@ -153,7 +153,7 @@ const Profile = () => {
                                   <>
                                     <p className="text-sm font-medium mb-1">Items ({orderItems.length})</p>
                                     <div className="space-y-1">
-                                      {orderItems.slice(0, 2).map((item: any, index: number) => (
+                                      {orderItems.map((item: any, index: number) => (
                                   <div key={index} className="flex items-center gap-2">
                                           {item.product?.mainImage?.secure_url && (
                                       <img
@@ -167,6 +167,7 @@ const Profile = () => {
                                               {(item.product?.titleEnglish || item.name || 'Item')} {item.variant ? `(${item.variant.color}, ${item.variant.size})` : ''} x{item.quantity}
                                       </p>
                                     </div>
+                                    
                                   </div>
                                       ))}
                                       {orderItems.length > 2 && (
@@ -182,9 +183,7 @@ const Profile = () => {
                             </div>
                             <div className="text-right">
                               <p className="text-lg font-semibold">${(order as any).totalAmount ? (order as any).totalAmount.toFixed(2) : (order as any).finalPrice?.toFixed(2)}</p>
-                              <Button variant="outline" size="sm" className="mt-2">
-                                View Details
-                              </Button>
+                            
                             </div>
                           </div>
                         </CardContent>

@@ -2,7 +2,7 @@ import React from "react";
 
 export default function InstagramNewsletter() {
   return (
-    <section className="bg-[#dbdbdb] py-16 px-6">
+    <section className="bg-secondary text-white py-16 px-6">
       <div className="max-w-6xl mx-auto text-center">
         {/* Instagram Heading */}
         <h2 className="text-2xl md:text-3xl font-bold mb-8">
@@ -44,25 +44,8 @@ export default function InstagramNewsletter() {
 </div>
 
 
-        {/* Newsletter Heading */}
-        <h3 className="text-2xl md:text-3xl font-bold mb-6">
-          Or Subscribe To The Newsletter
-        </h3>
-
-        {/* Newsletter Form */}
-        <form className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto">
-          <input
-            type="email"
-            placeholder="Email Address..."
-            className="w-full sm:flex-1 border-b border-gray-400 bg-transparent focus:outline-none focus:border-black py-2 text-sm"
-          />
-          <button
-            type="submit"
-            className="uppercase text-sm font-medium tracking-wider"
-          >
-            Submit
-          </button>
-        </form>
+      
+       
       </div>
     </section>
   );

@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
-import styleHero from "@/assets/style-hero.jpg";
-import manBlackOutfit from "@/assets/man-black-outfit.jpg";
-import womanWhiteOutfit from "@/assets/woman-white-outfit.jpg";
-import womanRedFloral from "@/assets/woman-red-floral.jpg";
-import manBlackJacket from "@/assets/man-black-jacket.jpg";
+import styleHero from "@/assets/5.jpg";
+import manBlackOutfit from "@/assets/1.jpg";
+import womanWhiteOutfit from "@/assets/2.jpg";
+import womanRedFloral from "@/assets/3.jpg";
+import manBlackJacket from "@/assets/4.jpg";
+
 
 const ExploreStyles = () => {
   const gridImages = [
@@ -39,7 +40,7 @@ const ExploreStyles = () => {
               <img
                 src={styleHero}
                 alt="Elegant woman in brown wrap dress"
-                className="w-full h-[600px] lg:h-[700px] object-cover"
+                className="w-full h-[700px] lg:h-[800px] object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
 
@@ -67,7 +68,7 @@ const ExploreStyles = () => {
                   <img
                     src={image.src}
                     alt={image.alt}
-                    className="w-full h-48 lg:h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-48 lg:h-[350px] object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
 

@@ -397,14 +397,6 @@ export default function Products() {
               </div>
             )}
 
-            {/* Load More (if needed) */}
-            {filteredProducts.length > 0 && !loading && (
-              <div className="text-center mt-12">
-                <Button variant="outline">
-                  Load More Products
-                </Button>
-              </div>
-            )}
           </main>
         </div>
       </div>
