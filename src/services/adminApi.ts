@@ -144,6 +144,7 @@ export interface Order {
   // Fields for guest users
   firstName?: string;
   lastName?: string;
+  paidAt?: string;
   email?: string;
 }
 

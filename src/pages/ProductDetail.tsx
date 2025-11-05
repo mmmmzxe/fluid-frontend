@@ -11,6 +11,8 @@ import { useCart } from "@/hooks/useCart";
 import { useAppSelector } from "@/hooks/useRedux";
 import { cn } from "@/lib/utils";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
+import { getProductTitle, getProductDescription } from "@/lib/i18nHelpers";
 
 const sizes = ["XS", "S", "M", "L", "XL"];
 const reviews = [
@@ -41,6 +43,7 @@ const reviews = [
 ];
 
 export default function ProductDetail() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const { fetchProductById, loading, error } = useProduct();
   const { addItemToCart, loading: cartLoading } = useCart();
@@ -85,7 +88,7 @@ export default function ProductDetail() {
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading product...</p>
+          <p className="text-muted-foreground">{t('productDetail.loadingProduct')}</p>
         </div>
         <Footer />
       </div>
@@ -97,12 +100,12 @@ export default function ProductDetail() {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <h1 className="text-2xl font-bold text-navy mb-4">Product Not Found</h1>
+          <h1 className="text-2xl font-bold text-navy mb-4">{t('productDetail.productNotFound')}</h1>
           <p className="text-muted-foreground mb-8">
-            {error || "The product you're looking for doesn't exist."}
+            {error || t('productDetail.productNotFoundMessage')}
           </p>
           <Button asChild>
-            <Link to="/products">Browse All Products</Link>
+            <Link to="/products">{t('productDetail.browseAllProducts')}</Link>
           </Button>
         </div>
         <Footer />
@@ -128,7 +131,7 @@ export default function ProductDetail() {
 
   const handleAddToCart = async () => {
     if (!selectedSize) {
-      toast.error("Please select a size");
+      toast.error(t('productDetail.selectSize'));
       return;
     }
 
@@ -190,9 +193,9 @@ export default function ProductDetail() {
         await addItemToCart(cartItem);
       }
       
-      toast.success("Added to cart!");
+      toast.success(t('productDetail.addToCart'));
     } catch (err: any) {
-      toast.error(err?.message || "Failed to add to cart");
+      toast.error(err?.message || t('common.error'));
     }
   };
 
@@ -203,11 +206,11 @@ export default function ProductDetail() {
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <nav className="text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-foreground">Home</Link>
+          <Link to="/" className="hover:text-foreground">{t('common.home')}</Link>
           <span className="mx-2">/</span>
-          <Link to="/products" className="hover:text-foreground">Products</Link>
+          <Link to="/products" className="hover:text-foreground">{t('nav.allProducts')}</Link>
           <span className="mx-2">/</span>
-          <span className="text-foreground">{product.titleEnglish}</span>
+          <span className="text-foreground">{getProductTitle(product)}</span>
         </nav>
       </div>
 
@@ -220,8 +223,10 @@ export default function ProductDetail() {
               <div className="col-span-4 aspect-square bg-gray-light rounded-lg overflow-hidden">
                 <img
                   src={activeImageUrl || product.mainImage?.secure_url || '/placeholder.svg'}
-                  alt={product.titleEnglish}
+                  alt={getProductTitle(product)}
                   className="w-full h-full object-cover"
+                  loading="eager"
+                  fetchPriority="high"
                 />
               </div>
               {/* Thumbnails */}
@@ -240,8 +245,9 @@ export default function ProductDetail() {
                     >
                       <img
                         src={image.secure_url}
-                        alt={`${product.titleEnglish} view ${index + 1}`}
+                        alt={`${getProductTitle(product)} ${t('common.viewMore')} ${index + 1}`}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                       />
                     </div>
                   );
@@ -255,15 +261,15 @@ export default function ProductDetail() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 {product.createdAt && new Date(product.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) && (
-                  <Badge variant="secondary" className="bg-navy text-white">NEW</Badge>
+                  <Badge variant="secondary" className="bg-navy text-white">{t('products.newArrivals')}</Badge>
                 )}
                 {isOnSale && (
                   <Badge variant="destructive" className="bg-primary text-white">
-                    -{discountPercentage}% OFF
+                    -{discountPercentage}% {t('productDetail.discount')}
                   </Badge>
                 )}
               </div>
-              <h1 className="text-3xl font-bold text-navy">{product.titleEnglish}</h1>
+              <h1 className="text-3xl font-bold text-navy">{getProductTitle(product)}</h1>
               
               {/* Rating */}
               <div className="flex items-center gap-2 mt-4">
@@ -301,7 +307,7 @@ export default function ProductDetail() {
             {/* Colors */}
             {availableColors.length > 0 && (
               <div>
-                <h3 className="font-medium mb-3">Color</h3>
+                <h3 className="font-medium mb-3">{t('productDetail.color')}</h3>
                 <div className="flex gap-2">
                   {availableColors.map((color, index) => (
                     <button
@@ -322,7 +328,7 @@ export default function ProductDetail() {
 
             {/* Sizes */}
             <div>
-              <h3 className="font-medium mb-3">Size</h3>
+              <h3 className="font-medium mb-3">{t('productDetail.size')}</h3>
               <div className="flex gap-2">
                 {availableSizes.map((size) => (
                   <button
@@ -343,7 +349,7 @@ export default function ProductDetail() {
 
             {/* Quantity */}
             <div>
-              <h3 className="font-medium mb-3">Quantity</h3>
+              <h3 className="font-medium mb-3">{t('productDetail.quantity')}</h3>
               <div className="flex items-center gap-4">
                 <div className="flex items-center border border-border rounded-lg">
                   <button
@@ -361,7 +367,7 @@ export default function ProductDetail() {
                   </button>
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  {product.stock ? `Only ${product.stock} left in stock` : "In stock"}
+                  {product.stock ? t('productDetail.onlyLeftInStock').replace('{count}', product.stock.toString()) : t('productDetail.inStock')}
                 </span>
               </div>
             </div>
@@ -370,7 +376,7 @@ export default function ProductDetail() {
             <div className="flex gap-4">
               <Button size="lg" className="flex-1" onClick={handleAddToCart} disabled={cartLoading}>
                 <ShoppingBag className="h-4 w-4 mr-2" />
-                {cartLoading ? "Adding..." : "Add to Cart"}
+                {cartLoading ? t('productDetail.adding') : t('productDetail.addToCart')}
               </Button>
               <Button
                 variant="outline"
@@ -391,15 +397,15 @@ export default function ProductDetail() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-6 border-t border-border">
               <div className="flex items-center gap-2">
                 <Truck className="h-5 w-5 text-primary" />
-                <span className="text-sm">Free Shipping</span>
+                <span className="text-sm">{t('productDetail.freeShipping')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <RotateCcw className="h-5 w-5 text-primary" />
-                <span className="text-sm">Easy Returns</span>
+                <span className="text-sm">{t('productDetail.easyReturns')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-primary" />
-                <span className="text-sm">2 Year Warranty</span>
+                <span className="text-sm">{t('productDetail.warranty')}</span>
               </div>
             </div>
           </div>
@@ -409,7 +415,7 @@ export default function ProductDetail() {
         <div className="mt-16">
           <div className="border-b border-border">
             <div className="flex space-x-8">
-              {["description", "reviews"].map((tab) => (
+              {["description", ""].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -420,7 +426,7 @@ export default function ProductDetail() {
                       : "border-transparent text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  {tab === "description" ? "Description" : "Reviews (12)"}
+                  {tab === "description" ? t('productDetail.description') : ``}
                 </button>
               ))}
             </div>
@@ -430,82 +436,16 @@ export default function ProductDetail() {
             {activeTab === "description" && (
               <div className="prose prose-sm max-w-none">
                 <p className="text-muted-foreground leading-relaxed">
-                  {product.descriptionEnglish || `This premium ${product.titleEnglish} combines style and comfort for the modern wardrobe. 
+                  {getProductDescription(product) || `This premium ${getProductTitle(product)} combines style and comfort for the modern wardrobe. 
                   Crafted from high-quality materials, it features a contemporary design that transitions 
                   seamlessly from casual to formal settings. The attention to detail and superior 
                   construction ensure lasting durability and timeless appeal.`}
                 </p>
-                <h4 className="font-semibold mt-6 mb-3">Features:</h4>
-                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                  <li>Premium fabric construction</li>
-                  <li>Modern, versatile design</li>
-                  <li>Comfortable fit for all-day wear</li>
-                  <li>Easy care and maintenance</li>
-                  <li>Available in multiple sizes and colors</li>
-                </ul>
+                
               </div>
             )}
 
-            {activeTab === "reviews" && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div>
-                    <h3 className="font-semibold mb-4">Customer Reviews</h3>
-                    <div className="space-y-4">
-                      {reviews.map((review) => (
-                        <div key={review.id} className="border border-border rounded-lg p-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">{review.name}</span>
-                              {review.verified && (
-                                <Badge variant="secondary" className="text-xs">Verified</Badge>
-                              )}
-                            </div>
-                            <span className="text-sm text-muted-foreground">{review.date}</span>
-                          </div>
-                          <div className="flex mb-2">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={cn(
-                                  "h-3 w-3",
-                                  i < review.rating
-                                    ? "fill-yellow-400 text-yellow-400"
-                                    : "text-gray-300"
-                                )}
-                              />
-                            ))}
-                          </div>
-                          <p className="text-sm text-muted-foreground">{review.comment}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-4">Write a Review</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Rating</label>
-                        <div className="flex gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="h-5 w-5 text-gray-300 hover:text-yellow-400 cursor-pointer" />
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Review</label>
-                        <textarea
-                          rows={4}
-                          className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                          placeholder="Share your thoughts about this product..."
-                        />
-                      </div>
-                      <Button>Submit Review</Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+      
           </div>
         </div>
 

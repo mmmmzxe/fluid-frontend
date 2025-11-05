@@ -1,25 +1,24 @@
 import { motion } from "framer-motion";
-import styleHero from "@/assets/5.jpg";
-import manBlackOutfit from "@/assets/1.jpg";
-import womanWhiteOutfit from "@/assets/2.jpg";
-import womanRedFloral from "@/assets/3.jpg";
-import manBlackJacket from "@/assets/4.jpg";
+import styleHero from "@/assets/5.webp";
+import manBlackOutfit from "@/assets/1.webp";
+import womanWhiteOutfit from "@/assets/2.webp";
+import womanRedFloral from "@/assets/3.webp";
+import manBlackJacket from "@/assets/4.webp";
 
+const gridImages = [
+  { src: manBlackOutfit, alt: "Man in black outfit", sale: true },
+  { src: womanWhiteOutfit, alt: "Woman in white outfit", sale: false },
+  { src: womanRedFloral, alt: "Woman in red floral dress", sale: false },
+  { src: manBlackJacket, alt: "Man in black jacket", sale: false },
+];
+
+// Animation settings
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0 },
+};
 
 const ExploreStyles = () => {
-  const gridImages = [
-    { src: manBlackOutfit, alt: "Man in black outfit", sale: true },
-    { src: womanWhiteOutfit, alt: "Woman in white outfit", sale: false },
-    { src: womanRedFloral, alt: "Woman in red floral dress", sale: false },
-    { src: manBlackJacket, alt: "Man in black jacket", sale: false },
-  ];
-
-  // إعدادات الانيميشن
-  const fadeUp = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0 },
-  };
-
   return (
     <section className="w-full bg-background py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,7 +29,7 @@ const ExploreStyles = () => {
           viewport={{ once: false, amount: 0.4 }}
           transition={{ staggerChildren: 0.2 }}
         >
-          {/* Hero Image with Vertical Text */}
+          {/* Hero Image */}
           <motion.div
             variants={fadeUp}
             transition={{ duration: 0.8 }}
@@ -41,6 +40,8 @@ const ExploreStyles = () => {
                 src={styleHero}
                 alt="Elegant woman in brown wrap dress"
                 className="w-full h-[700px] lg:h-[800px] object-cover"
+                loading="eager"
+                fetchPriority="high"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
 
@@ -55,13 +56,13 @@ const ExploreStyles = () => {
             </div>
           </motion.div>
 
-          {/* Grid of Images */}
+          {/* Grid of Thumbnails */}
           <div className="grid grid-cols-2 gap-4 order-1 lg:order-2">
             {gridImages.map((image, index) => (
               <motion.div
                 key={index}
                 variants={fadeUp}
-                transition={{ duration: 0.7, delay: index * 0.3 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
                 className="relative group cursor-pointer"
               >
                 <div className="relative overflow-hidden rounded-xl shadow-lg">
@@ -69,10 +70,10 @@ const ExploreStyles = () => {
                     src={image.src}
                     alt={image.alt}
                     className="w-full h-48 lg:h-[350px] object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                    fetchPriority="auto"
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-
-                  {/* Sale Badge */}
                   {image.sale && (
                     <div className="absolute top-3 right-3 bg-coral-charcoal text-white px-3 py-1 text-xs font-bold rounded">
                       SALE

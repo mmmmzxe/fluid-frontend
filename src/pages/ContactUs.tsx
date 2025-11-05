@@ -5,9 +5,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { supportApi } from '@/services/adminApi';
 import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
-import image from '@/assets/6.jpg';
+import { useTranslation } from 'react-i18next';
+import image from '@/assets/6.webp';
 
 const ContactUs: React.FC = () => {
+  const { t } = useTranslation();
   const [name, setName] = useState(' ');
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
@@ -56,6 +58,7 @@ const ContactUs: React.FC = () => {
             src={image}
             alt="Fashion Store Illustration"
             className="rounded-2xl w-full max-w-md object-cover shadow-md"
+            loading="eager"
           />
         </div>
 
@@ -63,10 +66,10 @@ const ContactUs: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Contact Our Fashion Store 
+          {t('contact.contactOurStore')}
         </h1>
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">Name</label>
+            <label className="block text-sm font-medium mb-1 text-gray-700">{t('contact.name')}</label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -75,7 +78,7 @@ const ContactUs: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">Phone</label>
+            <label className="block text-sm font-medium mb-1 text-gray-700">{t('contact.phone')}</label>
             <Input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
@@ -84,7 +87,7 @@ const ContactUs: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">Message</label>
+            <label className="block text-sm font-medium mb-1 text-gray-700">{t('contact.message')}</label>
             <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -99,7 +102,7 @@ const ContactUs: React.FC = () => {
               disabled={loading}
               className="bg-primary hover:bg-pink-700 text-white"
             >
-              {loading ? 'Sending...' : 'Send Message'}
+              {loading ? t('contact.sending') : t('contact.send')}
             </Button>
           </div>
         </form>

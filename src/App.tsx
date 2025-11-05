@@ -32,6 +32,8 @@ import "react-toastify/dist/ReactToastify.css";
 import ContactUs from "./pages/ContactUs";
 import OrderPage from "./pages/Order";
 import { SearchResults } from "./pages/SearchResults";
+import FAQ from "./pages/FAQ";
+import ShippingReturns from "./pages/ShippingReturns";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +59,8 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/order" element={<OrderPage />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/shipping-returns" element={<ShippingReturns />} />
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />}>

@@ -5,8 +5,10 @@ import { Navbar } from "@/components/Navbar";
 import  Footer from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { useAppSelector } from "@/hooks/useRedux";
+import { useTranslation } from "react-i18next";
 
 const Favorites = () => {
+  const { t } = useTranslation();
   const { items } = useAppSelector((state) => state.favorites);
 
   if (items.length === 0) {
@@ -16,10 +18,10 @@ const Favorites = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <Heart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h1 className="text-3xl font-bold text-foreground mb-4">No Favorites Yet</h1>
-            <p className="text-muted-foreground mb-8">Start adding products to your favorites</p>
+            <h1 className="text-3xl font-bold text-foreground mb-4">{t('favorites.empty')}</h1>
+            <p className="text-muted-foreground mb-8">{t('favorites.emptyMessage')}</p>
             <Button asChild>
-              <Link to="/products">Browse Products</Link>
+              <Link to="/products">{t('favorites.browseProducts')}</Link>
             </Button>
           </div>
         </div>
@@ -34,8 +36,8 @@ const Favorites = () => {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">My Favorites</h1>
-          <p className="text-muted-foreground">{items.length} favorite products</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t('favorites.title')}</h1>
+          <p className="text-muted-foreground">{items.length} {t('favorites.favoriteProducts')}</p>
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

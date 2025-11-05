@@ -181,7 +181,7 @@ export function useCart() {
     checkoutWithoutLogin: async (details: any) => {
       const items = readGuestCart();
       const products = items.map((it: any) => ({
-        productId: it.productId,
+        productId: typeof it.productId === 'string' ? it.productId : it.productId._id,
         variantId: it.variantId,
         sizeId: it.sizeId,
         quantity: it.quantity || 1,

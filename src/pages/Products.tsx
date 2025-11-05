@@ -12,8 +12,11 @@ import Footer  from "@/components/Footer";
 import { useCategories } from "@/hooks/useApi";
 import { productApi, Product } from "@/services/adminApi";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
+import { getCategoryName } from "@/lib/i18nHelpers";
 
 export default function Products() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -83,15 +86,16 @@ export default function Products() {
       .filter((product): product is NonNullable<typeof product> => product !== null);
 
   
-    if (selectedCategories.length > 0) {
-      filtered = filtered.filter(product => 
-        selectedCategories.includes(product.category)
-      );
-    }
-    if (selectedSubCategories.length > 0) {
-      filtered = filtered.filter(product => 
-        product.subCategory && selectedSubCategories.includes(product.subCategory)
-      );
+    // Apply category and subcategory filters
+    if (selectedCategories.length > 0 || selectedSubCategories.length > 0) {
+      filtered = filtered.filter(product => {
+        // If subcategories are selected, check if the product matches any selected subcategory
+        if (selectedSubCategories.length > 0) {
+          return product.subCategory && selectedSubCategories.includes(product.subCategory);
+        }
+        // If only categories are selected, check if the product matches any selected category
+        return selectedCategories.includes(product.category);
+      });
     }
 
     // Price range filter
@@ -134,7 +138,9 @@ export default function Products() {
 
   const handleCategoryChange = (categoryId: string, checked: boolean) => {
     if (checked) {
+      // When selecting a category, clear any selected subcategories
       setSelectedCategories(prev => [...prev, categoryId]);
+      setSelectedSubCategories([]);
     } else {
       setSelectedCategories(prev => prev.filter(id => id !== categoryId));
     }
@@ -165,9 +171,9 @@ export default function Products() {
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-navy mb-2">All Products</h1>
+            <h1 className="text-3xl font-bold text-navy mb-2">{t('products.title')}</h1>
             <p className="text-muted-foreground">
-              Showing {filteredProducts.length} of {products?.length || 0} products
+              {t('products.showing')} {filteredProducts.length} {t('products.of')} {products?.length || 0} {t('products.productsCount')}
             </p>
           </div>
           
@@ -195,14 +201,14 @@ export default function Products() {
             {/* Sort */}
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder={t('products.sortBy')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="featured">Featured</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="rating">Highest Rated</SelectItem>
+                <SelectItem value="featured">{t('products.featured')}</SelectItem>
+                <SelectItem value="price-low">{t('products.priceLowToHigh')}</SelectItem>
+                <SelectItem value="price-high">{t('products.priceHighToLow')}</SelectItem>
+                <SelectItem value="newest">{t('products.newest')}</SelectItem>
+                <SelectItem value="rating">{t('products.highestRated')}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -213,7 +219,7 @@ export default function Products() {
               className="lg:hidden"
             >
               <SlidersHorizontal className="h-4 w-4 mr-2" />
-              Filters
+              {t('products.filters')}
               {activeFiltersCount > 0 && (
                 <Badge variant="secondary" className="ml-2">
                   {activeFiltersCount}
@@ -231,19 +237,19 @@ export default function Products() {
           )}>
             <div className="sticky top-24 space-y-6">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-navy">Filters</h3>
+                <h3 className="font-semibold text-navy">{t('products.filters')}</h3>
                 {activeFiltersCount > 0 && (
                   <Button variant="ghost" size="sm" onClick={clearFilters}>
-                    Clear All
+                    {t('products.clearAll')}
                   </Button>
                 )}
               </div>
 
               {/* Categories */}
               <div className="space-y-3">
-                <h4 className="font-medium">Categories</h4>
+                <h4 className="font-medium">{t('products.categories')}</h4>
                 {loading ? (
-                  <div className="text-sm text-muted-foreground">Loading categories...</div>
+                  <div className="text-sm text-muted-foreground">{t('products.loadingCategories')}</div>
                 ) : (
                   <>
                     {/* All Products Option */}
@@ -258,7 +264,7 @@ export default function Products() {
                         }}
                       />
                       <label htmlFor="all-products" className="text-sm flex-1 cursor-pointer">
-                        All Products
+                        {t('products.allProducts')}
                       </label>
                       <span className="text-xs text-muted-foreground">
                         ({products?.length || 0})
@@ -277,7 +283,7 @@ export default function Products() {
                         }
                       />
                       <label htmlFor={category._id} className="text-sm flex-1 cursor-pointer">
-                        {category.nameEnglish || category.name}
+                        {getCategoryName(category)}
                       </label>
                       <span className="text-xs text-muted-foreground">
                         ({products?.filter(p => (p as any).category === category._id).length || 0})
@@ -300,7 +306,7 @@ export default function Products() {
                               }}
                             />
                             <label htmlFor={`sub-${sub._id}`} className="text-xs text-muted-foreground cursor-pointer">
-                              {sub.nameEnglish || sub.nameArabic || sub.name}
+                              {getCategoryName(sub)}
                             </label>
                           </div>
                         ))}
@@ -314,7 +320,7 @@ export default function Products() {
 
               {/* Price Range */}
               <div className="space-y-3">
-                <h4 className="font-medium">Price Range</h4>
+                <h4 className="font-medium">{t('products.priceRange')}</h4>
                 <div className="px-2">
                   <Slider
                     value={priceRange}
@@ -333,7 +339,7 @@ export default function Products() {
 
               {/* Special Filters */}
               <div className="space-y-3">
-                <h4 className="font-medium">Special</h4>
+                <h4 className="font-medium">{t('products.special')}</h4>
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="on-sale"
@@ -341,7 +347,7 @@ export default function Products() {
                     onCheckedChange={(checked) => setShowOnSale(checked as boolean)}
                   />
                   <label htmlFor="on-sale" className="text-sm cursor-pointer">
-                    On Sale
+                    {t('products.onSale')}
                   </label>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -351,7 +357,7 @@ export default function Products() {
                     onCheckedChange={(checked) => setShowNew(checked as boolean)}
                   />
                   <label htmlFor="new-arrivals" className="text-sm cursor-pointer">
-                    New Arrivals
+                    {t('products.newArrivals')}
                   </label>
                 </div>
               </div>
@@ -363,22 +369,22 @@ export default function Products() {
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin" />
-                <span className="ml-2">Loading products...</span>
+                <span className="ml-2">{t('products.loadingProducts')}</span>
               </div>
             ) : error ? (
               <div className="text-center py-12">
                 <p className="text-destructive mb-4">{error}</p>
                 <Button onClick={() => window.location.reload()}>
-                  Try Again
+                  {t('products.tryAgain')}
                 </Button>
               </div>
             ) : filteredProducts.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground mb-4">
-                  No products found matching your filters.
+                  {t('products.noProducts')}
                 </p>
                 <Button onClick={clearFilters}>
-                  Clear Filters
+                  {t('products.clearFilters')}
                 </Button>
               </div>
             ) : (

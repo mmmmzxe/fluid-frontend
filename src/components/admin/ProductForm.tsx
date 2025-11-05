@@ -31,6 +31,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, X, Plus, Trash2 } from 'lucide-react';
 import { Product, Category, SubCategory } from '@/services/adminApi';
+import { ColorPicker } from '@/components/ui/color-picker';
 
 const productSchema = z.object({
   titleEnglish: z.string().min(1, 'English title is required'),
@@ -583,9 +584,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <FormLabel>Color</FormLabel>
-                        <Input
+                        <ColorPicker
                           value={variant.color}
-                          onChange={(e) => updateVariant(variantIndex, 'color', e.target.value)}
+                          onChange={(color) => updateVariant(variantIndex, 'color', color)}
                           placeholder="Enter color"
                         />
                       </div>

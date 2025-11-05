@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ProductCard, transformApiProduct } from "@/components/ProductCard";
 import { Navbar } from "@/components/Navbar";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 import brandBanner from "@/assets/brand-banner.png";
 import ExploreStyles from "./ExploreStyles";
@@ -54,6 +55,7 @@ const scaleIn = {
 };
 
 const Index = () => {
+  const { t } = useTranslation();
   const { products: apiFeatured } = useProducts();
   const featuredProducts = apiFeatured.map(transformApiProduct).slice(0, 8);
   const { products: apiProducts } = useProducts({ sortBy: "best-selling" });
@@ -138,7 +140,7 @@ const Index = () => {
             variants={fadeInUp}
           >
             <h2 className="text-3xl font-bold text-navy mb-4">
-              Explore New And Popular Styles
+              {t('home.exploreNewStyles')}
             </h2>
           </motion.div>
           <motion.div 
@@ -167,7 +169,7 @@ const Index = () => {
           >
             <Button asChild variant="outline" size="lg">
               <Link to="/products">
-                View All Products
+                {t('home.viewAllProducts')}
               </Link>
             </Button>
           </motion.div>
@@ -218,7 +220,7 @@ const Index = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
               >
-                EXTRACHIC
+                {t('home.brandHeading')}
               </motion.h2>
 
               {/* Description */}
@@ -228,9 +230,7 @@ const Index = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
               >
-                Lustrous Yet Understated. The New Evening Wear Collection
-                Exclusively Offered At The Reopened Giorgio Armani Boutique In Los
-                Angeles.
+                {t('home.brandDescription')}
               </motion.p>
 
               {/* Button */}
@@ -243,7 +243,7 @@ const Index = () => {
 
                 whileTap={{ scale: 0.95 }}
               >
-                See Collection
+                {t('home.seeCollection')}
               </motion.button>
             </motion.div>
           </div>
@@ -265,7 +265,7 @@ const Index = () => {
             variants={fadeInUp}
           >
             <h2 className="text-3xl font-bold text-navy mb-4">
-              Best Sellers
+              {t('home.bestSellers')}
             </h2>
           </motion.div>
           <motion.div 

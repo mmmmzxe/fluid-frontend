@@ -9,8 +9,11 @@ import { useAppSelector } from "@/hooks/useRedux";
 import { useCart } from "@/hooks/useCart";
 import { toast } from "react-toastify";
 import { useProduct } from "@/hooks/useProduct";
+import { useTranslation } from "react-i18next";
+import { getProductTitle } from "@/lib/i18nHelpers";
 
 const Cart = () => {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAppSelector((state) => state.user);
   const { cart, loading: cartLoadingHook, fetchCart, updateItemQuantity, removeItemFromCart, clearUserCart } = useCart();
   const { fetchProductById } = useProduct();
@@ -156,7 +159,7 @@ const Cart = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <Loader2 className="animate-spin h-8 w-8 border-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading cart...</p>
+            <p className="text-muted-foreground">{t('cart.loadingCart')}</p>
           </div>
         </div>
         <Footer />
@@ -170,10 +173,10 @@ const Cart = () => {
         <Navbar />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-foreground mb-4">Your Cart is Empty</h1>
-            <p className="text-muted-foreground mb-8">Add some products to get started</p>
+            <h1 className="text-3xl font-bold text-foreground mb-4">{t('cart.empty')}</h1>
+            <p className="text-muted-foreground mb-8">{t('cart.emptyMessage')}</p>
             <Button asChild>
-              <Link to="/products">Continue Shopping</Link>
+              <Link to="/products">{t('cart.continueShopping')}</Link>
             </Button>
           </div>
         </div>
@@ -187,7 +190,7 @@ const Cart = () => {
       <Navbar />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-foreground mb-8">Shopping Cart</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-8">{t('cart.title')}</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
@@ -199,15 +202,16 @@ const Cart = () => {
                   <Link to={`/product/${item.productId?._id}`}>
                     <img
                       src={item.productId?.mainImage?.secure_url || '/placeholder.svg'}
-                      alt={item.productId?.titleEnglish || 'Product'}
+                      alt={getProductTitle(item.productId) || 'Product'}
                       className="w-20 h-20 object-cover rounded-lg"
+                      loading="lazy"
                     />
                   </Link>
 
                   <div className="flex-1">
                     <Link to={`/product/${item.productId?._id}`}>
                       <h3 className="font-medium text-foreground hover:text-primary transition-colors">
-                        {item.productId?.titleEnglish || 'Product'}
+                        {getProductTitle(item.productId) || 'Product'}
                       </h3>
                     </Link>
 
@@ -253,25 +257,25 @@ const Cart = () => {
           {/* Order Summary */}
           <div className="lg:col-span-1">
             <Card className="p-6 sticky top-4">
-              <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+              <h2 className="text-xl font-semibold mb-4">{t('cart.orderSummary')}</h2>
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between">
-                  <span>Subtotal ({finalCart.length} items)</span>
+                  <span>{t('cart.subtotal')} ({finalCart.length} {t('cart.items')})</span>
                   <span>${total.toFixed(2)}</span>
                 </div>
               
                 <div className="border-t pt-2">
                   <div className="flex justify-between font-semibold text-lg">
-                    <span>Total</span>
+                    <span>{t('cart.total')}</span>
                     <span>${total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
               <Button asChild className="w-full" size="lg">
-                <Link to="/order">Proceed to Checkout</Link>
+                <Link to="/order">{t('cart.proceedToCheckout')}</Link>
               </Button>
               <Button asChild variant="outline" className="w-full mt-2">
-                <Link to="/products">Continue Shopping</Link>
+                <Link to="/products">{t('cart.continueShopping')}</Link>
               </Button>
               {finalCart.length > 0 && (
                 <Button 
@@ -279,7 +283,7 @@ const Cart = () => {
                   className="w-full mt-2"
                   onClick={handleClearCart}
                 >
-                  Clear Cart
+                  {t('cart.clearCart')}
                 </Button>
               )}
             </Card>

@@ -6,11 +6,15 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/hooks/useRedux";
 import { useCategories } from "@/hooks/useApi";
-import logo from "@/assets/LogoText.png";
-import logoNav from "@/assets/LogoaNav.png";
+import logo from "@/assets/LogoText.webp";
+import logoNav from "@/assets/LogoaNav.webp";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { getCategoryName } from "@/lib/i18nHelpers";
 
 export function Navbar() {
+  const { t } = useTranslation();
   const favoritesItems = useAppSelector((state) => state.favorites.items);
   const { isAuthenticated, cart } = useAppSelector((state) => state.user);
   const { categories, loading: categoriesLoading } = useCategories();
@@ -47,7 +51,7 @@ export function Navbar() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products..."
+                placeholder={t('nav.searchPlaceholder')}
                 className="h-9 w-[200px] rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
               <Button type="submit" variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground ml-1">
@@ -64,6 +68,7 @@ export function Navbar() {
 
           {/* Account & Shopping - right */}
           <div className="flex items-center space-x-2">
+            <LanguageSwitcher />
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" asChild>
               <Link to="/favorites" className="relative">
                 <Heart className="h-5 w-5" />
@@ -114,9 +119,9 @@ export function Navbar() {
               ease: "linear",
             }}
           >
-            🌟 Discover our amazing categories and latest products 🌟
-            🌟 Discover our amazing categories and latest products 🌟
-            🌟 Discover our amazing categories and latest products 🌟
+            {t('nav.discoverCategories')}
+            {t('nav.discoverCategories')}
+            {t('nav.discoverCategories')}
 
           </motion.div>
         </div>
@@ -125,7 +130,7 @@ export function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="hidden md:flex items-center justify-center space-x-8 py-4 border-t border-border">
           {categoriesLoading ? (
-            <div className="text-sm text-muted-foreground">Loading categories...</div>
+            <div className="text-sm text-muted-foreground">{t('products.loadingCategories')}</div>
           ) : (
             categories?.map((category) => (
               <Link
@@ -139,11 +144,11 @@ export function Navbar() {
                 {category.image?.secure_url && (
                   <img
                     src={category.image.secure_url}
-                    alt={category.nameEnglish || category.name}
+                    alt={getCategoryName(category)}
                     className="w-6 h-6 rounded-full object-cover"
                   />
                 )}
-                <span>{category.nameEnglish || category.name}</span>
+                <span>{getCategoryName(category)}</span>
               </Link>
             ))
           )}
@@ -162,11 +167,11 @@ export function Navbar() {
                 )}
                 onClick={() => setIsOpen(false)}
               >
-                All Products
+                {t('nav.allProducts')}
               </Link>
 
               {categoriesLoading ? (
-                <div className="px-4 py-2 text-sm text-muted-foreground">Loading categories...</div>
+                <div className="px-4 py-2 text-sm text-muted-foreground">{t('products.loadingCategories')}</div>
               ) : (
                 categories?.map((category) => (
                   <Link
@@ -181,11 +186,11 @@ export function Navbar() {
                     {category.image?.secure_url && (
                       <img
                         src={category.image.secure_url}
-                        alt={category.nameEnglish || category.name}
+                        alt={getCategoryName(category)}
                         className="w-6 h-6 rounded-full object-cover"
                       />
                     )}
-                    <span>{category.nameEnglish || category.name}</span>
+                    <span>{getCategoryName(category)}</span>
                   </Link>
                 ))
               )}

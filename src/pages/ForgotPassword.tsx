@@ -7,8 +7,10 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { toast } from "react-toastify";
 import { useForgotPassword } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 const ForgotPassword = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const { requestReset, loading } = useForgotPassword();
 
@@ -28,24 +30,24 @@ const ForgotPassword = () => {
       <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Forgot Password</CardTitle>
-            <p className="text-muted-foreground">Enter your email to receive an OTP</p>
+            <CardTitle className="text-2xl">{t('auth.forgotPasswordTitle')}</CardTitle>
+            <p className="text-muted-foreground">{t('auth.forgotPasswordMessage')}</p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('auth.email')}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder={t('auth.enterYourEmail')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Sending..." : "Send OTP"}
+                {loading ? t('auth.sending') : t('auth.sendOTP')}
               </Button>
             </form>
           </CardContent>

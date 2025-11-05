@@ -4,29 +4,36 @@ import { http } from "@/services/http";
 
 import { Loader2 } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
+import { useTranslation } from "react-i18next";
 
 export function SearchResults() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const searchQuery = searchParams.get("query");
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const response = await http.get(`/product?name=${searchQuery}`);
-        setProducts(response.data);
-      } catch (error) {
-        console.error("Error fetching search results:", error);
-      }
-      setLoading(false);
-    };
-
-    if (searchQuery) {
-      fetchProducts();
+useEffect(() => {
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const response = await http.get(`/product/all?name=${searchQuery}`);
+      setProducts(Array.isArray(response.data.products) ? response.data.products : []);
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+      setProducts([]);
     }
-  }, [searchQuery]);
+    setLoading(false);
+  };
+
+  if (searchQuery) {
+    fetchProducts();
+  } else {
+    setProducts([]);
+    setLoading(false);
+  }
+}, [searchQuery]);
+
 
   if (loading) {
     return (
@@ -38,9 +45,9 @@ export function SearchResults() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Search Results for "{searchQuery}"</h1>
+      <h1 className="text-2xl font-bold mb-6">{t('search.results')} {t('search.for')} "{searchQuery}"</h1>
       {products.length === 0 ? (
-        <p className="text-muted-foreground">No products found matching your search.</p>
+        <p className="text-muted-foreground">{t('search.noProductsFound')}</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {products.map((product) => (

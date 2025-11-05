@@ -1,7 +1,13 @@
 import { FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram } from "react-icons/fa";
 import logo from "@/assets/Logo.png";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useCategories } from "@/hooks/useApi";
+import { getCategoryName } from "@/lib/i18nHelpers";
+
 export default function Footer() {
+  const { t } = useTranslation();
+  const { categories } = useCategories();
   return (
     <footer className="bg-white border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -9,8 +15,7 @@ export default function Footer() {
         <div>
          <img src={logo} alt="logo" className=" h-40" />
           <p className=" text-gray-600 text-sm">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-            tempor incididunt ut labore et dolore magna aliqua.
+            {t('footer.brandDescription')}
           </p>
           <div className="flex space-x-4 mt-4 text-gray-600">
             <a href="#" className="hover:text-gray-900"><FaFacebookF /></a>
@@ -22,44 +27,46 @@ export default function Footer() {
 
         {/* Catalog */}
         <div>
-          <h3 className="font-semibold mb-4">CATALOG</h3>
+          <h3 className="font-semibold mb-4">{t('footer.catalog').toUpperCase()}</h3>
           <ul className="space-y-2 text-sm text-gray-600">
-            <li><a href="#" className="hover:text-gray-900">Necklaces</a></li>
-            <li><a href="#" className="hover:text-gray-900">Hoodies</a></li>
-            <li><a href="#" className="hover:text-gray-900">Jewelry Box</a></li>
-            <li><a href="#" className="hover:text-gray-900">T-Shirt</a></li>
-            <li><a href="#" className="hover:text-gray-900">Jacket</a></li>
+            {categories.slice(0, 5).map((category) => (
+              <li key={category._id}>
+                <Link to={`/products?category=${category._id}`} className="hover:text-gray-900">
+                  {getCategoryName(category)}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
 
         {/* About Us */}
         <div>
-          <h3 className="font-semibold mb-4">ABOUT US</h3>
+          <h3 className="font-semibold mb-4">{t('footer.aboutUs').toUpperCase()}</h3>
           <ul className="space-y-2 text-sm text-gray-600">
-            <li><a href="#" className="hover:text-gray-900">Our Producers</a></li>
-            <li><a href="#" className="hover:text-gray-900">Sitemap</a></li>
-            <li><a href="#" className="hover:text-gray-900">FAQ</a></li>
-            <li><a href="#" className="hover:text-gray-900">About Us</a></li>
-            <li><a href="#" className="hover:text-gray-900">Terms & Conditions</a></li>
+            <li><a href="#" className="hover:text-gray-900">{t('footer.ourProducers')}</a></li>
+            <li><a href="#" className="hover:text-gray-900">{t('footer.sitemap')}</a></li>
+            <li><Link to="/faq" className="hover:text-gray-900">{t('footer.faq')}</Link></li>
+            <li><a href="#" className="hover:text-gray-900">{t('footer.aboutUs')}</a></li>
+            <li><a href="#" className="hover:text-gray-900">{t('footer.termsOfService')}</a></li>
           </ul>
         </div>
 
         {/* Customer Services */}
         <div>
-          <h3 className="font-semibold mb-4">CUSTOMER SERVICES</h3>
+          <h3 className="font-semibold mb-4">{t('footer.customerServices').toUpperCase()}</h3>
           <ul className="space-y-2 text-sm text-gray-600">
-            <li><Link to="/contact" className="hover:text-gray-900">Contact Us</Link></li>
-            <li><a href="#" className="hover:text-gray-900">Track Your Order</a></li>
-            <li><a href="#" className="hover:text-gray-900">Product Care & Repair</a></li>
-            <li><a href="#" className="hover:text-gray-900">Book An Appointment</a></li>
-            <li><a href="#" className="hover:text-gray-900">Shipping & Returns</a></li>
+            <li><Link to="/contact" className="hover:text-gray-900">{t('footer.contactUs')}</Link></li>
+            <li><a href="#" className="hover:text-gray-900">{t('footer.trackOrder')}</a></li>
+            <li><a href="#" className="hover:text-gray-900">{t('footer.productCare')}</a></li>
+            <li><a href="#" className="hover:text-gray-900">{t('footer.bookAppointment')}</a></li>
+            <li><Link to="/shipping-returns" className="hover:text-gray-900">{t('footer.shippingReturns')}</Link></li>
           </ul>
         </div>
       </div>
 
       {/* Bottom Bar */}
       <div className="bg-primary text-gray-200 text-sm py-4 px-6 flex flex-col md:flex-row justify-between items-center">
-        <p>© 2018 Extrachic, Inc.</p>
+        <p>© 2018 Extrachic, Inc. {t('footer.allRightsReserved')}</p>
         <div className="flex space-x-2 mt-2 md:mt-0">
           <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa" className="h-6" />
           <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="Paypal" className="h-6" />

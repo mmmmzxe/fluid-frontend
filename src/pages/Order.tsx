@@ -12,8 +12,11 @@ import { useAppSelector } from '@/hooks/useRedux';
 import { useCart } from '@/hooks/useCart';
 import { useProduct } from '@/hooks/useProduct';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { getProductTitle } from '@/lib/i18nHelpers';
 
 const OrderPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((s) => s.user);
   const { checkoutWithoutLogin, cart, fetchCart } = useCart();
@@ -180,7 +183,7 @@ const OrderPage: React.FC = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="max-w-5xl mx-auto p-6">
-        <h1 className="text-2xl font-semibold mb-4">Checkout</h1>
+        <h1 className="text-2xl font-semibold mb-4">{t('order.checkout')}</h1>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Order Form */}
           <Card className="p-6 lg:col-span-2">
@@ -188,55 +191,55 @@ const OrderPage: React.FC = () => {
               {!isAuthenticated && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">First Name</label>
+                    <label className="block text-sm font-medium mb-1">{t('order.firstName')}</label>
                     <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Last Name</label>
+                    <label className="block text-sm font-medium mb-1">{t('order.lastName')}</label>
                     <Input value={lastName} onChange={(e) => setLastName(e.target.value)} required />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium mb-1">Email</label>
+                    <label className="block text-sm font-medium mb-1">{t('auth.email')}</label>
                     <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium mb-1">Discount Percent</label>
+                    <label className="block text-sm font-medium mb-1">{t('order.discountPercent')}</label>
                     <Input type="number" value={discountPercent} onChange={(e) => setDiscountPercent(Number(e.target.value))} />
                   </div>
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium mb-1">Address</label>
+                <label className="block text-sm font-medium mb-1">{t('auth.address')}</label>
                 <Input value={address} onChange={(e) => setAddress(e.target.value)} required />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Phone</label>
+                <label className="block text-sm font-medium mb-1">{t('auth.phone')}</label>
                 <Input value={phone} onChange={(e) => setPhone(e.target.value)} required />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Note</label>
+                <label className="block text-sm font-medium mb-1">{t('order.note')}</label>
                 <Textarea value={note} onChange={(e) => setNote(e.target.value)} />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Payment Method</label>
+                <label className="block text-sm font-medium mb-1">{t('order.paymentMethod')}</label>
                 <select value={paymentWay} onChange={(e) => setPaymentWay(e.target.value)} className="w-full border rounded-md p-2 bg-background">
-                  <option value="card">Card</option>
-                  <option value="cash">Cash</option>
+                  <option value="card">{t('order.card')}</option>
+                  <option value="cash">{t('order.cash')}</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Shipping</label>
+                <label className="block text-sm font-medium mb-1">{t('order.shipping')}</label>
                 <select
                   value={shippingId}
                   onChange={(e) => setShippingId(e.target.value)}
                   className="w-full border rounded-md p-2 bg-background"
                   required
                 >
-                  {shippingOptions.length === 0 && <option>Loading options...</option>}
+                  {shippingOptions.length === 0 && <option>{t('order.loadingOptions')}</option>}
                   {shippingOptions.map((opt) => (
                     <option key={opt._id} value={opt._id}>
                       {opt.government || opt._id} {opt.price ? `- $${opt.price}` : ''}
@@ -248,10 +251,10 @@ const OrderPage: React.FC = () => {
               <div className="flex justify-end">
                 <Button type="submit" disabled={loading || isGuestDetailsLoading}>
                   {loading 
-                    ? 'Processing...' 
+                    ? t('order.processing')
                     : paymentWay === 'card' 
-                        ? 'Proceed to Payment' 
-                        : 'Create Order'}
+                        ? t('order.proceedToPayment')
+                        : t('order.createOrder')}
                 </Button>
               </div>
             </form>
@@ -259,7 +262,7 @@ const OrderPage: React.FC = () => {
 
           {/* Cart Summary */}
           <Card className="p-6 lg:col-span-1 h-max sticky top-6">
-            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+            <h2 className="text-xl font-semibold mb-4">{t('order.orderSummary')}</h2>
             <div className="space-y-4 max-h-[50vh] overflow-auto pr-2">
               {isGuestDetailsLoading ? (
                 <div className="flex justify-center items-center py-10">
@@ -270,15 +273,16 @@ const OrderPage: React.FC = () => {
                   <div key={item._id || `${item.productId}-${item.variantId}-${item.sizeId}`} className="flex gap-3">
                     <img
                       src={item.productId?.mainImage?.secure_url || '/placeholder.svg'}
-                      alt={item.productId?.titleEnglish || 'Product'}
+                      alt={getProductTitle(item.productId) || 'Product'}
                       className="w-16 h-16 rounded object-cover"
+                      loading="lazy"
                     />
                     <div className="flex-1">
-                      <div className="text-sm font-medium">{item.productId?.titleEnglish || 'Loading...'}</div>
+                      <div className="text-sm font-medium">{getProductTitle(item.productId) || t('common.loading')}</div>
                       <div className="text-xs text-muted-foreground">
                         {item.variant?.color || 'color'} - {item.variant?.size || 'size'}
                       </div>
-                      <div className="text-xs">Qty: {item.quantity || 1}</div>
+                      <div className="text-xs">{t('order.qty')}: {item.quantity || 1}</div>
                     </div>
                     <div className="text-sm font-semibold">${(item.productId?.finalPrice || 0).toFixed(2)}</div>
                   </div>
@@ -287,15 +291,15 @@ const OrderPage: React.FC = () => {
             </div>
             <div className="border-t mt-4 pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                    <span>Subtotal</span>
+                    <span>{t('cart.subtotal')}</span>
                     <span>${itemsTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                    <span>Shipping</span>
+                    <span>{t('cart.shipping')}</span>
                     <span>${selectedShippingCost.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between font-semibold text-lg">
-                    <span>Total</span>
+                    <span>{t('cart.total')}</span>
                     <span>${finalTotal.toFixed(2)}</span>
                 </div>
             </div>

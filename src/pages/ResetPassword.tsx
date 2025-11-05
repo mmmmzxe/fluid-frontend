@@ -7,8 +7,10 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { toast } from "react-toastify";
 import { useResetPassword } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 const ResetPassword = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
@@ -30,46 +32,46 @@ const ResetPassword = () => {
       <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Reset Password</CardTitle>
-            <p className="text-muted-foreground">Enter OTP and your new password</p>
+            <CardTitle className="text-2xl">{t('auth.resetPassword')}</CardTitle>
+            <p className="text-muted-foreground">{t('auth.resetPasswordMessage')}</p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('auth.email')}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder={t('auth.enterYourEmail')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="otp">OTP</Label>
+                <Label htmlFor="otp">{t('auth.otp')}</Label>
                 <Input
                   id="otp"
                   type="text"
-                  placeholder="Enter the OTP"
+                  placeholder={t('auth.enterTheOTP')}
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">New Password</Label>
+                <Label htmlFor="password">{t('auth.newPassword')}</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter new password"
+                  placeholder={t('auth.enterNewPassword')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Resetting..." : "Reset Password"}
+                {loading ? t('auth.resetting') : t('auth.resetPassword')}
               </Button>
             </form>
           </CardContent>

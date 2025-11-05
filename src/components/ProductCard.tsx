@@ -18,6 +18,8 @@ import { userApi } from '@/services/adminApi';
 import { useCart } from "@/hooks/useCart";
 import { toast } from "react-toastify";
 import { useProduct } from "@/hooks/useProduct";
+import { getProductTitle } from "@/lib/i18nHelpers";
+import { useTranslation } from "react-i18next";
 
 export interface Product {
   id: string;
@@ -94,7 +96,7 @@ export const transformApiProduct = (apiProduct: ApiProduct): Product => {
   
   return {
     id: apiProduct._id,
-    name: apiProduct.titleEnglish || 'Unnamed Product',
+    name: getProductTitle(apiProduct),
     price: apiProduct.finalPrice || 0,
     originalPrice: originalPrice,
     category: apiProduct.category || 'uncategorized',
@@ -115,6 +117,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, className }: ProductCardProps) {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const favorites = useAppSelector((state) => state.favorites.items);
   const { isAuthenticated } = useAppSelector((state) => state.user);
@@ -223,7 +226,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
           {product.isNew && (
             <Badge variant="secondary" className="bg-navy text-white">
-              NEW
+              {t('products.newArrivals').split(' ')[0].toUpperCase()}
             </Badge>
           )}
           {isOnSale && (
@@ -272,7 +275,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
             disabled={loading}
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
-            {loading ? "Adding..." : "Add to Cart"}
+            {loading ? t('common.loading') : t('productDetail.addToCart')}
           </Button>
         </div>
       </div>
@@ -341,7 +344,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
     <Dialog open={showVariantDialog} onOpenChange={setShowVariantDialog}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Choose Size and Color</DialogTitle>
+          <DialogTitle>{t('productDetail.selectSize')} & {t('productDetail.selectColor')}</DialogTitle>
           <DialogDescription>
             Please select your preferred color and size before adding to cart.
           </DialogDescription>
@@ -350,7 +353,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         {/* Colors */}
         {detail?.variants?.length > 0 && (
           <div className="space-y-2">
-            <div className="text-sm font-medium">Color</div>
+            <div className="text-sm font-medium">{t('productDetail.selectColor')}</div>
             <div className="flex flex-wrap gap-2">
               {detail.variants.map((v: any, idx: number) => (
                 <button
@@ -381,7 +384,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         {/* Sizes */}
         {detail && (
           <div className="space-y-2">
-            <div className="text-sm font-medium">Size</div>
+            <div className="text-sm font-medium">{t('productDetail.selectSize')}</div>
             <div className="flex flex-wrap gap-2">
               {(detail.variants?.find((v: any) => v.color === selectedColor)?.size || []).map((s: any, i: number) => {
                 const display = s.size ? s.size : (() => {
@@ -406,9 +409,9 @@ export function ProductCard({ product, className }: ProductCardProps) {
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setShowVariantDialog(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => setShowVariantDialog(false)}>{t('common.cancel')}</Button>
           <Button onClick={confirmAddToCart} disabled={!selectedColor || !selectedSize || loading}>
-            {loading ? "Adding..." : "Add to Cart"}
+            {loading ? t('common.loading') : t('productDetail.addToCart')}
           </Button>
         </DialogFooter>
       </DialogContent>

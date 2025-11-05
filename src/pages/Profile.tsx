@@ -10,8 +10,11 @@ import { useOrders } from "@/hooks/useOrders";
 import { useSignIn } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
+import { getProductTitle } from "@/lib/i18nHelpers";
 
 const Profile = () => {
+  const { t } = useTranslation();
   const { user, orders, isAuthenticated } = useAppSelector((state) => state.user);
   const { fetchOrders, loading: ordersLoading } = useOrders();
   const { signOut } = useSignIn();
@@ -26,7 +29,7 @@ const Profile = () => {
 
   const handleLogout = () => {
     signOut();
-    toast.success("Logged out successfully");
+    toast.success(t('common.success'));
   };
 
   if (!isAuthenticated || !user) {
@@ -36,10 +39,10 @@ const Profile = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <User className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h1 className="text-3xl font-bold text-foreground mb-4">Please Log In</h1>
-            <p className="text-muted-foreground mb-8">You need to be logged in to view your profile</p>
+            <h1 className="text-3xl font-bold text-foreground mb-4">{t('profile.pleaseLogin')}</h1>
+            <p className="text-muted-foreground mb-8">{t('profile.needLogin')}</p>
             <Button asChild>
-              <Link to="/login">Login</Link>
+              <Link to="/login">{t('auth.login')}</Link>
             </Button>
           </div>
         </div>
@@ -82,16 +85,16 @@ const Profile = () => {
               <CardContent className="space-y-2">
                 <div className="space-y-2">
                   <p className="text-sm">
-                    <span className="font-medium">Phone:</span> {user.phone}
+                    <span className="font-medium">{t('profile.phone')}:</span> {user.phone}
                   </p>
                   <p className="text-sm">
-                    <span className="font-medium">Member since:</span> January 2024
+                    <span className="font-medium">{t('profile.memberSince')}:</span> January 2024
                   </p>
                 </div>
                 <div className="pt-4 space-y-2">
                   <Button variant="outline" className="w-full justify-start">
                     <Settings className="h-4 w-4 mr-2" />
-                    Edit Profile
+                    {t('profile.editProfile')}
                   </Button>
                   <Button 
                     variant="outline" 
@@ -99,7 +102,7 @@ const Profile = () => {
                     onClick={handleLogout}
                   >
                     <LogOut className="h-4 w-4 mr-2" />
-                    Logout
+                    {t('profile.logout')}
                   </Button>
                 </div>
               </CardContent>
@@ -112,21 +115,21 @@ const Profile = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Package className="h-5 w-5" />
-                  Order History
+                  {t('profile.orderHistory')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {ordersLoading ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p className="text-muted-foreground">Loading orders...</p>
+                    <p className="text-muted-foreground">{t('profile.loadingOrders')}</p>
                   </div>
                 ) : orders.length === 0 ? (
                   <div className="text-center py-8">
                     <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">No orders yet</p>
+                    <p className="text-muted-foreground">{t('profile.noOrders')}</p>
                     <Button asChild className="mt-4">
-                      <Link to="/products">Start Shopping</Link>
+                      <Link to="/products">{t('profile.startShopping')}</Link>
                     </Button>
                   </div>
                 ) : (
@@ -136,13 +139,13 @@ const Profile = () => {
                         <CardContent className="p-4 ">
                           <div className="flex justify-between items-start mb-2">
                             <div>
-                              <p className="font-medium">Order #{order._id.slice(-6)}</p>
+                              <p className="font-medium">{t('order.orderNumber')} #{order._id.slice(-6)}</p>
                               <p className="text-sm text-muted-foreground">
                                 {new Date(order.createdAt).toLocaleDateString()}
                               </p>
                             </div>
                             <Badge className={getStatusColor(order.status)}>
-                              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                              {t(`order.status.${order.status}`) || order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                             </Badge>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -151,20 +154,21 @@ const Profile = () => {
                                 const orderItems: any[] = (order as any).items || (order as any).products || [];
                                 return (
                                   <>
-                                    <p className="text-sm font-medium mb-1">Items ({orderItems.length})</p>
+                                    <p className="text-sm font-medium mb-1">{t('cart.items')} ({orderItems.length})</p>
                                     <div className="space-y-1">
                                       {orderItems.map((item: any, index: number) => (
                                   <div key={index} className="flex items-center gap-2">
                                           {item.product?.mainImage?.secure_url && (
                                       <img
                                               src={item.product.mainImage.secure_url}
-                                              alt={item.product.titleEnglish}
+                                              alt={getProductTitle(item.product) || 'Product'}
                                         className="w-8 h-8 rounded object-cover"
+                                        loading="lazy"
                                       />
                                     )}
                                     <div>
                                       <p className="text-sm text-muted-foreground">
-                                              {(item.product?.titleEnglish || item.name || 'Item')} {item.variant ? `(${item.variant.color}, ${item.variant.size})` : ''} x{item.quantity}
+                                              {(getProductTitle(item.product) || item.name || 'Item')} {item.variant ? `(${item.variant.color}, ${item.variant.size})` : ''} x{item.quantity}
                                       </p>
                                     </div>
                                     
@@ -172,7 +176,7 @@ const Profile = () => {
                                       ))}
                                       {orderItems.length > 2 && (
                                         <p className="text-sm text-muted-foreground">
-                                          +{orderItems.length - 2} more items
+                                          +{orderItems.length - 2} {t('profile.moreItems')}
                                         </p>
                                       )}
                                     </div>

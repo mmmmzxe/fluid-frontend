@@ -121,23 +121,34 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
             </Card>
           </div>
 
-          {/* [EDIT] Added Payment Information Card */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                {order.paymentWay === 'card' ? <CreditCard className="h-5 w-5" /> : <Wallet className="h-5 w-5" />}
-                Payment Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div>
-                <span className="font-medium">Method:</span>
-                <span className="ml-2 capitalize bg-gray-100 text-gray-800 px-2 py-1 rounded-md">
-                  {order.paymentWay}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+  <CardHeader>
+    <CardTitle className="flex items-center gap-2">
+      {order.paymentWay === 'card' ? <CreditCard className="h-5 w-5" /> : <Wallet className="h-5 w-5" />}
+      Payment Information
+    </CardTitle>
+  </CardHeader>
+  <CardContent className="space-y-2 text-sm">
+    <div>
+      <span className="font-medium">Method:</span>
+      <span className="ml-2 capitalize bg-gray-100 text-gray-800 px-2 py-1 rounded-md">
+        {order.paymentWay}
+      </span>
+    </div>
+
+    {order.paidAt ? (
+      <div>
+        <span className="font-medium">Paid At:</span>
+        <span className="ml-2 text-green-700 font-semibold">
+          {new Date(order.paidAt).toLocaleString()}
+        </span>
+      </div>
+    ) : (
+      <div className="text-red-500 font-medium">Not Paid Yet</div>
+    )}
+  </CardContent>
+</Card>
+
 
           <Card>
             <CardHeader>
