@@ -14,33 +14,7 @@ import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import { getProductTitle, getProductDescription } from "@/lib/i18nHelpers";
 
-const sizes = ["XS", "S", "M", "L", "XL"];
-const reviews = [
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    rating: 5,
-    date: "2 weeks ago",
-    comment: "Amazing quality and perfect fit! The fabric feels premium and the color is exactly as shown.",
-    verified: true
-  },
-  {
-    id: 2,
-    name: "Michael Chen",
-    rating: 4,
-    date: "1 month ago", 
-    comment: "Great product overall. Shipping was fast and the item arrived in perfect condition.",
-    verified: true
-  },
-  {
-    id: 3,
-    name: "Emma Davis",
-    rating: 5,
-    date: "3 weeks ago",
-    comment: "Absolutely love this! Will definitely order more items from this brand.",
-    verified: false
-  }
-];
+
 
 export default function ProductDetail() {
   const { t } = useTranslation();
@@ -124,7 +98,7 @@ export default function ProductDetail() {
     // For new structure, find the first string value that's not 'stock' or '_id'
     const keys = Object.keys(s).filter(key => key !== 'stock' && key !== '_id');
     return keys.length > 0 ? String(s[keys[0]]) : 'M';
-  }).filter(Boolean).map(String) || sizes;
+  }).filter(Boolean).map(String) ;
 
   const isOnSale = product.discount && product.discount > 0;
   const discountPercentage = isOnSale ? product.discount : 0;
@@ -302,6 +276,11 @@ export default function ProductDetail() {
                   ${product.price.toFixed(2)}
                 </span>
               )}
+            </div>
+
+            {/* Lingerie - no returns notice (i18n) */}
+            <div className="mt-2 text-sm rounded-md px-3 py-2 bg-rose-50 text-rose-700">
+              {t('productDetail.lingerieNoReturn')}
             </div>
 
             {/* Colors */}

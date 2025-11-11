@@ -68,6 +68,11 @@ const ShippingReturns: React.FC = () => {
                 <h3 className="font-semibold mb-2">{t('shipping.refundProcess')}</h3>
                 <p className="text-muted-foreground">{t('shipping.refundProcessDesc')}</p>
               </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">{t('shipping.lingerieExceptionTitle')}</h3>
+                <p className="text-muted-foreground">{t('shipping.lingerieExceptionDesc')}</p>
+              </div>
             </div>
           </div>
         </div>

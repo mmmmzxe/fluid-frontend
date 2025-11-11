@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-const API_BASE = "https://366c75b254ad.ngrok-free.app";
+const API_BASE = "https://9036aeff7f83.ngrok-free.app";
 
 export interface ApiProductDetail {
   _id: string;

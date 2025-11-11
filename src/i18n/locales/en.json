@@ -68,6 +68,7 @@
     "freeShipping": "Free Shipping",
     "easyReturns": "Easy Returns",
     "warranty": "2 Year Warranty",
+  "lingerieNoReturn": "Lingerie is non-returnable — we apologize. For hygiene reasons, lingerie items are not eligible for return or exchange. If you receive a defective item, please contact us within 7 days with a clear photo of the issue.",
     "features": "Features:",
     "premiumFabric": "Premium fabric construction",
     "modernDesign": "Modern, versatile design",
@@ -295,6 +296,8 @@
     "answer5": "We accept all major credit cards, PayPal, and cash on delivery for select locations.",
     "question6": "How can I contact customer support?",
     "answer6": "You can reach our customer support team via email, phone, or the contact form on our website. We're available 24/7 to assist you.",
+  "lingerieQuestion": "Can lingerie items be returned?",
+  "lingerieAnswer": "For hygiene and safety reasons, lingerie items are not eligible for return or exchange. If the item is defective, please contact us within 7 days with a clear photo and we'll assist with an exchange or refund after review.",
     "stillHaveQuestions": "Still have questions?",
     "contactMessage": "Can't find the answer you're looking for? Please chat to our friendly team."
   },
@@ -321,5 +324,8 @@
     "processingTimeDesc": "Orders are processed within 1-2 business days before shipment.",
     "needHelp": "Need Help?",
     "needHelpDesc": "Our customer service team is here to help with any questions about shipping or returns."
+    ,
+    "lingerieExceptionTitle": "Exception: Lingerie items",
+    "lingerieExceptionDesc": "To protect health and safety, all lingerie items are non-returnable and non-exchangeable. If you receive a product with a manufacturing defect, contact us within 7 days of delivery with photos of the defect and our support team will review the case."
   }
 }

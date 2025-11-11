@@ -37,6 +37,10 @@ const FAQ: React.FC = () => {
       question: t('faq.question6'),
       answer: t('faq.answer6'),
     },
+    {
+      question: t('faq.lingerieQuestion'),
+      answer: t('faq.lingerieAnswer'),
+    },
   ];
 
   return (

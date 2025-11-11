@@ -6,7 +6,7 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const apiTarget = "https://366c75b254ad.ngrok-free.app";
+  const apiTarget = "https://9036aeff7f83.ngrok-free.app";
   return ({
   server: {
     host: "::",
