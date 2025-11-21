@@ -6,7 +6,14 @@ import { Plus, Edit, Trash2, Truck } from 'lucide-react';
 import { toast } from 'sonner';
 import DataTable, { Column } from '@/components/admin/DataTable';
 import ShippingForm from '@/components/admin/ShippingForm';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 import { shippingApi, Shipping } from '@/services/adminApi';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
+
+interface ShippingFormData {
+  government: string;
+  price: number;
+}
 
 const ShippingManagement: React.FC = () => {
   const [shippingOptions, setShippingOptions] = useState<Shipping[]>([]);
@@ -16,6 +23,7 @@ const ShippingManagement: React.FC = () => {
   const [editingShipping, setEditingShipping] = useState<Shipping | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const { dialogState, confirm, closeDialog } = useConfirmDialog();
 
   const fetchShippingOptions = async () => {
     try {
@@ -34,9 +42,8 @@ const ShippingManagement: React.FC = () => {
     fetchShippingOptions();
   }, []);
 
-  const handleCreate = async (data: any) => {
+  const handleCreate = async (data: ShippingFormData) => {
     try {
-      // Expecting { government, price }
       await shippingApi.createGov({ government: data.government, price: Number(data.price) });
       toast.success('Shipping option created successfully');
       setShowForm(false);
@@ -47,9 +54,9 @@ const ShippingManagement: React.FC = () => {
     }
   };
 
-  const handleUpdate = async (data: any) => {
+  const handleUpdate = async (data: ShippingFormData) => {
     if (!editingShipping) return;
-    
+
     try {
       await shippingApi.updateGov(editingShipping._id, {
         government: data.government,
@@ -65,17 +72,22 @@ const ShippingManagement: React.FC = () => {
     }
   };
 
-  const handleDelete = async (shipping: Shipping) => {
-    if (!confirm('Are you sure you want to delete this shipping option?')) return;
-    
-    try {
-      await shippingApi.delete(shipping._id);
-      toast.success('Shipping option deleted successfully');
-      fetchShippingOptions();
-    } catch (error) {
-      toast.error('Failed to delete shipping option');
-      console.error('Error deleting shipping option:', error);
-    }
+  const handleDelete = (shipping: Shipping) => {
+    confirm(
+      'Delete Shipping Option',
+      `Are you sure you want to delete shipping option for "${shipping.government}"? This action cannot be undone.`,
+      async () => {
+        try {
+          await shippingApi.delete(shipping._id);
+          toast.success('Shipping option deleted successfully');
+          fetchShippingOptions();
+        } catch (error) {
+          toast.error('Failed to delete shipping option');
+          console.error('Error deleting shipping option:', error);
+        }
+      },
+      'destructive'
+    );
   };
 
   const handleEdit = (shipping: Shipping) => {
@@ -182,6 +194,17 @@ const ShippingManagement: React.FC = () => {
           onSubmit={editingShipping ? handleUpdate : handleCreate}
         />
       )}
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        open={dialogState.open}
+        onOpenChange={closeDialog}
+        title={dialogState.title}
+        description={dialogState.description}
+        onConfirm={dialogState.onConfirm}
+        variant={dialogState.variant}
+        confirmText="Delete"
+      />
     </div>
   );
 };

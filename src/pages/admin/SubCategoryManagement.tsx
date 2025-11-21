@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,7 +6,10 @@ import { Plus, Edit, Trash2, FolderOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import DataTable, { Column } from '@/components/admin/DataTable';
 import SubCategoryForm from '@/components/admin/SubCategoryForm';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 import { subCategoryApi, categoryApi, SubCategory, Category } from '@/services/adminApi';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
+import { getCategoryId, getCategoryName } from '@/utils/adminHelpers';
 
 const SubCategoryManagement: React.FC = () => {
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
@@ -18,6 +21,7 @@ const SubCategoryManagement: React.FC = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const { dialogState, confirm, closeDialog } = useConfirmDialog();
 
   const fetchSubCategories = async () => {
     try {
@@ -64,7 +68,7 @@ const SubCategoryManagement: React.FC = () => {
 
   const handleUpdate = async (data: any) => {
     if (!editingSubCategory) return;
-    
+
     try {
       const form = new FormData();
       if (data.image instanceof File) form.append('image', data.image);
@@ -81,17 +85,22 @@ const SubCategoryManagement: React.FC = () => {
     }
   };
 
-  const handleDelete = async (subCategory: SubCategory) => {
-    if (!confirm('Are you sure you want to delete this subcategory?')) return;
-    
-    try {
-      await subCategoryApi.delete(subCategory._id);
-      toast.success('SubCategory deleted successfully');
-      fetchSubCategories();
-    } catch (error) {
-      toast.error('Failed to delete subcategory');
-      console.error('Error deleting subcategory:', error);
-    }
+  const handleDelete = (subCategory: SubCategory) => {
+    confirm(
+      'Delete SubCategory',
+      `Are you sure you want to delete "${subCategory.nameEnglish}"? This action cannot be undone.`,
+      async () => {
+        try {
+          await subCategoryApi.delete(subCategory._id);
+          toast.success('SubCategory deleted successfully');
+          fetchSubCategories();
+        } catch (error) {
+          toast.error('Failed to delete subcategory');
+          console.error('Error deleting subcategory:', error);
+        }
+      },
+      'destructive'
+    );
   };
 
   const handleEdit = (subCategory: SubCategory) => {
@@ -102,15 +111,13 @@ const SubCategoryManagement: React.FC = () => {
   const filteredSubCategories = (subCategories || []).filter(subCategory => {
     const nameEnglish = subCategory.nameEnglish || '';
     const nameArabic = subCategory.nameArabic || '';
-    const matchesSearch = 
+    const matchesSearch =
       nameEnglish.toLowerCase().includes(searchQuery.toLowerCase()) ||
       nameArabic.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const categoryId = typeof subCategory.categoryId === 'string' 
-      ? subCategory.categoryId 
-      : subCategory.categoryId?._id;
-    const matchesCategory = !selectedCategory || categoryId === selectedCategory;
-    
+
+    const categoryIdValue = getCategoryId(subCategory.categoryId);
+    const matchesCategory = !selectedCategory || categoryIdValue === selectedCategory;
+
     return matchesSearch && matchesCategory;
   });
 
@@ -131,12 +138,13 @@ const SubCategoryManagement: React.FC = () => {
       key: 'categoryId',
       title: 'Parent Category',
       render: (value, row) => {
-        const categoryId = typeof row.categoryId === 'string' 
-          ? row.categoryId 
-          : row.categoryId?._id;
-        const categoryName = typeof row.categoryId === 'object' && row.categoryId?.name
-          ? row.categoryId.name
-          : categories.find(cat => cat._id === categoryId)?.nameEnglish || categories.find(cat => cat._id === categoryId)?.name || 'Unknown';
+        const categoryIdValue = getCategoryId(row.categoryId);
+        const categoryName = getCategoryName(
+          row.categoryId,
+          categories.find(cat => cat._id === categoryIdValue)?.nameEnglish ||
+          categories.find(cat => cat._id === categoryIdValue)?.name ||
+          'Unknown'
+        );
         return (
           <Badge variant="outline">
             {categoryName}
@@ -170,6 +178,24 @@ const SubCategoryManagement: React.FC = () => {
     (page - 1) * pageSize,
     page * pageSize
   );
+
+  // Calculate stats using useMemo for performance
+  const stats = useMemo(() => {
+    const avgPerCategory = categories?.length > 0
+      ? Math.round((subCategories?.length || 0) / categories.length)
+      : 0;
+
+    const maxSubCategoriesInCategory = categories?.length > 0
+      ? Math.max(...categories.map(cat =>
+        (subCategories || []).filter(sub => {
+          const categoryIdValue = getCategoryId(sub.categoryId);
+          return categoryIdValue === cat._id;
+        }).length
+      ))
+      : 0;
+
+    return { avgPerCategory, maxSubCategoriesInCategory };
+  }, [categories, subCategories]);
 
   const categoryFilters = [
     {
@@ -229,12 +255,7 @@ const SubCategoryManagement: React.FC = () => {
             <FolderOpen className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {categories?.length > 0 
-                ? Math.round((subCategories?.length || 0) / categories.length)
-                : 0
-              }
-            </div>
+            <div className="text-2xl font-bold">{stats.avgPerCategory}</div>
           </CardContent>
         </Card>
 
@@ -244,19 +265,7 @@ const SubCategoryManagement: React.FC = () => {
             <FolderOpen className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {categories?.length > 0 
-                ? Math.max(...categories.map(cat => 
-                    (subCategories || []).filter(sub => {
-                      const categoryId = typeof sub.categoryId === 'string' 
-                        ? sub.categoryId 
-                        : sub.categoryId?._id;
-                      return categoryId === cat._id;
-                    }).length
-                  ))
-                : 0
-              }
-            </div>
+            <div className="text-2xl font-bold">{stats.maxSubCategoriesInCategory}</div>
           </CardContent>
         </Card>
       </div>
@@ -302,6 +311,17 @@ const SubCategoryManagement: React.FC = () => {
           onSubmit={editingSubCategory ? handleUpdate : handleCreate}
         />
       )}
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        open={dialogState.open}
+        onOpenChange={closeDialog}
+        title={dialogState.title}
+        description={dialogState.description}
+        onConfirm={dialogState.onConfirm}
+        variant={dialogState.variant}
+        confirmText="Delete"
+      />
     </div>
   );
 };

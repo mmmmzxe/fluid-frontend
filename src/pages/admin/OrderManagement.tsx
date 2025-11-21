@@ -6,7 +6,10 @@ import { Eye, Package, Truck, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import DataTable, { Column } from '@/components/admin/DataTable';
 import OrderDetails from '@/components/admin/OrderDetails';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 import { orderApi, Order } from '@/services/adminApi';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
+import { getCustomerName, getCustomerEmail } from '@/utils/adminHelpers';
 
 const OrderManagement: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -17,13 +20,14 @@ const OrderManagement: React.FC = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const { dialogState, confirm, closeDialog } = useConfirmDialog();
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
       const response = await orderApi.getAll();
       // Assuming the API response is the array directly
-      setOrders(response.data); 
+      setOrders(response.data);
     } catch (error) {
       toast.error('Failed to fetch orders');
       console.error('Error fetching orders:', error);
@@ -47,17 +51,22 @@ const OrderManagement: React.FC = () => {
     }
   };
 
-  const handleCancelOrder = async (order: Order) => {
-    if (!confirm('Are you sure you want to cancel this order?')) return;
-    
-    try {
-      await orderApi.cancel(order._id);
-      toast.success('Order cancelled successfully');
-      fetchOrders();
-    } catch (error) {
-      toast.error('Failed to cancel order');
-      console.error('Error cancelling order:', error);
-    }
+  const handleCancelOrder = (order: Order) => {
+    confirm(
+      'Cancel Order',
+      `Are you sure you want to cancel order ${order._id.slice(-8).toUpperCase()}? This action cannot be undone.`,
+      async () => {
+        try {
+          await orderApi.cancel(order._id);
+          toast.success('Order cancelled successfully');
+          fetchOrders();
+        } catch (error) {
+          toast.error('Failed to cancel order');
+          console.error('Error cancelling order:', error);
+        }
+      },
+      'destructive'
+    );
   };
 
   const handleView = (order: Order) => {
@@ -100,16 +109,16 @@ const OrderManagement: React.FC = () => {
   };
 
   const filteredOrders = (orders || []).filter(order => {
-    const customerName = order.createdBy?.name || `${order.firstName || ''} ${order.lastName || ''}`.trim();
-    const customerEmail = order.createdBy?.email || order.email || '';
+    const customerName = getCustomerName(order);
+    const customerEmail = getCustomerEmail(order);
 
-    const matchesSearch = 
+    const matchesSearch =
       order._id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       customerEmail.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesStatus = !statusFilter || order.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -124,14 +133,14 @@ const OrderManagement: React.FC = () => {
       ),
     },
     {
-      key: 'createdBy' as any, // Use a key that exists, we will use the `row` object
+      key: 'createdBy' as any,
       title: 'Customer',
       render: (_, row) => {
-        const name = row.createdBy?.name || `${row.firstName || ''} ${row.lastName || ''}`.trim();
-        const email = row.createdBy?.email || row.email || '';
+        const name = getCustomerName(row);
+        const email = getCustomerEmail(row);
         return (
           <div>
-            <div className="font-medium">{name || 'Guest'}</div>
+            <div className="font-medium">{name}</div>
             <div className="text-sm text-muted-foreground">{email}</div>
           </div>
         );
@@ -316,6 +325,17 @@ const OrderManagement: React.FC = () => {
           onCancel={handleCancelOrder}
         />
       )}
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        open={dialogState.open}
+        onOpenChange={closeDialog}
+        title={dialogState.title}
+        description={dialogState.description}
+        onConfirm={dialogState.onConfirm}
+        variant={dialogState.variant}
+        confirmText="Confirm"
+      />
     </div>
   );
 };

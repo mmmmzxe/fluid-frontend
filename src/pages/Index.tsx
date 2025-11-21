@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import brandBanner from "@/assets/brand-banner.png";
 import ExploreStyles from "./ExploreStyles";
 import CollectionsHero from "./CollectionsHero";
-import InstagramNewsletter from "./InstagramNewsletter";
+
 import Footer from "@/components/Footer";
 import TextVideoSection from "./MediaSection";
 import { useProducts } from "@/hooks/useApi";
@@ -62,25 +62,25 @@ const Index = () => {
   const apiBestSelling = apiProducts;
   const bestSellingProducts = apiBestSelling.map(transformApiProduct).slice(0, 4);
   return (
-    <motion.div 
+    <motion.div
       className="min-h-screen bg-background"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
       <Navbar />
-      
+
       {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
       >
-        <CollectionsHero/>
+        <CollectionsHero />
       </motion.div>
 
       {/* Brand Logos */}
-      <motion.section 
+      <motion.section
         className="py-16 bg-background"
         initial="initial"
         whileInView="animate"
@@ -88,7 +88,7 @@ const Index = () => {
         variants={fadeInUp}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center"
             variants={staggerContainer}
             initial="initial"
@@ -96,8 +96,8 @@ const Index = () => {
             viewport={{ once: false, amount: 0.2 }}
           >
             {brandLogos.map((brand, index) => (
-              <motion.div 
-                key={index} 
+              <motion.div
+                key={index}
                 className="text-center"
                 variants={scaleIn}
                 whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
@@ -115,19 +115,19 @@ const Index = () => {
           </motion.div>
         </div>
       </motion.section>
-   
-      
-      <ExploreStyles/>
-     <motion.div
+
+
+      <ExploreStyles />
+      <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: false, amount: 0.3 }}
         transition={{ duration: 0.8 }}
       >
-        <TextVideoSection/>
+        <TextVideoSection />
       </motion.div>
       {/* Featured Products */}
-      <motion.section 
+      <motion.section
         className="py-16 bg-gray-light"
         initial="initial"
         whileInView="animate"
@@ -135,7 +135,7 @@ const Index = () => {
         variants={fadeInUp}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             className="text-center mb-12"
             variants={fadeInUp}
           >
@@ -143,7 +143,7 @@ const Index = () => {
               {t('home.exploreNewStyles')}
             </h2>
           </motion.div>
-          <motion.div 
+          <motion.div
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
             variants={staggerContainer}
             initial="initial"
@@ -160,7 +160,7 @@ const Index = () => {
               </motion.div>
             ))}
           </motion.div>
-          <motion.div 
+          <motion.div
             className="text-center mt-12"
             variants={fadeInUp}
             initial="initial"
@@ -199,12 +199,12 @@ const Index = () => {
             <div></div>
 
             {/* Right side text content */}
-            <motion.div 
+            <motion.div
               className="relative z-10 flex flex-col justify-center space-y-6"
               variants={fadeInRight}
             >
               {/* Big faded ZARA in background */}
-              <motion.h1 
+              <motion.h1
                 className="absolute -top-16 -right-10 text-[8rem] lg:text-[12rem] font-bold text-white/10 leading-none z-0 select-none"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 0.1, scale: 1 }}
@@ -214,7 +214,7 @@ const Index = () => {
               </motion.h1>
 
               {/* Foreground small ZARA */}
-              <motion.h2 
+              <motion.h2
                 className="text-3xl lg:text-4xl font-bold"
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -224,7 +224,7 @@ const Index = () => {
               </motion.h2>
 
               {/* Description */}
-              <motion.p 
+              <motion.p
                 className="text-base lg:text-lg text-gray-300 max-w-md leading-relaxed"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -234,7 +234,7 @@ const Index = () => {
               </motion.p>
 
               {/* Button */}
-              <motion.button 
+              <motion.button
                 className="px-6 py-3 w-fit border border-white text-white font-medium hover:bg-white hover:text-black transition"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -252,7 +252,7 @@ const Index = () => {
 
 
       {/* Best Sellers */}
-      <motion.section 
+      <motion.section
         className="py-16 bg-gray-light"
         initial="initial"
         whileInView="animate"
@@ -260,7 +260,7 @@ const Index = () => {
         variants={fadeInUp}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             className="text-center mb-12"
             variants={fadeInUp}
           >
@@ -268,7 +268,7 @@ const Index = () => {
               {t('home.bestSellers')}
             </h2>
           </motion.div>
-          <motion.div 
+          <motion.div
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
             variants={staggerContainer}
             initial="initial"
@@ -287,15 +287,8 @@ const Index = () => {
           </motion.div>
         </div>
       </motion.section>
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: false, amount: 0.3 }}
-        transition={{ duration: 0.8 }}
-      >
-        <InstagramNewsletter/>
-      </motion.div>
-  
+
+
 
       <motion.div
         initial={{ opacity: 0 }}

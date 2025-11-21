@@ -150,15 +150,15 @@
     --coral-beige: 30 15% 88%;
     --coral-charcoal: 0 0% 25%;
     --coral-light: 30 10% 97%;
-    
+
     /* Elegant gradients */
     --gradient-warm: linear-gradient(135deg, hsl(var(--coral-light)), hsl(var(--coral-beige)));
     --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--coral-light)));
-    
+
     /* Sophisticated shadows */
     --shadow-elegant: 0 4px 20px -4px hsl(var(--coral-charcoal) / 0.1);
     --shadow-soft: 0 2px 8px -2px hsl(var(--coral-charcoal) / 0.08);
-    
+
     /* Smooth transitions */
     --transition-elegant: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -226,13 +226,61 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
-html{
+
+html {
   overflow-x: hidden;
 }
+
 @layer base {
   * {
     @apply border-border;
   }
+}
 
+/* Custom Animations for Admin Dashboard */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 10px rgba(147, 51, 234, 0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+  background-size: 200% 100%;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
 }

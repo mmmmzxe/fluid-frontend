@@ -46,7 +46,7 @@ const UserManagement: React.FC = () => {
       // In a real app, you would call an API endpoint to get all users
       // const response = await userApi.getAll();
       // setUsers(response.data);
-      
+
       // For now, using mock data
       setUsers(mockUsers);
     } catch (error) {
@@ -89,12 +89,12 @@ const UserManagement: React.FC = () => {
   };
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = 
+    const matchesSearch =
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesRole = !roleFilter || user.role === roleFilter;
-    
+
     return matchesSearch && matchesRole;
   });
 
@@ -239,8 +239,6 @@ const UserManagement: React.FC = () => {
       {/* User Details Modal */}
       {showDetails && selectedUser && (
         <UserDetails
-        
-
           user={selectedUser}
           onClose={() => {
             setShowDetails(false);

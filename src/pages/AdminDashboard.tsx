@@ -16,31 +16,38 @@ const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { fetchProfile } = useUserProfile();
 
+  // Helper function to map user data consistently
+  const mapUserData = React.useCallback((userData: any) => ({
+    _id: userData._id || userData.id || "",
+    name: userData.name || "",
+    email: userData.email || "",
+    phone: userData.phone || "",
+    role: userData.role || 'user',
+  }), []);
+
   // Check authentication and role-based access
   React.useEffect(() => {
     const checkAuthAndRole = async () => {
       const token = localStorage.getItem('accessToken');
       const userData = localStorage.getItem('userData');
-      
+
       if (!token) {
         navigate('/login');
         return;
       }
 
+      let currentUser = user;
+
       // If user is not in Redux store but we have data in localStorage, restore it
       if (!isAuthenticated && userData) {
         try {
           const parsedUser = JSON.parse(userData);
-          const mappedUser = {
-            _id: parsedUser._id || parsedUser.id || "",
-            name: parsedUser.name || "",
-            email: parsedUser.email || "",
-            phone: parsedUser.phone || "",
-            role: parsedUser.role || 'user',
-          };
+          const mappedUser = mapUserData(parsedUser);
           dispatch(login({ user: mappedUser, token }));
+          currentUser = mappedUser;
         } catch (error) {
           console.error('Error parsing user data:', error);
+          toast.error('Invalid session data');
           navigate('/login');
           return;
         }
@@ -50,23 +57,21 @@ const AdminDashboard: React.FC = () => {
       try {
         const profileData = await fetchProfile();
         if (profileData) {
-          const mappedUser = {
-            _id: profileData._id || profileData.id || "",
-            name: profileData.name || "",
-            email: profileData.email || "",
-            phone: profileData.phone || "",
-            role: profileData.role || 'user',
-          };
+          const mappedUser = mapUserData(profileData);
           dispatch(login({ user: mappedUser, token }));
+          currentUser = mappedUser;
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
-        toast.error('Failed to fetch user profile');
+        // Don't show error if we already have user data
+        if (!currentUser) {
+          toast.error('Failed to fetch user profile');
+        }
       }
 
       // Check if user has admin role
-      const currentUser = user || (userData ? JSON.parse(userData) : null);
       if (!currentUser?.role || (currentUser.role !== 'superAdmin' && currentUser.role !== 'admin')) {
+        toast.error('Access denied. Admin privileges required.');
         navigate('/');
         return;
       }
@@ -78,7 +83,7 @@ const AdminDashboard: React.FC = () => {
     };
 
     checkAuthAndRole();
-  }, [isAuthenticated, user, navigate, dispatch, fetchProfile]);
+  }, [isAuthenticated, user, navigate, dispatch, fetchProfile, location.pathname, mapUserData]);
 
   if (!isAuthenticated || !user || !user.role) {
     return null;

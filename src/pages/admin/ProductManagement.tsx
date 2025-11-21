@@ -6,7 +6,9 @@ import { Plus, Edit, Trash2, Eye, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import DataTable, { Column } from '@/components/admin/DataTable';
 import ProductForm from '@/components/admin/ProductForm';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 import { productApi, categoryApi, Product, Category } from '@/services/adminApi';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 const ProductManagement: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -19,6 +21,7 @@ const ProductManagement: React.FC = () => {
   const [pageSize, setPageSize] = useState(10);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>('');
+  const { dialogState, confirm, closeDialog } = useConfirmDialog();
 
   const fetchProducts = async () => {
     try {
@@ -74,7 +77,7 @@ const ProductManagement: React.FC = () => {
 
   const handleUpdate = async (formData: FormData) => {
     if (!editingProduct) return;
-    
+
     try {
       await productApi.update(editingProduct._id, formData);
       toast.success('Product updated successfully');
@@ -87,17 +90,22 @@ const ProductManagement: React.FC = () => {
     }
   };
 
-  const handleDelete = async (product: Product) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
-    
-    try {
-      await productApi.delete(product._id);
-      toast.success('Product deleted successfully');
-      fetchProducts();
-    } catch (error) {
-      toast.error('Failed to delete product');
-      console.error('Error deleting product:', error);
-    }
+  const handleDelete = (product: Product) => {
+    confirm(
+      'Delete Product',
+      `Are you sure you want to delete "${product.titleEnglish}"? This action cannot be undone.`,
+      async () => {
+        try {
+          await productApi.delete(product._id);
+          toast.success('Product deleted successfully');
+          fetchProducts();
+        } catch (error) {
+          toast.error('Failed to delete product');
+          console.error('Error deleting product:', error);
+        }
+      },
+      'destructive'
+    );
   };
 
   const handleEdit = (product: Product) => {
@@ -115,8 +123,8 @@ const ProductManagement: React.FC = () => {
     const titleArabic = product.titleArabic || '';
     const descriptionEnglish = product.descriptionEnglish || '';
     return titleEnglish.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           titleArabic.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           descriptionEnglish.toLowerCase().includes(searchQuery.toLowerCase());
+      titleArabic.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      descriptionEnglish.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   const columns: Column<Product>[] = [
@@ -280,6 +288,17 @@ const ProductManagement: React.FC = () => {
           onSubmit={editingProduct ? handleUpdate : handleCreate}
         />
       )}
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        open={dialogState.open}
+        onOpenChange={closeDialog}
+        title={dialogState.title}
+        description={dialogState.description}
+        onConfirm={dialogState.onConfirm}
+        variant={dialogState.variant}
+        confirmText="Delete"
+      />
     </div>
   );
 };

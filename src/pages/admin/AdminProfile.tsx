@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAppSelector } from '@/hooks/useRedux';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,14 +8,24 @@ import { Separator } from '@/components/ui/separator';
 import { User, Mail, Phone, Shield, Calendar, Settings, RefreshCw } from 'lucide-react';
 import { useUserProfile } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { getInitials } from '@/utils/adminHelpers';
+
+interface ProfileData {
+  _id?: string;
+  id?: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+}
 
 const AdminProfile: React.FC = () => {
   const { user } = useAppSelector((state) => state.user);
   const { fetchProfile, loading } = useUserProfile();
-  const [profileData, setProfileData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const handleRefreshProfile = async () => {
+  const handleRefreshProfile = useCallback(async () => {
     try {
       setRefreshing(true);
       const data = await fetchProfile();
@@ -26,12 +36,12 @@ const AdminProfile: React.FC = () => {
     } finally {
       setRefreshing(false);
     }
-  };
+  }, [fetchProfile]);
 
   useEffect(() => {
     // Fetch profile data on component mount
     handleRefreshProfile();
-  }, []);
+  }, [handleRefreshProfile]);
 
   if (!user) {
     return <div>Loading...</div>;
@@ -62,15 +72,6 @@ const AdminProfile: React.FC = () => {
     }
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -81,8 +82,8 @@ const AdminProfile: React.FC = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={handleRefreshProfile}
             disabled={refreshing}
           >
@@ -177,12 +178,12 @@ const AdminProfile: React.FC = () => {
                 <Mail className="mr-2 h-4 w-4" />
                 Change Email Address
               </Button>
-              
+
               <Button variant="outline" className="w-full justify-start">
                 <User className="mr-2 h-4 w-4" />
                 Change Password
               </Button>
-              
+
               <Button variant="outline" className="w-full justify-start">
                 <Phone className="mr-2 h-4 w-4" />
                 Update Phone Number
@@ -196,7 +197,7 @@ const AdminProfile: React.FC = () => {
               <Button variant="outline" className="w-full justify-start">
                 Two-Factor Authentication
               </Button>
-              
+
               <Button variant="outline" className="w-full justify-start">
                 Login History
               </Button>
@@ -222,7 +223,7 @@ const AdminProfile: React.FC = () => {
               <div>
                 <div className="font-medium">Current Role</div>
                 <div className="text-sm text-muted-foreground">
-                  {displayUser.role === 'superAdmin' 
+                  {displayUser.role === 'superAdmin'
                     ? 'Super Administrator - Full access to all features'
                     : 'Administrator - Limited access to order and support management'
                   }

@@ -183,16 +183,7 @@ function DataTable<T extends Record<string, any>>({
             </Select>
           ))}
         </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
-          <Button variant="outline" size="sm">
-            <Filter className="mr-2 h-4 w-4" />
-            Filter
-          </Button>
-        </div>
+      
       </div>
 
       {/* Table */}
