@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Package, Truck, CheckCircle, XCircle } from 'lucide-react';
+import { Eye, Package, Truck, CheckCircle, XCircle, ShoppingCart, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 import DataTable, { Column } from '@/components/admin/DataTable';
 import OrderDetails from '@/components/admin/OrderDetails';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
+import EnhancedStatsCard from '@/components/admin/EnhancedStatsCard';
+import EnhancedBadge from '@/components/admin/EnhancedBadge';
 import { orderApi, Order } from '@/services/adminApi';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 import { getCustomerName, getCustomerEmail } from '@/utils/adminHelpers';
@@ -74,20 +76,20 @@ const OrderManagement: React.FC = () => {
     setShowDetails(true);
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: string): 'success' | 'warning' | 'error' | 'info' | 'purple' => {
     switch (status) {
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'warning';
       case 'placed':
-        return 'bg-blue-100 text-blue-800';
+        return 'info';
       case 'on_way':
-        return 'bg-purple-100 text-purple-800';
+        return 'purple';
       case 'delivered':
-        return 'bg-green-100 text-green-800';
+        return 'success';
       case 'cancelled':
-        return 'bg-red-100 text-red-800';
+        return 'error';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'info';
     }
   };
 
@@ -167,12 +169,12 @@ const OrderManagement: React.FC = () => {
       key: 'status',
       title: 'Status',
       render: (value) => (
-        <Badge className={getStatusColor(value)}>
+        <EnhancedBadge variant={getStatusVariant(value)} glow>
           <span className="flex items-center gap-1">
             {getStatusIcon(value)}
             {value.charAt(0).toUpperCase() + value.slice(1).replace('_', ' ')}
           </span>
-        </Badge>
+        </EnhancedBadge>
       ),
     },
     {
@@ -228,60 +230,49 @@ const OrderManagement: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header with Gradient */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Order Management</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+            Order Management
+          </h1>
+          <p className="text-muted-foreground mt-2">
             Manage customer orders and track their status
           </p>
         </div>
       </div>
 
       {/* Order Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{orders.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
-            <Package className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {orders.filter(order => order.status === 'pending').length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">On Way Orders</CardTitle>
-            <Truck className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {orders.filter(order => order.status === 'on_way').length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <Package className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${orders.reduce((sum, order) => sum + Number(order.finalPrice || 0), 0).toFixed(2)}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <EnhancedStatsCard
+          title="Total Orders"
+          value={orders.length}
+          icon={ShoppingCart}
+          gradient="blue"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="Pending Orders"
+          value={orders.filter(order => order.status === 'pending').length}
+          icon={Package}
+          gradient="orange"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="On Way Orders"
+          value={orders.filter(order => order.status === 'on_way').length}
+          icon={Truck}
+          gradient="cyan"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="Total Revenue"
+          value={`$${orders.reduce((sum, order) => sum + Number(order.finalPrice || 0), 0).toLocaleString()}`}
+          icon={DollarSign}
+          gradient="green"
+          loading={loading}
+        />
       </div>
 
       <Card>

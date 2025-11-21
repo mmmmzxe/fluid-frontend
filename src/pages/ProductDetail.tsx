@@ -22,7 +22,7 @@ export default function ProductDetail() {
   const { fetchProductById, loading, error } = useProduct();
   const { addItemToCart, loading: cartLoading } = useCart();
   const { isAuthenticated } = useAppSelector((state) => state.user);
-  
+
   const [product, setProduct] = useState<ApiProductDetail | null>(null);
   const [activeImageUrl, setActiveImageUrl] = useState<string>("");
   const [selectedSize, setSelectedSize] = useState("");
@@ -32,12 +32,12 @@ export default function ProductDetail() {
   const [activeTab, setActiveTab] = useState("description");
   const allImages = (product?.subImages && product.subImages.length > 0)
     ? [
-        { secure_url: product.mainImage?.secure_url || '/placeholder.svg' },
-        ...product.subImages,
-      ]
+      { secure_url: product.mainImage?.secure_url || '/placeholder.svg' },
+      ...product.subImages,
+    ]
     : [
-        { secure_url: product?.mainImage?.secure_url || '/placeholder.svg' },
-      ];
+      { secure_url: product?.mainImage?.secure_url || '/placeholder.svg' },
+    ];
 
   useEffect(() => {
     if (id) {
@@ -89,7 +89,7 @@ export default function ProductDetail() {
 
   // Get available colors from variants
   const availableColors = product.variants?.map(v => v.color) || [];
-  
+
   // Get available sizes from selected color variant
   const selectedVariant = product.variants?.find(v => v.color === selectedColor);
   const availableSizes = selectedVariant?.size?.map(s => {
@@ -98,7 +98,7 @@ export default function ProductDetail() {
     // For new structure, find the first string value that's not 'stock' or '_id'
     const keys = Object.keys(s).filter(key => key !== 'stock' && key !== '_id');
     return keys.length > 0 ? String(s[keys[0]]) : 'M';
-  }).filter(Boolean).map(String) ;
+  }).filter(Boolean).map(String);
 
   const isOnSale = product.discount && product.discount > 0;
   const discountPercentage = isOnSale ? product.discount : 0;
@@ -147,9 +147,9 @@ export default function ProductDetail() {
 
         // Check if item with same variant and size exists
         const existingItemIndex = guestCart.findIndex(
-          (item: any) => 
-            item.variantId === variantId && 
-            item.variant.size === selectedSize && 
+          (item: any) =>
+            item.variantId === variantId &&
+            item.variant.size === selectedSize &&
             item.variant.color === selectedColor
         );
 
@@ -166,7 +166,7 @@ export default function ProductDetail() {
         // Handle authenticated user cart
         await addItemToCart(cartItem);
       }
-      
+
       toast.success(t('productDetail.addToCart'));
     } catch (err: any) {
       toast.error(err?.message || t('common.error'));
@@ -176,7 +176,7 @@ export default function ProductDetail() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <nav className="text-sm text-muted-foreground">
@@ -200,7 +200,8 @@ export default function ProductDetail() {
                   alt={getProductTitle(product)}
                   className="w-full h-full object-cover"
                   loading="eager"
-                  fetchPriority="high"
+                  // @ts-ignore
+                  fetchpriority="high"
                 />
               </div>
               {/* Thumbnails */}
@@ -244,7 +245,7 @@ export default function ProductDetail() {
                 )}
               </div>
               <h1 className="text-3xl font-bold text-navy">{getProductTitle(product)}</h1>
-              
+
               {/* Rating */}
               <div className="flex items-center gap-2 mt-4">
                 <div className="flex">
@@ -420,15 +421,15 @@ export default function ProductDetail() {
                   seamlessly from casual to formal settings. The attention to detail and superior 
                   construction ensure lasting durability and timeless appeal.`}
                 </p>
-                
+
               </div>
             )}
 
-      
+
           </div>
         </div>
 
-      
+
       </div>
 
       <Footer />

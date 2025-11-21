@@ -52,24 +52,28 @@ const AdminBreadcrumb: React.FC = () => {
   const breadcrumbItems = getBreadcrumbItems();
 
   return (
-    <Breadcrumb>
-      <BreadcrumbList>
+    <Breadcrumb className="mb-4">
+      <BreadcrumbList className="bg-white/40 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 shadow-sm inline-flex">
         <BreadcrumbItem>
-          <BreadcrumbLink href="/admin" className="flex items-center gap-1">
-            <Home className="h-4 w-4" />
-            Admin
+          <BreadcrumbLink href="/admin" className="flex items-center gap-1.5 text-muted-foreground hover:text-purple-600 transition-colors">
+            <Home className="h-3.5 w-3.5" />
+            <span className="font-medium text-xs">Admin</span>
           </BreadcrumbLink>
         </BreadcrumbItem>
         {breadcrumbItems.map((item, index) => (
           <React.Fragment key={item.href}>
             <BreadcrumbSeparator>
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
             </BreadcrumbSeparator>
             <BreadcrumbItem>
               {item.isLast ? (
-                <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                <BreadcrumbPage className="font-semibold text-xs bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  {item.label}
+                </BreadcrumbPage>
               ) : (
-                <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
+                <BreadcrumbLink href={item.href} className="text-muted-foreground hover:text-purple-600 transition-colors text-xs font-medium">
+                  {item.label}
+                </BreadcrumbLink>
               )}
             </BreadcrumbItem>
           </React.Fragment>

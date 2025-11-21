@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, MessageSquare, Plus } from 'lucide-react';
+import { Eye, MessageSquare, Plus, Clock, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import DataTable, { Column } from '@/components/admin/DataTable';
 import SupportTicketDetails from '@/components/admin/SupportTicketDetails';
+import EnhancedStatsCard from '@/components/admin/EnhancedStatsCard';
 import { supportApi, SupportTicket } from '@/services/adminApi';
 
 const SupportManagement: React.FC = () => {
@@ -84,64 +85,46 @@ const SupportManagement: React.FC = () => {
   const filters: any[] = [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header with Gradient */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Support Management</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+            Support Management
+          </h1>
+          <p className="text-muted-foreground mt-2">
             Manage customer support tickets and inquiries
           </p>
         </div>
       </div>
 
       {/* Support Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Tickets</CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{tickets.length}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Open Tickets</CardTitle>
-            <MessageSquare className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {tickets.filter(ticket => ticket.status === 'open').length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-            <MessageSquare className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {tickets.filter(ticket => ticket.status === 'in-progress').length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">High Priority</CardTitle>
-            <MessageSquare className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {tickets.filter(ticket => ticket.priority === 'high').length}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-6 md:grid-cols-3">
+        <EnhancedStatsCard
+          title="Total Tickets"
+          value={tickets.length}
+          icon={MessageSquare}
+          gradient="purple"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="Recent Tickets (24h)"
+          value={tickets.filter(t => new Date(t.createdAt).getTime() > Date.now() - 86400000).length}
+          icon={Clock}
+          gradient="blue"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="Avg Tickets/Day"
+          value={(tickets.length / 30).toFixed(1)}
+          icon={MessageSquare}
+          gradient="green"
+          loading={loading}
+          subtitle="Last 30 days"
+        />
       </div>
+
+
 
       <Card>
         <CardHeader>
@@ -172,16 +155,18 @@ const SupportManagement: React.FC = () => {
       </Card>
 
       {/* Ticket Details Modal */}
-      {showDetails && selectedTicket && (
-        <SupportTicketDetails
-          ticket={selectedTicket}
-          onClose={() => {
-            setShowDetails(false);
-            setSelectedTicket(null);
-          }}
-        />
-      )}
-    </div>
+      {
+        showDetails && selectedTicket && (
+          <SupportTicketDetails
+            ticket={selectedTicket}
+            onClose={() => {
+              setShowDetails(false);
+              setSelectedTicket(null);
+            }}
+          />
+        )
+      }
+    </div >
   );
 };
 

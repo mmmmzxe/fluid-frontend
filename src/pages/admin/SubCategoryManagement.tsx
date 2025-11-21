@@ -2,11 +2,14 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, FolderOpen } from 'lucide-react';
+import { Plus, Edit, Trash2, FolderOpen, Layers, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import DataTable, { Column } from '@/components/admin/DataTable';
 import SubCategoryForm from '@/components/admin/SubCategoryForm';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
+import EnhancedStatsCard from '@/components/admin/EnhancedStatsCard';
+import GradientButton from '@/components/admin/GradientButton';
+import EnhancedBadge from '@/components/admin/EnhancedBadge';
 import { subCategoryApi, categoryApi, SubCategory, Category } from '@/services/adminApi';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 import { getCategoryId, getCategoryName } from '@/utils/adminHelpers';
@@ -213,61 +216,53 @@ const SubCategoryManagement: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header with Gradient */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">SubCategory Management</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+            SubCategory Management
+          </h1>
+          <p className="text-muted-foreground mt-2">
             Manage product subcategories and their organization
           </p>
         </div>
-        <Button onClick={() => setShowForm(true)}>
+        <GradientButton gradient="purple" onClick={() => setShowForm(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add SubCategory
-        </Button>
+        </GradientButton>
       </div>
 
       {/* SubCategory Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total SubCategories</CardTitle>
-            <FolderOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{subCategories?.length || 0}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Categories</CardTitle>
-            <FolderOpen className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{categories?.length || 0}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average per Category</CardTitle>
-            <FolderOpen className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.avgPerCategory}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Most SubCategories</CardTitle>
-            <FolderOpen className="h-4 w-4 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.maxSubCategoriesInCategory}</div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <EnhancedStatsCard
+          title="Total SubCategories"
+          value={subCategories?.length || 0}
+          icon={Layers}
+          gradient="purple"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="Categories"
+          value={categories?.length || 0}
+          icon={FolderOpen}
+          gradient="blue"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="Avg per Category"
+          value={stats.avgPerCategory}
+          icon={TrendingUp}
+          gradient="green"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="Max in Category"
+          value={stats.maxSubCategoriesInCategory}
+          icon={Layers}
+          gradient="orange"
+          loading={loading}
+        />
       </div>
 
       <Card>
@@ -300,17 +295,19 @@ const SubCategoryManagement: React.FC = () => {
       </Card>
 
       {/* SubCategory Form Modal */}
-      {showForm && (
-        <SubCategoryForm
-          subCategory={editingSubCategory}
-          categories={categories}
-          onClose={() => {
-            setShowForm(false);
-            setEditingSubCategory(null);
-          }}
-          onSubmit={editingSubCategory ? handleUpdate : handleCreate}
-        />
-      )}
+      {
+        showForm && (
+          <SubCategoryForm
+            subCategory={editingSubCategory}
+            categories={categories}
+            onClose={() => {
+              setShowForm(false);
+              setEditingSubCategory(null);
+            }}
+            onSubmit={editingSubCategory ? handleUpdate : handleCreate}
+          />
+        )
+      }
 
       {/* Confirm Dialog */}
       <ConfirmDialog
@@ -322,7 +319,7 @@ const SubCategoryManagement: React.FC = () => {
         variant={dialogState.variant}
         confirmText="Delete"
       />
-    </div>
+    </div >
   );
 };
 

@@ -152,14 +152,14 @@ const OrderPage: React.FC = () => {
           paymentResponse = await orderApi.getPaymobUrlForGuest(orderId);
         }
         
-        // Step 5: Redirect to the payment URL in a new tab
+        // Step 5: Redirect to the payment URL
         // The URL is nested inside the 'data' property
         const paymentUrl = paymentResponse?.data?.url;
 
         if (paymentUrl) {
-          toast.info("Redirecting to payment gateway...");
-          window.open(paymentUrl, '_blank'); // Open in a new tab
-          navigate('/profile'); // Redirect current page to orders/confirmation page
+          toast.success("Redirecting to payment gateway...");
+          // Use window.location.href for reliable redirection (instead of window.open which may be blocked)
+          window.location.href = paymentUrl;
         } else {
           console.error("Payment response did not contain a URL:", paymentResponse);
           throw new Error("Could not retrieve payment URL.");

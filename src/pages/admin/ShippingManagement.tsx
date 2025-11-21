@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Truck } from 'lucide-react';
+import { Plus, Edit, Trash2, Truck, DollarSign, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import DataTable, { Column } from '@/components/admin/DataTable';
 import ShippingForm from '@/components/admin/ShippingForm';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
+import EnhancedStatsCard from '@/components/admin/EnhancedStatsCard';
+import GradientButton from '@/components/admin/GradientButton';
 import { shippingApi, Shipping } from '@/services/adminApi';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
@@ -128,31 +130,46 @@ const ShippingManagement: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header with Gradient */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Shipping Management</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+            Shipping Management
+          </h1>
+          <p className="text-muted-foreground mt-2">
             Manage shipping options and delivery methods
           </p>
         </div>
-        <Button onClick={() => setShowForm(true)}>
+        <GradientButton gradient="purple" onClick={() => setShowForm(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add Shipping Option
-        </Button>
+        </GradientButton>
       </div>
 
-      {/* Shipping Stats (simplified to what's needed) */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Options</CardTitle>
-            <Truck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{shippingOptions?.length || 0}</div>
-          </CardContent>
-        </Card>
+      {/* Shipping Stats */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <EnhancedStatsCard
+          title="Total Options"
+          value={shippingOptions?.length || 0}
+          icon={Truck}
+          gradient="purple"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="Average Cost"
+          value={`$${(shippingOptions.length > 0 ? shippingOptions.reduce((sum, s) => sum + (s.price || 0), 0) / shippingOptions.length : 0).toFixed(2)}`}
+          icon={DollarSign}
+          gradient="green"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="Covered Regions"
+          value={shippingOptions?.length || 0}
+          icon={MapPin}
+          gradient="blue"
+          loading={loading}
+        />
       </div>
 
       <Card>

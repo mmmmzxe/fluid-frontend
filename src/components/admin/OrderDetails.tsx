@@ -18,8 +18,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 // [EDIT] Import new icons for payment method
-import { Package, Truck, CheckCircle, XCircle, User, MapPin, CreditCard, Wallet } from 'lucide-react';
+import { Package, Truck, CheckCircle, XCircle, User, MapPin, CreditCard, Wallet, Printer } from 'lucide-react';
 import { Order } from '@/services/adminApi';
+import { printInvoice } from '@/utils/printInvoice';
 
 interface OrderDetailsProps {
   order: Order;
@@ -86,6 +87,13 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
           </DialogDescription>
         </DialogHeader>
 
+        <div className="flex justify-end mb-4">
+          <Button variant="outline" onClick={() => printInvoice(order)}>
+            <Printer className="mr-2 h-4 w-4" />
+            Print Invoice
+          </Button>
+        </div>
+
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
@@ -122,32 +130,32 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
           </div>
 
           <Card>
-  <CardHeader>
-    <CardTitle className="flex items-center gap-2">
-      {order.paymentWay === 'card' ? <CreditCard className="h-5 w-5" /> : <Wallet className="h-5 w-5" />}
-      Payment Information
-    </CardTitle>
-  </CardHeader>
-  <CardContent className="space-y-2 text-sm">
-    <div>
-      <span className="font-medium">Method:</span>
-      <span className="ml-2 capitalize bg-gray-100 text-gray-800 px-2 py-1 rounded-md">
-        {order.paymentWay}
-      </span>
-    </div>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                {order.paymentWay === 'card' ? <CreditCard className="h-5 w-5" /> : <Wallet className="h-5 w-5" />}
+                Payment Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <div>
+                <span className="font-medium">Method:</span>
+                <span className="ml-2 capitalize bg-gray-100 text-gray-800 px-2 py-1 rounded-md">
+                  {order.paymentWay}
+                </span>
+              </div>
 
-    {order.paidAt ? (
-      <div>
-        <span className="font-medium">Paid At:</span>
-        <span className="ml-2 text-green-700 font-semibold">
-          {new Date(order.paidAt).toLocaleString()}
-        </span>
-      </div>
-    ) : (
-      <div className="text-red-500 font-medium">Not Paid Yet</div>
-    )}
-  </CardContent>
-</Card>
+              {order.paidAt ? (
+                <div>
+                  <span className="font-medium">Paid At:</span>
+                  <span className="ml-2 text-green-700 font-semibold">
+                    {new Date(order.paidAt).toLocaleString()}
+                  </span>
+                </div>
+              ) : (
+                <div className="text-red-500 font-medium">Not Paid Yet</div>
+              )}
+            </CardContent>
+          </Card>
 
 
           <Card>
@@ -228,7 +236,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-              
+
               {order.status !== 'cancelled' && order.status !== 'delivered' && (
                 <Button
                   variant="destructive"

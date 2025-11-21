@@ -22,8 +22,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { Category } from '@/services/adminApi';
+import { compressImage } from '@/utils/imageCompression';
 
 const categorySchema = z.object({
   nameEnglish: z.string().min(1, 'English name is required'),
@@ -43,6 +44,8 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ category, onClose, onSubmit
   const [imagePreview, setImagePreview] = useState<string | null>(
     category?.image?.secure_url || null
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<CategoryFormData>({
@@ -53,15 +56,31 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ category, onClose, onSubmit
     },
   });
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        setIsCompressing(true);
+        const compressedFile = await compressImage(file);
+        setImageFile(compressedFile);
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setImagePreview(e.target?.result as string);
+        };
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        console.error('Error compressing image:', error);
+        // Fallback to original file
+        setImageFile(file);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setImagePreview(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      } finally {
+        setIsCompressing(false);
+      }
     }
   };
 
@@ -73,16 +92,21 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ category, onClose, onSubmit
     }
   };
 
-  const handleSubmit = (data: CategoryFormData) => {
+  const handleSubmit = async (data: CategoryFormData) => {
+    setIsSubmitting(true);
     const formData = new FormData();
     formData.append('nameEnglish', data.nameEnglish);
     formData.append('nameArabic', data.nameArabic);
-    
+
     if (imageFile) {
       formData.append('image', imageFile);
     }
 
-    onSubmit(formData);
+    try {
+      await onSubmit(formData);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -93,7 +117,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ category, onClose, onSubmit
             {category ? 'Edit Category' : 'Create New Category'}
           </DialogTitle>
           <DialogDescription>
-            {category 
+            {category
               ? 'Update the category information below.'
               : 'Fill in the details to create a new category.'
             }
@@ -147,7 +171,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ category, onClose, onSubmit
                   />
                   <label
                     htmlFor="image-upload"
-                    className="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
+                    className={`flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${isCompressing ? 'border-gray-200 bg-gray-50' : 'border-gray-300 hover:border-gray-400'}`}
                   >
                     {imagePreview ? (
                       <div className="relative w-full h-full">
@@ -162,15 +186,20 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ category, onClose, onSubmit
                           size="sm"
                           className="absolute top-2 right-2"
                           onClick={removeImage}
+                          disabled={isCompressing}
                         >
                           <X className="h-4 w-4" />
                         </Button>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center space-y-2">
-                        <Upload className="h-8 w-8 text-gray-400" />
+                        {isCompressing ? (
+                          <Loader2 className="h-8 w-8 text-gray-400 animate-spin" />
+                        ) : (
+                          <Upload className="h-8 w-8 text-gray-400" />
+                        )}
                         <span className="text-sm text-gray-500">
-                          Click to upload image
+                          {isCompressing ? 'Processing image...' : 'Click to upload image'}
                         </span>
                       </div>
                     )}
@@ -180,11 +209,27 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ category, onClose, onSubmit
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting || isCompressing}>
                 Cancel
               </Button>
-              <Button type="submit">
-                {category ? 'Update Category' : 'Create Category'}
+              <Button
+                type="submit"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90"
+                disabled={isSubmitting || isCompressing}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {category ? 'Updating...' : 'Creating...'}
+                  </>
+                ) : isCompressing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  category ? 'Update Category' : 'Create Category'
+                )}
               </Button>
             </DialogFooter>
           </form>

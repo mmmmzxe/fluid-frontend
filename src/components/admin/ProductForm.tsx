@@ -29,7 +29,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, X, Plus, Trash2 } from 'lucide-react';
+import { X, Plus, Upload, Loader2, Trash2 } from 'lucide-react';
+import { compressImage } from '@/utils/imageCompression';
 import { Product, Category, SubCategory } from '@/services/adminApi';
 import { ColorPicker } from '@/components/ui/color-picker';
 
@@ -54,7 +55,7 @@ interface ProductFormProps {
   onSubmit: (formData: FormData) => void;
 }
 
-const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose, onSubmit }) => {
+const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose, onSubmit: onSubmitProp }) => {
   const [mainImageFile, setMainImageFile] = useState<File | null>(null);
   const [subImageFiles, setSubImageFiles] = useState<File[]>([]);
   const [mainImagePreview, setMainImagePreview] = useState<string | null>(
@@ -74,8 +75,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
       stock: 0, // default stock; do not read v.stock
     }))
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   // Subcategories are derived from the selected category
-  
+
   const mainImageInputRef = useRef<HTMLInputElement>(null);
   const subImagesInputRef = useRef<HTMLInputElement>(null);
 
@@ -110,65 +113,60 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
     return (selected?.subCategories || []) as SubCategory[];
   }, [categories, selectedCategoryId]);
 
-  // Compress image in-browser via canvas (keeps aspect ratio)
-  const compressImage = async (file: File, maxWidth = 1280, quality = 0.8): Promise<File> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        img.src = e.target?.result as string;
-      };
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          resolve(file);
-          return;
-        }
-        const scale = Math.min(1, maxWidth / img.width);
-        const width = Math.round(img.width * scale);
-        const height = Math.round(img.height * scale);
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
-        canvas.toBlob((blob) => {
-          if (!blob) {
-            resolve(file);
-            return;
-          }
-          const compressed = new File([blob], file.name.replace(/\.(png|jpg|jpeg|webp)$/i, '.jpg'), { type: 'image/jpeg' });
-          resolve(compressed);
-        }, 'image/jpeg', quality);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
+  const handleMainImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      try {
+        setIsCompressing(true);
+        const file = e.target.files[0];
+        const compressedFile = await compressImage(file);
+        setMainImageFile(compressedFile);
 
-  const handleMainImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const compressed = await compressImage(file);
-      setMainImageFile(compressed);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setMainImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(compressed);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setMainImagePreview(reader.result as string);
+        };
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        console.error('Error compressing image:', error);
+        // Fallback to original file if compression fails
+        const file = e.target.files[0];
+        setMainImageFile(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setMainImagePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      } finally {
+        setIsCompressing(false);
+      }
     }
   };
 
-  const handleSubImagesChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    if (files.length > 0) {
-      const compressedFiles = await Promise.all(files.map(f => compressImage(f)));
-      setSubImageFiles(prev => [...prev, ...compressedFiles]);
-      compressedFiles.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setSubImagePreviews(prev => [...prev, e.target?.result as string]);
-        };
-        reader.readAsDataURL(file);
-      });
+  const handleSubImagesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      try {
+        setIsCompressing(true);
+        const files = Array.from(e.target.files);
+        const compressedFiles = await Promise.all(
+          files.map(file => compressImage(file))
+        );
+
+        setSubImageFiles(prev => [...prev, ...compressedFiles]);
+
+        const newPreviews = await Promise.all(
+          compressedFiles.map(file => new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(file);
+          }))
+        );
+        setSubImagePreviews(prev => [...prev, ...newPreviews]);
+      } catch (error) {
+        console.error('Error compressing images:', error);
+        // Fallback logic could be added here
+      } finally {
+        setIsCompressing(false);
+      }
     }
   };
 
@@ -194,41 +192,42 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
   };
 
   const updateVariant = (index: number, field: string, value: any) => {
-    setVariants(prev => prev.map((variant, i) => 
+    setVariants(prev => prev.map((variant, i) =>
       i === index ? { ...variant, [field]: value } : variant
     ));
   };
 
   const addVariantSize = (variantIndex: number) => {
-    setVariants(prev => prev.map((variant, i) => 
-      i === variantIndex 
+    setVariants(prev => prev.map((variant, i) =>
+      i === variantIndex
         ? { ...variant, size: [...variant.size, { size: '', stock: 0 }] }
         : variant
     ));
   };
 
   const removeVariantSize = (variantIndex: number, sizeIndex: number) => {
-    setVariants(prev => prev.map((variant, i) => 
-      i === variantIndex 
+    setVariants(prev => prev.filter((variant, i) =>
+      i === variantIndex
         ? { ...variant, size: variant.size.filter((_, j) => j !== sizeIndex) }
         : variant
     ));
   };
 
   const updateVariantSize = (variantIndex: number, sizeIndex: number, field: string, value: any) => {
-    setVariants(prev => prev.map((variant, i) => 
-      i === variantIndex 
-        ? { 
-            ...variant, 
-            size: variant.size.map((size, j) => 
-              j === sizeIndex ? { ...size, [field]: value } : size
-            )
-          }
+    setVariants(prev => prev.map((variant, i) =>
+      i === variantIndex
+        ? {
+          ...variant,
+          size: variant.size.map((size, j) =>
+            j === sizeIndex ? { ...size, [field]: value } : size
+          )
+        }
         : variant
     ));
   };
 
-  const handleSubmit = (data: ProductFormData) => {
+  const _handleSubmit = async (data: ProductFormData) => {
+    setIsSubmitting(true);
     const formData = new FormData();
     formData.append('titleEnglish', data.titleEnglish);
     formData.append('titleArabic', data.titleArabic);
@@ -239,11 +238,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
     formData.append('discountType', data.discountType || 'percentage');
     formData.append('category', data.category);
     if (data.subCategory) formData.append('subCategory', data.subCategory);
-    
+
     if (mainImageFile) {
       formData.append('mainImage', mainImageFile);
     }
-    
+
     subImageFiles.forEach((file, index) => {
       formData.append('subImages', file);
     });
@@ -252,7 +251,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
       formData.append('variants', JSON.stringify(variants));
     }
 
-    onSubmit(formData);
+    try {
+      await onSubmitProp(formData);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -263,7 +266,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
             {product ? 'Edit Product' : 'Create New Product'}
           </DialogTitle>
           <DialogDescription>
-            {product 
+            {product
               ? 'Update the product information below.'
               : 'Fill in the details to create a new product.'
             }
@@ -271,7 +274,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(_handleSubmit)} className="space-y-6">
             {/* Basic Information */}
             <Card>
               <CardHeader>
@@ -346,10 +349,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                       <FormItem>
                         <FormLabel>Price ($)</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
+                          <Input
+                            type="number"
                             step="0.01"
-                            placeholder="0.00" 
+                            placeholder="0.00"
                             {...field}
                             onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                           />
@@ -366,10 +369,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                       <FormItem>
                         <FormLabel>Discount</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
+                          <Input
+                            type="number"
                             step="0.01"
-                            placeholder="0.00" 
+                            placeholder="0.00"
                             {...field}
                             onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                           />
@@ -471,10 +474,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                       onChange={handleMainImageChange}
                       className="hidden"
                       id="main-image-upload"
+                      disabled={isCompressing}
                     />
                     <label
                       htmlFor="main-image-upload"
-                      className="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
+                      className={`flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${isCompressing ? 'border-gray-200 bg-gray-50' : 'border-gray-300 hover:border-gray-400'}`}
                     >
                       {mainImagePreview ? (
                         <div className="relative w-full h-full">
@@ -489,15 +493,20 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                             size="sm"
                             className="absolute top-2 right-2"
                             onClick={removeMainImage}
+                            disabled={isCompressing}
                           >
                             <X className="h-4 w-4" />
                           </Button>
                         </div>
                       ) : (
                         <div className="flex flex-col items-center space-y-2">
-                          <Upload className="h-8 w-8 text-gray-400" />
+                          {isCompressing ? (
+                            <Loader2 className="h-8 w-8 text-gray-400 animate-spin" />
+                          ) : (
+                            <Upload className="h-8 w-8 text-gray-400" />
+                          )}
                           <span className="text-sm text-gray-500">
-                            Click to upload main image
+                            {isCompressing ? 'Processing image...' : 'Click to upload main image'}
                           </span>
                         </div>
                       )}
@@ -516,15 +525,20 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                       onChange={handleSubImagesChange}
                       className="hidden"
                       id="sub-images-upload"
+                      disabled={isCompressing}
                     />
                     <label
                       htmlFor="sub-images-upload"
-                      className="flex items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
+                      className={`flex items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${isCompressing ? 'border-gray-200 bg-gray-50' : 'border-gray-300 hover:border-gray-400'}`}
                     >
                       <div className="flex flex-col items-center space-y-2">
-                        <Upload className="h-6 w-6 text-gray-400" />
+                        {isCompressing ? (
+                          <Loader2 className="h-6 w-6 text-gray-400 animate-spin" />
+                        ) : (
+                          <Upload className="h-6 w-6 text-gray-400" />
+                        )}
                         <span className="text-sm text-gray-500">
-                          Click to upload additional images
+                          {isCompressing ? 'Processing images...' : 'Click to upload additional images'}
                         </span>
                       </div>
                     </label>
@@ -544,6 +558,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                             size="sm"
                             className="absolute top-1 right-1 h-6 w-6 p-0"
                             onClick={() => removeSubImage(index)}
+                            disabled={isCompressing}
                           >
                             <X className="h-3 w-3" />
                           </Button>
@@ -560,13 +575,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Product Variants</CardTitle>
-                  <Button type="button" variant="outline" size="sm" onClick={addVariant}>
+                  <Button type="button" variant="outline" size="sm" onClick={addVariant} disabled={isCompressing}>
                     <Plus className="mr-2 h-4 w-4" />
                     Add Variant
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 ">
                 {variants.map((variant, variantIndex) => (
                   <div key={variantIndex} className="border rounded-lg p-4 space-y-4">
                     <div className="flex items-center justify-between">
@@ -576,11 +591,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                         variant="destructive"
                         size="sm"
                         onClick={() => removeVariant(variantIndex)}
+                        disabled={isCompressing}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <FormLabel>Color</FormLabel>
@@ -588,15 +604,17 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                           value={variant.color}
                           onChange={(color) => updateVariant(variantIndex, 'color', color)}
                           placeholder="Enter color"
+                          disabled={isCompressing}
                         />
                       </div>
-                    
+
                       <div className="flex items-end">
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
                           onClick={() => addVariantSize(variantIndex)}
+                          disabled={isCompressing}
                         >
                           <Plus className="mr-2 h-4 w-4" />
                           Add Size
@@ -612,6 +630,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                             value={size.size}
                             onChange={(e) => updateVariantSize(variantIndex, sizeIndex, 'size', e.target.value)}
                             placeholder="Enter size"
+                            disabled={isCompressing}
                           />
                         </div>
                         <div className="flex items-end space-x-2">
@@ -622,6 +641,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                               value={size.stock}
                               onChange={(e) => updateVariantSize(variantIndex, sizeIndex, 'stock', parseInt(e.target.value) || 0)}
                               placeholder="0"
+                              disabled={isCompressing}
                             />
                           </div>
                           <Button
@@ -629,6 +649,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                             variant="destructive"
                             size="sm"
                             onClick={() => removeVariantSize(variantIndex, sizeIndex)}
+                            disabled={isCompressing}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -641,11 +662,27 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
             </Card>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting || isCompressing}>
                 Cancel
               </Button>
-              <Button type="submit">
-                {product ? 'Update Product' : 'Create Product'}
+              <Button
+                type="submit"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90"
+                disabled={isSubmitting || isCompressing}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {product ? 'Updating...' : 'Creating...'}
+                  </>
+                ) : isCompressing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing Images...
+                  </>
+                ) : (
+                  product ? 'Update Product' : 'Create Product'
+                )}
               </Button>
             </DialogFooter>
           </form>

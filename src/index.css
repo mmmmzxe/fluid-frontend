@@ -227,60 +227,38 @@
   }
 }
 
-html {
-  overflow-x: hidden;
-}
+
 
 @layer base {
   * {
     @apply border-border;
   }
+
+
 }
 
-/* Custom Animations for Admin Dashboard */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+@layer base {
+
+  /* Custom Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
   }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
+  ::-webkit-scrollbar-track {
+    background: transparent;
   }
 
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes pulse-glow {
-
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.4);
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 10px;
   }
 
-  50% {
-    box-shadow: 0 0 0 10px rgba(147, 51, 234, 0);
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
   }
-}
 
-.animate-fadeIn {
-  animation: fadeIn 0.4s ease-out;
-}
-
-.animate-shimmer {
-  animation: shimmer 2s infinite;
-  background-size: 200% 100%;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s infinite;
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
 }

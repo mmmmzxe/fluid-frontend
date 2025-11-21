@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Users, UserCheck, UserX } from 'lucide-react';
+import { Eye, Users, UserCheck, UserX, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import DataTable, { Column } from '@/components/admin/DataTable';
 import { userApi, User } from '@/services/adminApi';
 import UserDetails from '@/components/admin/UserDetails';
+import EnhancedStatsCard from '@/components/admin/EnhancedStatsCard';
+import EnhancedBadge from '@/components/admin/EnhancedBadge';
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -66,14 +68,14 @@ const UserManagement: React.FC = () => {
     setShowDetails(true);
   };
 
-  const getRoleColor = (role: string) => {
+  const getRoleVariant = (role: string): 'success' | 'warning' | 'error' | 'info' | 'purple' => {
     switch (role) {
       case 'superAdmin':
-        return 'bg-purple-100 text-purple-800';
+        return 'purple';
       case 'admin':
-        return 'bg-blue-100 text-blue-800';
+        return 'info';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'info';
     }
   };
 
@@ -113,12 +115,12 @@ const UserManagement: React.FC = () => {
       key: 'role',
       title: 'Role',
       render: (value) => (
-        <Badge className={getRoleColor(value)}>
+        <EnhancedBadge variant={getRoleVariant(value)} glow>
           <span className="flex items-center gap-1">
             {getRoleIcon(value)}
             {value === 'superAdmin' ? 'Super Admin' : value.charAt(0).toUpperCase() + value.slice(1)}
           </span>
-        </Badge>
+        </EnhancedBadge>
       ),
     },
     {
@@ -151,62 +153,44 @@ const UserManagement: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header with Gradient */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+            User Management
+          </h1>
+          <p className="text-muted-foreground mt-2">
             Manage user accounts and their roles
           </p>
         </div>
       </div>
 
       {/* User Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{users.length}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Super Admins</CardTitle>
-            <UserCheck className="h-4 w-4 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {users.filter(user => user.role === 'superAdmin').length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Admins</CardTitle>
-            <Users className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {users.filter(user => user.role === 'admin').length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <UserCheck className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{users.length}</div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-6 md:grid-cols-3">
+        <EnhancedStatsCard
+          title="Total Users"
+          value={users.length}
+          icon={Users}
+          gradient="purple"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="Super Admins"
+          value={users.filter(u => u.role === 'superAdmin').length}
+          icon={ShieldCheck}
+          gradient="orange"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="Admins"
+          value={users.filter(u => u.role === 'admin').length}
+          icon={UserCheck}
+          gradient="blue"
+          loading={loading}
+        />
       </div>
+
 
       <Card>
         <CardHeader>
@@ -237,16 +221,18 @@ const UserManagement: React.FC = () => {
       </Card>
 
       {/* User Details Modal */}
-      {showDetails && selectedUser && (
-        <UserDetails
-          user={selectedUser}
-          onClose={() => {
-            setShowDetails(false);
-            setSelectedUser(null);
-          }}
-        />
-      )}
-    </div>
+      {
+        showDetails && selectedUser && (
+          <UserDetails
+            user={selectedUser}
+            onClose={() => {
+              setShowDetails(false);
+              setSelectedUser(null);
+            }}
+          />
+        )
+      }
+    </div >
   );
 };
 

@@ -7,6 +7,9 @@ import { toast } from 'sonner';
 import DataTable, { Column } from '@/components/admin/DataTable';
 import CategoryForm from '@/components/admin/CategoryForm';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
+import EnhancedStatsCard from '@/components/admin/EnhancedStatsCard';
+import GradientButton from '@/components/admin/GradientButton';
+import EnhancedBadge from '@/components/admin/EnhancedBadge';
 import { categoryApi, Category } from '@/services/adminApi';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
@@ -135,9 +138,9 @@ const CategoryManagement: React.FC = () => {
       key: 'subCategories',
       title: 'Sub Categories',
       render: (value) => (
-        <Badge variant="secondary">
+        <EnhancedBadge variant="info">
           {value?.length || 0} subcategories
-        </Badge>
+        </EnhancedBadge>
       ),
     },
     {
@@ -154,74 +157,46 @@ const CategoryManagement: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="space-y-8">
+      {/* Header with Gradient */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent tracking-tight">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
             Category Management
           </h1>
           <p className="text-muted-foreground mt-2">
-            Organize and manage your product categories
+            Manage product categories and their subcategories
           </p>
         </div>
-        <Button
-          onClick={() => setShowForm(true)}
-          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg shadow-purple-500/30 transition-all duration-300"
-        >
+        <GradientButton gradient="purple" onClick={() => setShowForm(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add Category
-        </Button>
+        </GradientButton>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-2">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full blur-2xl" />
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Categories</CardTitle>
-            <div className="p-2.5 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform">
-              <FolderOpen className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{categories.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Active categories
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-2">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full blur-2xl" />
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Filtered Results</CardTitle>
-            <div className="p-2.5 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
-              <FolderOpen className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{filteredCategories.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Matching search
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-2">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-transparent rounded-full blur-2xl" />
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Current Page</CardTitle>
-            <div className="p-2.5 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg shadow-green-500/30 group-hover:scale-110 transition-transform">
-              <FolderOpen className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{paginatedCategories.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Items on page {page}
-            </p>
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title="Total Categories"
+          value={categories.length}
+          icon={FolderOpen}
+          gradient="purple"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="With Images"
+          value={categories.filter(c => c.image?.secure_url).length}
+          icon={Eye}
+          gradient="blue"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="Total Subcategories"
+          value={categories.reduce((sum, cat) => sum + (cat.subCategories?.length || 0), 0)}
+          icon={FolderOpen}
+          gradient="green"
+          loading={loading}
+        />
       </div>
 
       <Card>

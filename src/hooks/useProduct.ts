@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-const API_BASE = "https://9036aeff7f83.ngrok-free.app";
+const API_BASE = "http://localhost:3000";
 
 export interface ApiProductDetail {
   _id: string;
@@ -52,7 +52,7 @@ export function useProduct() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch(`${API_BASE}/product/withId/${productId}`, {
         method: "GET",
         headers: {
@@ -60,13 +60,13 @@ export function useProduct() {
           "ngrok-skip-browser-warning": "true"
         },
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch product: ${response.statusText}`);
       }
-      
+
       const data = await response.json();
-      
+
       if (data.message === "Done" && data.product) {
         return data.product;
       } else {

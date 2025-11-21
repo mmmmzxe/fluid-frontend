@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Eye, Package } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Package, DollarSign, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import DataTable, { Column } from '@/components/admin/DataTable';
 import ProductForm from '@/components/admin/ProductForm';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
+import EnhancedStatsCard from '@/components/admin/EnhancedStatsCard';
+import GradientButton from '@/components/admin/GradientButton';
+import EnhancedBadge from '@/components/admin/EnhancedBadge';
 import { productApi, categoryApi, Product, Category } from '@/services/adminApi';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
@@ -232,18 +235,53 @@ const ProductManagement: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header with Gradient */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Product Management</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+            Product Management
+          </h1>
+          <p className="text-muted-foreground mt-2">
             Manage your product catalog, inventory, and pricing
           </p>
         </div>
-        <Button onClick={() => setShowForm(true)}>
+        <GradientButton gradient="purple" onClick={() => setShowForm(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add Product
-        </Button>
+        </GradientButton>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid gap-6 md:grid-cols-4">
+        <EnhancedStatsCard
+          title="Total Products"
+          value={products.length}
+          icon={Package}
+          gradient="purple"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="In Stock"
+          value={products.filter(p => p.stock > 0).length}
+          icon={TrendingUp}
+          gradient="green"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="Out of Stock"
+          value={products.filter(p => p.stock === 0).length}
+          icon={Package}
+          gradient="orange"
+          loading={loading}
+        />
+        <EnhancedStatsCard
+          title="Avg Price"
+          value={`$${products.length > 0 ? (products.reduce((sum, p) => sum + (p.price || 0), 0) / products.length).toFixed(2) : '0.00'}`}
+          icon={DollarSign}
+          gradient="blue"
+          loading={loading}
+        />
       </div>
 
       <Card>

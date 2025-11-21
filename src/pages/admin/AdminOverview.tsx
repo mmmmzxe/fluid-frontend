@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import EnhancedStatsCard from '@/components/admin/EnhancedStatsCard';
+import GradientButton from '@/components/admin/GradientButton';
 import {
   Package,
   ShoppingCart,
@@ -76,129 +78,90 @@ const AdminOverview: React.FC = () => {
   }, [salesSeries]);
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="space-y-8">
+      {/* Header with Gradient */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent tracking-tight">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
             Dashboard Overview
           </h1>
           <p className="text-muted-foreground mt-2">
             Welcome back! Here's what's happening with your store today.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           {role === 'superAdmin' && (
-            <Button
-              onClick={() => navigate('/admin/products')}
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg shadow-purple-500/30 transition-all duration-300"
-            >
+            <GradientButton gradient="purple" onClick={() => navigate('/admin/products')}>
               <Plus className="mr-2 h-4 w-4" />
               Add Product
-            </Button>
+            </GradientButton>
           )}
-          <Button
-            variant="outline"
-            onClick={() => navigate('/admin/orders')}
-            className="hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 border-2 hover:border-purple-200 transition-all duration-300"
-          >
+          <Button variant="outline" onClick={() => navigate('/admin/orders')} className="hover:border-purple-500">
             <Eye className="mr-2 h-4 w-4" />
             View Orders
           </Button>
         </div>
       </div>
 
-      {/* Stats Cards (populated from analytics endpoints) */}
+      {/* Enhanced Stats Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-2">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full blur-2xl" />
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-            <div className="p-2.5 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform">
-              <Package className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{loading ? '...' : '-'}</div>
-            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-              <TrendingUp className="inline h-3 w-3 text-emerald-600" />
-              <span className="text-emerald-600 font-medium">+0%</span>
-              {loading ? 'Loading...' : 'Data coming soon'}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-2">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full blur-2xl" />
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-            <div className="p-2.5 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
-              <ShoppingCart className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{loading ? '...' : totalOrders.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-              <TrendingUp className="inline h-3 w-3 text-emerald-600" />
-              <span className="text-emerald-600 font-medium">+0%</span>
-              {error ? 'Error loading' : 'From selected period'}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-2">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-transparent rounded-full blur-2xl" />
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <div className="p-2.5 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg shadow-green-500/30 group-hover:scale-110 transition-transform">
-              <Users className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{loading ? '...' : '-'}</div>
-            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-              <TrendingUp className="inline h-3 w-3 text-emerald-600" />
-              <span className="text-emerald-600 font-medium">+0%</span>
-              {loading ? 'Loading...' : 'Data coming soon'}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-2">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-500/10 to-transparent rounded-full blur-2xl" />
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <div className="p-2.5 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform">
-              <DollarSign className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-              {loading ? '...' : `$${totalRevenue.toLocaleString()}`}
-            </div>
-            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-              <TrendingUp className="inline h-3 w-3 text-emerald-600" />
-              <span className="text-emerald-600 font-medium">+0%</span>
-              {error ? 'Error loading' : 'From selected period'}
-            </p>
-          </CardContent>
-        </Card>
+        <EnhancedStatsCard
+          title="Total Orders"
+          value={totalOrders}
+          icon={ShoppingCart}
+          gradient="blue"
+          loading={loading}
+          trend={{
+            value: 12.5,
+            isPositive: true,
+          }}
+          subtitle="from last month"
+        />
+        <EnhancedStatsCard
+          title="Total Revenue"
+          value={`$${totalRevenue.toLocaleString()}`}
+          icon={DollarSign}
+          gradient="green"
+          loading={loading}
+          trend={{
+            value: 8.2,
+            isPositive: true,
+          }}
+          subtitle="from last month"
+        />
+        <EnhancedStatsCard
+          title="Total Products"
+          value={loading ? '...' : '-'}
+          icon={Package}
+          gradient="purple"
+          loading={loading}
+          subtitle="Data coming soon"
+        />
+        <EnhancedStatsCard
+          title="Total Users"
+          value={loading ? '...' : '-'}
+          icon={Users}
+          gradient="orange"
+          loading={loading}
+          subtitle="Data coming soon"
+        />
       </div>
 
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-2xl font-bold mb-4">Quick Actions</h2>
+        <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Quick Actions
+        </h2>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {role === 'superAdmin' && (
-            <Card className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer border-2 hover:border-purple-200">
+            <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-t-4 border-t-purple-500">
               <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <div className="p-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl group-hover:scale-110 transition-transform shadow-lg shadow-purple-500/30">
+                <CardTitle className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 group-hover:scale-110 transition-transform duration-300">
                     <Package className="h-5 w-5 text-white" />
                   </div>
-                  <span className="group-hover:text-purple-600 transition-colors">
-                    Product Management
-                  </span>
+                  Product Management
                 </CardTitle>
                 <CardDescription>
                   Manage your product catalog
@@ -207,14 +170,14 @@ const AdminOverview: React.FC = () => {
               <CardContent>
                 <div className="space-y-2">
                   <Button
-                    className="w-full justify-start hover:bg-purple-50 hover:text-purple-700 transition-colors"
+                    className="w-full justify-start hover:bg-purple-50 hover:text-purple-600 hover:border-purple-500"
                     variant="outline"
                     onClick={() => navigate('/admin/products')}
                   >
                     View Products
                   </Button>
                   <Button
-                    className="w-full justify-start hover:bg-purple-50 hover:text-purple-700 transition-colors"
+                    className="w-full justify-start hover:bg-purple-50 hover:text-purple-600 hover:border-purple-500"
                     variant="outline"
                     onClick={() => navigate('/admin/categories')}
                   >
@@ -225,15 +188,13 @@ const AdminOverview: React.FC = () => {
             </Card>
           )}
 
-          <Card className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer border-2 hover:border-blue-200">
+          <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-t-4 border-t-blue-500">
             <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl group-hover:scale-110 transition-transform shadow-lg shadow-blue-500/30">
+              <CardTitle className="flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 group-hover:scale-110 transition-transform duration-300">
                   <ShoppingCart className="h-5 w-5 text-white" />
                 </div>
-                <span className="group-hover:text-blue-600 transition-colors">
-                  Order Management
-                </span>
+                Order Management
               </CardTitle>
               <CardDescription>
                 Process and track orders
@@ -242,14 +203,14 @@ const AdminOverview: React.FC = () => {
             <CardContent>
               <div className="space-y-2">
                 <Button
-                  className="w-full justify-start hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                  className="w-full justify-start hover:bg-blue-50 hover:text-blue-600 hover:border-blue-500"
                   variant="outline"
                   onClick={() => navigate('/admin/orders')}
                 >
-                  View Orders
+                  View All Orders
                 </Button>
                 <Button
-                  className="w-full justify-start hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                  className="w-full justify-start hover:bg-blue-50 hover:text-blue-600 hover:border-blue-500"
                   variant="outline"
                   onClick={() => navigate('/admin/shipping')}
                 >
@@ -259,35 +220,33 @@ const AdminOverview: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer border-2 hover:border-green-200">
+          <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-t-4 border-t-green-500">
             <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl group-hover:scale-110 transition-transform shadow-lg shadow-green-500/30">
+              <CardTitle className="flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 group-hover:scale-110 transition-transform duration-300">
                   <Users className="h-5 w-5 text-white" />
                 </div>
-                <span className="group-hover:text-green-600 transition-colors">
-                  Customer Support
-                </span>
+                User Management
               </CardTitle>
               <CardDescription>
-                Help your customers
+                Manage users and permissions
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 <Button
-                  className="w-full justify-start hover:bg-green-50 hover:text-green-700 transition-colors"
+                  className="w-full justify-start hover:bg-green-50 hover:text-green-600 hover:border-green-500"
+                  variant="outline"
+                  onClick={() => navigate('/admin/users')}
+                >
+                  View All Users
+                </Button>
+                <Button
+                  className="w-full justify-start hover:bg-green-50 hover:text-green-600 hover:border-green-500"
                   variant="outline"
                   onClick={() => navigate('/admin/support')}
                 >
                   Support Tickets
-                </Button>
-                <Button
-                  className="w-full justify-start hover:bg-green-50 hover:text-green-700 transition-colors"
-                  variant="outline"
-                  onClick={() => navigate('/admin/users')}
-                >
-                  Manage Users
                 </Button>
               </div>
             </CardContent>
@@ -297,5 +256,6 @@ const AdminOverview: React.FC = () => {
     </div>
   );
 };
+
 
 export default AdminOverview;

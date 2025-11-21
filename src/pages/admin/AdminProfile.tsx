@@ -5,10 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { User, Mail, Phone, Shield, Calendar, Settings, RefreshCw } from 'lucide-react';
+import { User, Mail, Phone, Shield, Calendar, Settings, RefreshCw, ShieldCheck } from 'lucide-react';
 import { useUserProfile } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { getInitials } from '@/utils/adminHelpers';
+import GradientButton from '@/components/admin/GradientButton';
+import EnhancedBadge from '@/components/admin/EnhancedBadge';
 
 interface ProfileData {
   _id?: string;
@@ -50,14 +52,14 @@ const AdminProfile: React.FC = () => {
   // Use profile data if available, otherwise fall back to Redux user data
   const displayUser = profileData || user;
 
-  const getRoleColor = (role: string) => {
+  const getRoleVariant = (role: string): 'success' | 'warning' | 'error' | 'info' | 'purple' => {
     switch (role) {
       case 'superAdmin':
-        return 'bg-purple-100 text-purple-800';
+        return 'purple';
       case 'admin':
-        return 'bg-blue-100 text-blue-800';
+        return 'info';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'info';
     }
   };
 
@@ -73,11 +75,14 @@ const AdminProfile: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header with Gradient */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Admin Profile</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+            Admin Profile
+          </h1>
+          <p className="text-muted-foreground mt-2">
             Manage your admin account settings and preferences
           </p>
         </div>
@@ -90,10 +95,10 @@ const AdminProfile: React.FC = () => {
             <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          <Button>
+          <GradientButton gradient="purple">
             <Settings className="mr-2 h-4 w-4" />
             Edit Profile
-          </Button>
+          </GradientButton>
         </div>
       </div>
 
@@ -120,12 +125,12 @@ const AdminProfile: React.FC = () => {
               <div>
                 <h3 className="text-xl font-semibold">{displayUser.name}</h3>
                 <p className="text-muted-foreground">{displayUser.email}</p>
-                <Badge className={getRoleColor(displayUser.role || 'admin')}>
+                <EnhancedBadge variant={getRoleVariant(displayUser.role || 'admin')} glow>
                   <span className="flex items-center gap-1">
                     {getRoleIcon(displayUser.role || 'admin')}
-                    {displayUser.role === 'superAdmin' ? 'Super Admin' : 'Admin'}
+                    {displayUser.role === 'superAdmin' ? 'Super Admin' : (displayUser.role || 'admin').charAt(0).toUpperCase() + (displayUser.role || 'admin').slice(1)}
                   </span>
-                </Badge>
+                </EnhancedBadge>
               </div>
             </div>
 
@@ -161,49 +166,7 @@ const AdminProfile: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Account Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              Account Settings
-            </CardTitle>
-            <CardDescription>
-              Manage your account preferences
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <Button variant="outline" className="w-full justify-start">
-                <Mail className="mr-2 h-4 w-4" />
-                Change Email Address
-              </Button>
 
-              <Button variant="outline" className="w-full justify-start">
-                <User className="mr-2 h-4 w-4" />
-                Change Password
-              </Button>
-
-              <Button variant="outline" className="w-full justify-start">
-                <Phone className="mr-2 h-4 w-4" />
-                Update Phone Number
-              </Button>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium">Security</h4>
-              <Button variant="outline" className="w-full justify-start">
-                Two-Factor Authentication
-              </Button>
-
-              <Button variant="outline" className="w-full justify-start">
-                Login History
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Role Information */}
@@ -229,12 +192,12 @@ const AdminProfile: React.FC = () => {
                   }
                 </div>
               </div>
-              <Badge className={getRoleColor(displayUser.role || 'admin')}>
+              <EnhancedBadge variant={getRoleVariant(displayUser.role || 'admin')} glow>
                 <span className="flex items-center gap-1">
                   {getRoleIcon(displayUser.role || 'admin')}
-                  {displayUser.role === 'superAdmin' ? 'Super Admin' : 'Admin'}
+                  {displayUser.role === 'superAdmin' ? 'Super Admin' : (displayUser.role || 'admin').charAt(0).toUpperCase() + (displayUser.role || 'admin').slice(1)}
                 </span>
-              </Badge>
+              </EnhancedBadge>
             </div>
 
             <Separator />
