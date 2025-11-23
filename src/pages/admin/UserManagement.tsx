@@ -20,37 +20,13 @@ const UserManagement: React.FC = () => {
   const [pageSize, setPageSize] = useState(10);
   const [roleFilter, setRoleFilter] = useState<string>('');
 
-  // Mock data for demonstration - in real app, this would come from API
-  const mockUsers: User[] = [
-    {
-      _id: '1',
-      name: 'John Doe',
-      email: 'john@example.com',
-      role: 'superAdmin',
-    },
-    {
-      _id: '2',
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      role: 'admin',
-    },
-    {
-      _id: '3',
-      name: 'Bob Johnson',
-      email: 'bob@example.com',
-      role: 'admin',
-    },
-  ];
+
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      // In a real app, you would call an API endpoint to get all users
-      // const response = await userApi.getAll();
-      // setUsers(response.data);
-
-      // For now, using mock data
-      setUsers(mockUsers);
+      const response = await userApi.getAll();
+      setUsers(response.data);
     } catch (error) {
       toast.error('Failed to fetch users');
       console.error('Error fetching users:', error);

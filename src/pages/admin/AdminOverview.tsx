@@ -119,7 +119,7 @@ const AdminOverview: React.FC = () => {
         />
         <EnhancedStatsCard
           title="Total Revenue"
-          value={`$${totalRevenue.toLocaleString()}`}
+          value={`L.E ${totalRevenue.toLocaleString()}`}
           icon={DollarSign}
           gradient="green"
           loading={loading}

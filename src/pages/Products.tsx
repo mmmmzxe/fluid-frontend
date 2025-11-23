@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { ProductCard, transformApiProduct } from "@/components/ProductCard";
 import { Navbar } from "@/components/Navbar";
-import Footer  from "@/components/Footer";
+import Footer from "@/components/Footer";
 import { useCategories } from "@/hooks/useApi";
 import { productApi, Product } from "@/services/adminApi";
 import { cn } from "@/lib/utils";
@@ -20,13 +20,13 @@ export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  
+
   // API data
   const { categories, loading: categoriesLoading, error: categoriesError } = useCategories();
   const [products, setProducts] = useState<Product[] | null>(null);
   const [productsLoading, setProductsLoading] = useState<boolean>(false);
   const [productsError, setProductsError] = useState<string | null>(null);
-  
+
   const loading = categoriesLoading || productsLoading;
   const error = categoriesError || productsError;
 
@@ -73,7 +73,7 @@ export default function Products() {
   // Filter and sort products
   const filteredProducts = useMemo(() => {
     if (!products || products.length === 0) return [];
-    
+
     let filtered = products
       .map(product => {
         try {
@@ -85,7 +85,7 @@ export default function Products() {
       })
       .filter((product): product is NonNullable<typeof product> => product !== null);
 
-  
+
     // Apply category and subcategory filters
     if (selectedCategories.length > 0 || selectedSubCategories.length > 0) {
       filtered = filtered.filter(product => {
@@ -99,7 +99,7 @@ export default function Products() {
     }
 
     // Price range filter
-    filtered = filtered.filter(product => 
+    filtered = filtered.filter(product =>
       product.price >= priceRange[0] && product.price <= priceRange[1]
     );
 
@@ -157,16 +157,16 @@ export default function Products() {
     setSearchParams({});
   };
 
-  const activeFiltersCount = selectedCategories.length + 
-    selectedSubCategories.length + 
-    (showOnSale ? 1 : 0) + 
-    (showNew ? 1 : 0) + 
+  const activeFiltersCount = selectedCategories.length +
+    selectedSubCategories.length +
+    (showOnSale ? 1 : 0) +
+    (showNew ? 1 : 0) +
     (priceRange[0] > 0 || priceRange[1] < 50000 ? 1 : 0);
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
@@ -176,7 +176,7 @@ export default function Products() {
               {t('products.showing')} {filteredProducts.length} {t('products.of')} {products?.length || 0} {t('products.productsCount')}
             </p>
           </div>
-          
+
           <div className="flex items-center gap-4">
             {/* View Mode Toggle */}
             <div className="flex border border-border rounded-lg p-1">
@@ -270,50 +270,50 @@ export default function Products() {
                         ({products?.length || 0})
                       </span>
                     </div>
-                    
+
                     {/* Category Options */}
                     {categories?.map((category) => (
-                  <div key={category._id} className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={category._id}
-                        checked={selectedCategories.includes(category._id)}
-                        onCheckedChange={(checked) => 
-                          handleCategoryChange(category._id, checked as boolean)
-                        }
-                      />
-                      <label htmlFor={category._id} className="text-sm flex-1 cursor-pointer">
-                        {getCategoryName(category)}
-                      </label>
-                      <span className="text-xs text-muted-foreground">
-                        ({products?.filter(p => (p as any).category === category._id).length || 0})
-                      </span>
-                    </div>
+                      <div key={category._id} className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id={category._id}
+                            checked={selectedCategories.includes(category._id)}
+                            onCheckedChange={(checked) =>
+                              handleCategoryChange(category._id, checked as boolean)
+                            }
+                          />
+                          <label htmlFor={category._id} className="text-sm flex-1 cursor-pointer">
+                            {getCategoryName(category)}
+                          </label>
+                          <span className="text-xs text-muted-foreground">
+                            ({products?.filter(p => (p as any).category === category._id).length || 0})
+                          </span>
+                        </div>
 
-                    {(category as any)?.subCategories?.length > 0 && (
-                      <div className="ml-6 space-y-1">
-                        {(category as any).subCategories.map((sub: any) => (
-                          <div key={sub._id} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`sub-${sub._id}`}
-                              checked={selectedSubCategories.includes(sub._id)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSelectedSubCategories(prev => [...prev, sub._id]);
-                                } else {
-                                  setSelectedSubCategories(prev => prev.filter(id => id !== sub._id));
-                                }
-                              }}
-                            />
-                            <label htmlFor={`sub-${sub._id}`} className="text-xs text-muted-foreground cursor-pointer">
-                              {getCategoryName(sub)}
-                            </label>
+                        {(category as any)?.subCategories?.length > 0 && (
+                          <div className="ml-6 space-y-1">
+                            {(category as any).subCategories.map((sub: any) => (
+                              <div key={sub._id} className="flex items-center space-x-2">
+                                <Checkbox
+                                  id={`sub-${sub._id}`}
+                                  checked={selectedSubCategories.includes(sub._id)}
+                                  onCheckedChange={(checked) => {
+                                    if (checked) {
+                                      setSelectedSubCategories(prev => [...prev, sub._id]);
+                                    } else {
+                                      setSelectedSubCategories(prev => prev.filter(id => id !== sub._id));
+                                    }
+                                  }}
+                                />
+                                <label htmlFor={`sub-${sub._id}`} className="text-xs text-muted-foreground cursor-pointer">
+                                  {getCategoryName(sub)}
+                                </label>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
+                    ))}
                   </>
                 )}
               </div>
@@ -331,8 +331,8 @@ export default function Products() {
                     className="w-full"
                   />
                   <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                    <span>${priceRange[0].toLocaleString()}</span>
-                    <span>${priceRange[1].toLocaleString()}</span>
+                    <span>L.E{priceRange[0].toLocaleString()}</span>
+                    <span>L.E{priceRange[1].toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -389,7 +389,7 @@ export default function Products() {
               </div>
             ) : (
               <div className={cn(
-                viewMode === "grid" 
+                viewMode === "grid"
                   ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
                   : "space-y-6"
               )}>

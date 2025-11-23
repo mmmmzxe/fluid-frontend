@@ -35,7 +35,7 @@ const OrderPage: React.FC = () => {
   const [email, setEmail] = useState('abdullahmostafa737@gmail.com');
   const [discountPercent, setDiscountPercent] = useState<number>(10);
   const [loading, setLoading] = useState(false);
-  
+
   // States for guest cart details
   const [detailedCart, setDetailedCart] = useState<any[]>([]);
   const [isGuestDetailsLoading, setIsGuestDetailsLoading] = useState(false);
@@ -43,7 +43,7 @@ const OrderPage: React.FC = () => {
 
   // Load base cart and shipping options
   useEffect(() => {
-    fetchCart().catch(() => {});
+    fetchCart().catch(() => { });
     (async () => {
       try {
         const res = await shippingApi.getAll();
@@ -103,13 +103,13 @@ const OrderPage: React.FC = () => {
       return toast.error('Address and Phone are required');
     }
     if (!isAuthenticated && (!firstName.trim() || !lastName.trim() || !email.trim())) {
-        return toast.error('First Name, Last Name, and Email are required for guest checkout.');
+      return toast.error('First Name, Last Name, and Email are required for guest checkout.');
     }
 
     setLoading(true);
     try {
       let createOrderResponse;
-      
+
       // Step 1: Create the order (for both guests and logged-in users)
       if (isAuthenticated) {
         const payload = { address, phone, note, paymentWay, shippingId };
@@ -118,14 +118,14 @@ const OrderPage: React.FC = () => {
         const payload = { firstName, lastName, address, phone, note, paymentWay, shippingId, email, discountPercent };
         createOrderResponse = await checkoutWithoutLogin(payload);
       }
-      
+
       // Step 2: Handle based on payment method
       if (paymentWay === 'cash') {
         toast.success(isAuthenticated ? 'Order created successfully' : 'Order placed successfully');
         navigate('/');
         return;
       }
-      
+
       if (paymentWay === 'card') {
         // Step 3: Extract Order ID from the response robustly
         let orderId;
@@ -143,7 +143,7 @@ const OrderPage: React.FC = () => {
           console.error("Failed to parse order ID from response:", createOrderResponse);
           throw new Error("Could not retrieve Order ID from the server response.");
         }
-        
+
         // Step 4: Get the payment URL based on user authentication status
         let paymentResponse;
         if (isAuthenticated) {
@@ -151,7 +151,7 @@ const OrderPage: React.FC = () => {
         } else {
           paymentResponse = await orderApi.getPaymobUrlForGuest(orderId);
         }
-        
+
         // Step 5: Redirect to the payment URL
         // The URL is nested inside the 'data' property
         const paymentUrl = paymentResponse?.data?.url;
@@ -242,7 +242,7 @@ const OrderPage: React.FC = () => {
                   {shippingOptions.length === 0 && <option>{t('order.loadingOptions')}</option>}
                   {shippingOptions.map((opt) => (
                     <option key={opt._id} value={opt._id}>
-                      {opt.government || opt._id} {opt.price ? `- $${opt.price}` : ''}
+                      {opt.government || opt._id} {opt.price ? `- L.E${opt.price}` : ''}
                     </option>
                   ))}
                 </select>
@@ -250,11 +250,11 @@ const OrderPage: React.FC = () => {
 
               <div className="flex justify-end">
                 <Button type="submit" disabled={loading || isGuestDetailsLoading}>
-                  {loading 
+                  {loading
                     ? t('order.processing')
-                    : paymentWay === 'card' 
-                        ? t('order.proceedToPayment')
-                        : t('order.createOrder')}
+                    : paymentWay === 'card'
+                      ? t('order.proceedToPayment')
+                      : t('order.createOrder')}
                 </Button>
               </div>
             </form>
@@ -284,24 +284,24 @@ const OrderPage: React.FC = () => {
                       </div>
                       <div className="text-xs">{t('order.qty')}: {item.quantity || 1}</div>
                     </div>
-                    <div className="text-sm font-semibold">${(item.productId?.finalPrice || 0).toFixed(2)}</div>
+                    <div className="text-sm font-semibold">L.E{(item.productId?.finalPrice || 0).toFixed(2)}</div>
                   </div>
                 ))
               )}
             </div>
             <div className="border-t mt-4 pt-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                    <span>{t('cart.subtotal')}</span>
-                    <span>${itemsTotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                    <span>{t('cart.shipping')}</span>
-                    <span>${selectedShippingCost.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between font-semibold text-lg">
-                    <span>{t('cart.total')}</span>
-                    <span>${finalTotal.toFixed(2)}</span>
-                </div>
+              <div className="flex justify-between text-sm">
+                <span>{t('cart.subtotal')}</span>
+                <span>L.E{itemsTotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>{t('cart.shipping')}</span>
+                <span>L.E{selectedShippingCost.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-semibold text-lg">
+                <span>{t('cart.total')}</span>
+                <span>L.E{finalTotal.toFixed(2)}</span>
+              </div>
             </div>
           </Card>
         </div>

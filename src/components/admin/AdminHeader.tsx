@@ -53,11 +53,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ user }) => {
           {/* Breadcrumbs will be here or below */}
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="relative hover:bg-white/50 rounded-full h-9 w-9">
-            <Bell className="h-4 w-4 text-muted-foreground" />
-            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white animate-pulse">
-            </span>
-          </Button>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full ring-2 ring-white/50 hover:ring-purple-200 transition-all">
@@ -78,8 +74,8 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ user }) => {
                   </p>
                   <div className="pt-1">
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${user.role === 'superAdmin'
-                        ? 'bg-purple-100 text-purple-700'
-                        : 'bg-blue-100 text-blue-700'
+                      ? 'bg-purple-100 text-purple-700'
+                      : 'bg-blue-100 text-blue-700'
                       }`}>
                       {user.role === 'superAdmin' ? 'Super Admin' : 'Admin'}
                     </span>

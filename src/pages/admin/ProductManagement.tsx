@@ -166,10 +166,10 @@ const ProductManagement: React.FC = () => {
       title: 'Price',
       render: (value, row) => (
         <div>
-          <div className="font-medium">${row.finalPrice}</div>
+          <div className="font-medium">L.E {row.finalPrice}</div>
           {row.discount && (
             <div className="text-sm text-muted-foreground line-through">
-              ${value}
+              L.E {value}
             </div>
           )}
         </div>
@@ -277,7 +277,7 @@ const ProductManagement: React.FC = () => {
         />
         <EnhancedStatsCard
           title="Avg Price"
-          value={`$${products.length > 0 ? (products.reduce((sum, p) => sum + (p.price || 0), 0) / products.length).toFixed(2) : '0.00'}`}
+          value={`L.E ${products.length > 0 ? (products.reduce((sum, p) => sum + (p.price || 0), 0) / products.length).toFixed(2) : '0.00'}`}
           icon={DollarSign}
           gradient="blue"
           loading={loading}

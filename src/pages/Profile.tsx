@@ -69,7 +69,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen ">
       <Navbar />
-      
+
       <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Profile Sidebar */}
@@ -87,17 +87,15 @@ const Profile = () => {
                   <p className="text-sm">
                     <span className="font-medium">{t('profile.phone')}:</span> {user.phone}
                   </p>
-                  <p className="text-sm">
-                    <span className="font-medium">{t('profile.memberSince')}:</span> January 2024
-                  </p>
+
                 </div>
                 <div className="pt-4 space-y-2">
                   <Button variant="outline" className="w-full justify-start">
                     <Settings className="h-4 w-4 mr-2" />
                     {t('profile.editProfile')}
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full justify-start text-red-600 hover:text-red-700"
                     onClick={handleLogout}
                   >
@@ -157,22 +155,22 @@ const Profile = () => {
                                     <p className="text-sm font-medium mb-1">{t('cart.items')} ({orderItems.length})</p>
                                     <div className="space-y-1">
                                       {orderItems.map((item: any, index: number) => (
-                                  <div key={index} className="flex items-center gap-2">
+                                        <div key={index} className="flex items-center gap-2">
                                           {item.product?.mainImage?.secure_url && (
-                                      <img
+                                            <img
                                               src={item.product.mainImage.secure_url}
                                               alt={getProductTitle(item.product) || 'Product'}
-                                        className="w-8 h-8 rounded object-cover"
-                                        loading="lazy"
-                                      />
-                                    )}
-                                    <div>
-                                      <p className="text-sm text-muted-foreground">
+                                              className="w-8 h-8 rounded object-cover"
+                                              loading="lazy"
+                                            />
+                                          )}
+                                          <div>
+                                            <p className="text-sm text-muted-foreground">
                                               {(getProductTitle(item.product) || item.name || 'Item')} {item.variant ? `(${item.variant.color}, ${item.variant.size})` : ''} x{item.quantity}
-                                      </p>
-                                    </div>
-                                    
-                                  </div>
+                                            </p>
+                                          </div>
+
+                                        </div>
                                       ))}
                                       {orderItems.length > 2 && (
                                         <p className="text-sm text-muted-foreground">
@@ -183,11 +181,11 @@ const Profile = () => {
                                   </>
                                 );
                               })()}
-                              
+
                             </div>
                             <div className="text-right">
-                              <p className="text-lg font-semibold">${(order as any).totalAmount ? (order as any).totalAmount.toFixed(2) : (order as any).finalPrice?.toFixed(2)}</p>
-                            
+                              <p className="text-lg font-semibold">L.E {(order as any).totalAmount ? (order as any).totalAmount.toFixed(2) : (order as any).finalPrice?.toFixed(2)}</p>
+
                             </div>
                           </div>
                         </CardContent>

@@ -201,16 +201,16 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
-                  <span>${Number(order.subTotal ?? 0).toFixed(2)}</span>
+                  <span>L.E{Number(order.subTotal ?? 0).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping:</span>
-                  <span>${(Number(order.finalPrice ?? 0) - Number(order.subTotal ?? 0)).toFixed(2)}</span>
+                  <span>L.E{(Number(order.finalPrice ?? 0) - Number(order.subTotal ?? 0)).toFixed(2)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-medium text-lg">
                   <span>Total:</span>
-                  <span>${Number(order.finalPrice ?? 0).toFixed(2)}</span>
+                  <span>L.E{Number(order.finalPrice ?? 0).toFixed(2)}</span>
                 </div>
               </div>
             </CardContent>

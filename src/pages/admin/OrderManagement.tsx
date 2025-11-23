@@ -161,7 +161,7 @@ const OrderManagement: React.FC = () => {
       key: 'finalPrice' as any,
       title: 'Total',
       render: (value) => (
-        <div className="font-medium">${Number(value || 0).toFixed(2)}</div>
+        <div className="font-medium">L.E {Number(value || 0).toFixed(2)}</div>
       ),
       sortable: true,
     },
@@ -268,7 +268,7 @@ const OrderManagement: React.FC = () => {
         />
         <EnhancedStatsCard
           title="Total Revenue"
-          value={`$${orders.reduce((sum, order) => sum + Number(order.finalPrice || 0), 0).toLocaleString()}`}
+          value={`L.E ${orders.reduce((sum, order) => sum + Number(order.finalPrice || 0), 0).toLocaleString()}`}
           icon={DollarSign}
           gradient="green"
           loading={loading}

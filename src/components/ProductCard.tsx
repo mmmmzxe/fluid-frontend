@@ -81,19 +81,19 @@ export const transformApiProduct = (apiProduct: ApiProduct): Product => {
   if (!apiProduct || !apiProduct._id) {
     throw new Error('Invalid product data');
   }
-  
+
   const isOnSale = apiProduct.discount && apiProduct.discount > 0;
   const originalPrice = isOnSale ? apiProduct.price : undefined;
-  
+
   // Extract colors from variants
   const colors = apiProduct.variants?.map(variant => variant.color) || [];
-  
+
   // Calculate if product is new (created within last 30 days)
   const createdAt = new Date(apiProduct.createdAt);
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const isNew = createdAt > thirtyDaysAgo;
-  
+
   return {
     id: apiProduct._id,
     name: getProductTitle(apiProduct),
@@ -101,8 +101,8 @@ export const transformApiProduct = (apiProduct: ApiProduct): Product => {
     originalPrice: originalPrice,
     category: apiProduct.category || 'uncategorized',
     subCategory: apiProduct.subCategory,
-    image: apiProduct.mainImage?.secure_url || 
-           (apiProduct.subImages && apiProduct.subImages.length > 0 ? apiProduct.subImages[0].secure_url : '/placeholder.svg'),
+    image: apiProduct.mainImage?.secure_url ||
+      (apiProduct.subImages && apiProduct.subImages.length > 0 ? apiProduct.subImages[0].secure_url : '/placeholder.svg'),
     rating: 4.5, // Default rating since not provided in API
     reviewCount: Math.floor(Math.random() * 200) + 10, // Mock review count
     isNew: isNew,
@@ -130,7 +130,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const [detail, setDetail] = useState<any | null>(null);
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [selectedSize, setSelectedSize] = useState<string>("");
-  
+
   const isWishlisted = favorites.some(item => item.id === product.id);
 
   const openVariantDialog = async (e: React.MouseEvent) => {
@@ -214,208 +214,208 @@ export function ProductCard({ product, className }: ProductCardProps) {
   };
 
   const isOnSale = product.originalPrice && product.originalPrice > product.price;
-  const discountPercentage = isOnSale 
+  const discountPercentage = isOnSale
     ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
     : 0;
 
   return (
     <>
-    <div className={cn("group relative", className)}>
-      <div className="relative bg-gray-light rounded-lg overflow-hidden">
-        {/* Badges */}
-        <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
-          {product.isNew && (
-            <Badge variant="secondary" className="bg-navy text-white">
-              {t('products.newArrivals').split(' ')[0].toUpperCase()}
-            </Badge>
-          )}
-          {isOnSale && (
-            <Badge variant="destructive" className="bg-primary text-white">
-              -{discountPercentage}%
-            </Badge>
-          )}
-        </div>
-
-        {/* Wishlist Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-3 right-3 z-10 bg-white/80 hover:bg-white"
-          onClick={handleToggleFavorite}
-        >
-          <Heart 
-            className={cn(
-              "h-4 w-4",
-              isWishlisted ? "fill-primary text-primary" : "text-muted-foreground"
-            )} 
-          />
-        </Button>
-
-        {/* Product Image */}
-        <Link to={`/product/${product.id}`}>
-          <div 
-            className="aspect-square overflow-hidden"
-            onMouseEnter={() => setHoveredImage(product.image)}
-            onMouseLeave={() => setHoveredImage(product.image)}
-          >
-            <img
-              src={hoveredImage}
-              alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          </div>
-        </Link>
-
-        {/* Quick Actions */}
-        <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <Button 
-            variant="secondary"
-            className="w-full"
-            onClick={openVariantDialog}
-            disabled={loading}
-          >
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            {loading ? t('common.loading') : t('productDetail.addToCart')}
-          </Button>
-        </div>
-      </div>
-
-      {/* Product Info */}
-      <div className="mt-4 space-y-2">
-        <Link to={`/product/${product.id}`}>
-          <h3 className="font-medium text-foreground hover:text-primary transition-colors line-clamp-2">
-            {product.name}
-          </h3>
-        </Link>
-
-        {/* Rating */}
-        <div className="flex items-center gap-1">
-          <div className="flex">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={cn(
-                  "h-3 w-3",
-                  i < Math.floor(product.rating)
-                    ? "fill-yellow-400 text-yellow-400"
-                    : "text-gray-300"
-                )}
-              />
-            ))}
-          </div>
-          <span className="text-xs text-muted-foreground">
-            ({product.reviewCount})
-          </span>
-        </div>
-
-        {/* Price */}
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-foreground">
-            ${product.price.toFixed(2)}
-          </span>
-          {isOnSale && (
-            <span className="text-sm text-muted-foreground line-through">
-              ${product.originalPrice!.toFixed(2)}
-            </span>
-          )}
-        </div>
-
-        {/* Colors */}
-        {product.colors && product.colors.length > 0 && (
-          <div className="flex gap-1">
-            {product.colors.slice(0, 4).map((color, index) => (
-              <div
-                key={index}
-                className="w-4 h-4 rounded-full border border-border"
-                style={{ backgroundColor: color }}
-              />
-            ))}
-            {product.colors.length > 4 && (
-              <span className="text-xs text-muted-foreground ml-1">
-                +{product.colors.length - 4}
-              </span>
+      <div className={cn("group relative", className)}>
+        <div className="relative bg-gray-light rounded-lg overflow-hidden">
+          {/* Badges */}
+          <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
+            {product.isNew && (
+              <Badge variant="secondary" className="bg-navy text-white">
+                {t('products.newArrivals').split(' ')[0].toUpperCase()}
+              </Badge>
+            )}
+            {isOnSale && (
+              <Badge variant="destructive" className="bg-primary text-white">
+                -{discountPercentage}%
+              </Badge>
             )}
           </div>
-        )}
-      </div>
-    </div>
 
-    {/* Variant Selection Dialog */}
-    <Dialog open={showVariantDialog} onOpenChange={setShowVariantDialog}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('productDetail.selectSize')} & {t('productDetail.selectColor')}</DialogTitle>
-          <DialogDescription>
-            Please select your preferred color and size before adding to cart.
-          </DialogDescription>
-        </DialogHeader>
+          {/* Wishlist Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-3 right-3 z-10 bg-white/80 hover:bg-white"
+            onClick={handleToggleFavorite}
+          >
+            <Heart
+              className={cn(
+                "h-4 w-4",
+                isWishlisted ? "fill-primary text-primary" : "text-muted-foreground"
+              )}
+            />
+          </Button>
 
-        {/* Colors */}
-        {detail?.variants?.length > 0 && (
-          <div className="space-y-2">
-            <div className="text-sm font-medium">{t('productDetail.selectColor')}</div>
-            <div className="flex flex-wrap gap-2">
-              {detail.variants.map((v: any, idx: number) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setSelectedColor(v.color);
-                    const firstSize = v.size?.[0];
-                    if (firstSize) {
-                      if (firstSize.size) setSelectedSize(String(firstSize.size));
-                      else {
-                        const keys = Object.keys(firstSize).filter(k => k !== 'stock' && k !== '_id');
-                        setSelectedSize(keys.length ? String(firstSize[keys[0]]) : "M");
-                      }
-                    }
-                  }}
+          {/* Product Image */}
+          <Link to={`/product/${product.id}`}>
+            <div
+              className="aspect-square overflow-hidden"
+              onMouseEnter={() => setHoveredImage(product.image)}
+              onMouseLeave={() => setHoveredImage(product.image)}
+            >
+              <img
+                src={hoveredImage}
+                alt={product.name}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            </div>
+          </Link>
+
+          {/* Quick Actions */}
+          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={openVariantDialog}
+              disabled={loading}
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              {loading ? t('common.loading') : t('productDetail.addToCart')}
+            </Button>
+          </div>
+        </div>
+
+        {/* Product Info */}
+        <div className="mt-4 space-y-2">
+          <Link to={`/product/${product.id}`}>
+            <h3 className="font-medium text-foreground hover:text-primary transition-colors line-clamp-2">
+              {product.name}
+            </h3>
+          </Link>
+
+          {/* Rating */}
+          <div className="flex items-center gap-1">
+            <div className="flex">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
                   className={cn(
-                    "px-3 py-1 rounded border text-sm",
-                    selectedColor === v.color ? "border-navy" : "border-border hover:border-gray-400"
+                    "h-3 w-3",
+                    i < Math.floor(product.rating)
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-300"
                   )}
-                  style={{ backgroundColor: String(v.color) }}
-                  title={v.color}
                 />
               ))}
             </div>
+            <span className="text-xs text-muted-foreground">
+              ({product.reviewCount})
+            </span>
           </div>
-        )}
 
-        {/* Sizes */}
-        {detail && (
-          <div className="space-y-2">
-            <div className="text-sm font-medium">{t('productDetail.selectSize')}</div>
-            <div className="flex flex-wrap gap-2">
-              {(detail.variants?.find((v: any) => v.color === selectedColor)?.size || []).map((s: any, i: number) => {
-                const display = s.size ? s.size : (() => {
-                  const keys = Object.keys(s).filter(k => k !== 'stock' && k !== '_id');
-                  return keys.length ? String(s[keys[0]]) : 'M';
-                })();
-                return (
+          {/* Price */}
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-foreground">
+              L.E{product.price.toFixed(2)}
+            </span>
+            {isOnSale && (
+              <span className="text-sm text-muted-foreground line-through">
+                L.E{product.originalPrice!.toFixed(2)}
+              </span>
+            )}
+          </div>
+
+          {/* Colors */}
+          {product.colors && product.colors.length > 0 && (
+            <div className="flex gap-1">
+              {product.colors.slice(0, 4).map((color, index) => (
+                <div
+                  key={index}
+                  className="w-4 h-4 rounded-full border border-border"
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+              {product.colors.length > 4 && (
+                <span className="text-xs text-muted-foreground ml-1">
+                  +{product.colors.length - 4}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Variant Selection Dialog */}
+      <Dialog open={showVariantDialog} onOpenChange={setShowVariantDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('productDetail.selectSize')} & {t('productDetail.selectColor')}</DialogTitle>
+            <DialogDescription>
+              Please select your preferred color and size before adding to cart.
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Colors */}
+          {detail?.variants?.length > 0 && (
+            <div className="space-y-2">
+              <div className="text-sm font-medium">{t('productDetail.selectColor')}</div>
+              <div className="flex flex-wrap gap-2">
+                {detail.variants.map((v: any, idx: number) => (
                   <button
-                    key={i}
-                    onClick={() => setSelectedSize(display)}
+                    key={idx}
+                    onClick={() => {
+                      setSelectedColor(v.color);
+                      const firstSize = v.size?.[0];
+                      if (firstSize) {
+                        if (firstSize.size) setSelectedSize(String(firstSize.size));
+                        else {
+                          const keys = Object.keys(firstSize).filter(k => k !== 'stock' && k !== '_id');
+                          setSelectedSize(keys.length ? String(firstSize[keys[0]]) : "M");
+                        }
+                      }
+                    }}
                     className={cn(
                       "px-3 py-1 rounded border text-sm",
-                      selectedSize === display ? "border-navy" : "border-border hover:border-gray-400"
+                      selectedColor === v.color ? "border-navy" : "border-border hover:border-gray-400"
                     )}
-                  >
-                    {display}
-                  </button>
-                );
-              })}
+                    style={{ backgroundColor: String(v.color) }}
+                    title={v.color}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setShowVariantDialog(false)}>{t('common.cancel')}</Button>
-          <Button onClick={confirmAddToCart} disabled={!selectedColor || !selectedSize || loading}>
-            {loading ? t('common.loading') : t('productDetail.addToCart')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          {/* Sizes */}
+          {detail && (
+            <div className="space-y-2">
+              <div className="text-sm font-medium">{t('productDetail.selectSize')}</div>
+              <div className="flex flex-wrap gap-2">
+                {(detail.variants?.find((v: any) => v.color === selectedColor)?.size || []).map((s: any, i: number) => {
+                  const display = s.size ? s.size : (() => {
+                    const keys = Object.keys(s).filter(k => k !== 'stock' && k !== '_id');
+                    return keys.length ? String(s[keys[0]]) : 'M';
+                  })();
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedSize(display)}
+                      className={cn(
+                        "px-3 py-1 rounded border text-sm",
+                        selectedSize === display ? "border-navy" : "border-border hover:border-gray-400"
+                      )}
+                    >
+                      {display}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowVariantDialog(false)}>{t('common.cancel')}</Button>
+            <Button onClick={confirmAddToCart} disabled={!selectedColor || !selectedSize || loading}>
+              {loading ? t('common.loading') : t('productDetail.addToCart')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

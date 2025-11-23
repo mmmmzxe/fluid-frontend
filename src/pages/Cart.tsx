@@ -41,7 +41,7 @@ const Cart = () => {
       if (cart.length > 0) {
         // Determine if we need to fetch details (i.e., if any productId is a string).
         const needsDetails = cart.some(item => typeof item.productId === 'string');
-        
+
         if (needsDetails) {
           setIsGuestDetailsLoading(true);
           try {
@@ -98,9 +98,9 @@ const Cart = () => {
             guestCart[itemIndex].quantity = newQuantity;
           }
         }
-        
+
         localStorage.setItem('guestCart', JSON.stringify(guestCart));
-        
+
         // Trigger a re-fetch from the hook to update the UI state
         await fetchCart();
       } else {
@@ -188,17 +188,17 @@ const Cart = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-foreground mb-8">{t('cart.title')}</h1>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             {finalCart.map((item) => (
               <Card key={item._id} className="p-4">
                 <div className="flex gap-4">
-                  
+
                   <Link to={`/product/${item.productId?._id}`}>
                     <img
                       src={item.productId?.mainImage?.secure_url || '/placeholder.svg'}
@@ -218,7 +218,7 @@ const Cart = () => {
                     <p className="text-sm text-muted-foreground">
                       {item.variant?.color || 'N/A'} - {item.variant?.size || 'N/A'}
                     </p>
-                    <p className="text-lg font-semibold text-primary">${(item.productId?.finalPrice || 0).toFixed(2)}</p>
+                    <p className="text-lg font-semibold text-primary">L.E{(item.productId?.finalPrice || 0).toFixed(2)}</p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <Button
@@ -261,13 +261,13 @@ const Cart = () => {
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between">
                   <span>{t('cart.subtotal')} ({finalCart.length} {t('cart.items')})</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>L.E{total.toFixed(2)}</span>
                 </div>
-              
+
                 <div className="border-t pt-2">
                   <div className="flex justify-between font-semibold text-lg">
                     <span>{t('cart.total')}</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>L.E{total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -278,8 +278,8 @@ const Cart = () => {
                 <Link to="/products">{t('cart.continueShopping')}</Link>
               </Button>
               {finalCart.length > 0 && (
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   className="w-full mt-2"
                   onClick={handleClearCart}
                 >

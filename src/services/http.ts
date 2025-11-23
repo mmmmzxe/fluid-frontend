@@ -1,3 +1,6 @@
+import { store } from "@/store/store";
+import { logout } from "@/store/slices/userSlice";
+
 const BASE_URL = "/api";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -37,6 +40,12 @@ async function request<T = any>(path: string, options: RequestOptions = {}): Pro
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const message = (data && (data.message || data.error)) || res.statusText || "Request failed";
+
+    // Check for token expiration
+    if (message === "jwt expired" || (data && data.name === "TokenExpiredError")) {
+      store.dispatch(logout());
+    }
+
     throw new Error(message);
   }
   return data as T;

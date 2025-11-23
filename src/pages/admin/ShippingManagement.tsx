@@ -113,7 +113,7 @@ const ShippingManagement: React.FC = () => {
       title: 'Price',
       sortable: true,
       render: (value) => (
-        <div className="font-medium">${value ? Number(value).toFixed(2) : '0.00'}</div>
+        <div className="font-medium">L.E {value ? Number(value).toFixed(2) : '0.00'}</div>
       ),
     },
     {
@@ -158,7 +158,7 @@ const ShippingManagement: React.FC = () => {
         />
         <EnhancedStatsCard
           title="Average Cost"
-          value={`$${(shippingOptions.length > 0 ? shippingOptions.reduce((sum, s) => sum + (s.price || 0), 0) / shippingOptions.length : 0).toFixed(2)}`}
+          value={`L.E ${(shippingOptions.length > 0 ? shippingOptions.reduce((sum, s) => sum + (s.price || 0), 0) / shippingOptions.length : 0).toFixed(2)}`}
           icon={DollarSign}
           gradient="green"
           loading={loading}

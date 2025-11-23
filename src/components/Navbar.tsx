@@ -43,69 +43,69 @@ export function Navbar() {
       <div className="mx-auto ">
         {/* Top bar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Search icon - left */}
-          <div className="flex items-center">
-            <form onSubmit={handleSearch} className="flex items-center">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('nav.searchPlaceholder')}
-                className="h-9 w-[200px] rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              />
-              <Button type="submit" variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground ml-1">
-                <Search className="h-5 w-5" />
+          <div className="flex items-center justify-between h-16">
+            {/* Search icon - left */}
+            <div className="hidden md:flex items-center">
+              <form onSubmit={handleSearch} className="flex items-center">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t('nav.searchPlaceholder')}
+                  className="h-9 w-[200px] rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                />
+                <Button type="submit" variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground ml-1">
+                  <Search className="h-5 w-5" />
+                </Button>
+              </form>
+            </div>
+
+            {/* Logo - center */}
+            <Link to="/" className="flex-shrink-0 flex justify-center items-center">
+              <img src={logoNav} className="h-16" alt="Logo Nav" />
+              <img src={logo} className="object-cover h-12" alt="Logo" />
+            </Link>
+
+            {/* Account & Shopping - right */}
+            <div className="flex items-center space-x-2">
+              <LanguageSwitcher />
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" asChild>
+                <Link to="/favorites" className="relative">
+                  <Heart className="h-5 w-5" />
+                  {favoritesItems.length > 0 && (
+                    <Badge className="absolute text-center flex justify-center -top-2 -right-2 h-5 w-5 p-0 text-xs">
+                      {favoritesItems.length}
+                    </Badge>
+                  )}
+                </Link>
               </Button>
-            </form>
-          </div>
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" asChild>
+                <Link to={isAuthenticated ? "/profile" : "/login"}>
+                  <User className="h-5 w-5" />
+                </Link>
+              </Button>
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" asChild>
+                <Link to="/cart" className="relative">
+                  <ShoppingBag className="h-5 w-5" />
+                  {cartItemsCount > 0 && (
+                    <Badge className="absolute -top-2 text-center flex justify-center -right-2 h-5 w-5 p-0 text-xs">
+                      {cartItemsCount}
+                    </Badge>
+                  )}
+                </Link>
+              </Button>
 
-          {/* Logo - center */}
-          <Link to="/" className="flex-shrink-0 flex justify-center items-center">
-            <img src={logoNav} className="h-16" alt="Logo Nav" />
-            <img src={logo} className="object-cover h-12" alt="Logo" />
-          </Link>
-
-          {/* Account & Shopping - right */}
-          <div className="flex items-center space-x-2">
-            <LanguageSwitcher />
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" asChild>
-              <Link to="/favorites" className="relative">
-                <Heart className="h-5 w-5" />
-                {favoritesItems.length > 0 && (
-                  <Badge className="absolute text-center flex justify-center -top-2 -right-2 h-5 w-5 p-0 text-xs">
-                    {favoritesItems.length}
-                  </Badge>
-                )}
-              </Link>
-            </Button>
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" asChild>
-              <Link to={isAuthenticated ? "/profile" : "/login"}>
-                <User className="h-5 w-5" />
-              </Link>
-            </Button>
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" asChild>
-              <Link to="/cart" className="relative">
-                <ShoppingBag className="h-5 w-5" />
-                {cartItemsCount > 0 && (
-                  <Badge className="absolute -top-2 text-center flex justify-center -right-2 h-5 w-5 p-0 text-xs">
-                    {cartItemsCount}
-                  </Badge>
-                )}
-              </Link>
-            </Button>
-
-            {/* Mobile menu button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden text-muted-foreground hover:text-foreground"
-              onClick={() => setIsOpen(!isOpen)}
-            >
-              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-          </div>
-        </div></div>
+              {/* Mobile menu button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden text-muted-foreground hover:text-foreground"
+                onClick={() => setIsOpen(!isOpen)}
+              >
+                {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
+            </div>
+          </div></div>
 
         {/* Text marquee before categories */}
         <div className="overflow-hidden w-full bg-secondary text-primary-foreground border-t border-border py-2">
@@ -114,7 +114,7 @@ export function Navbar() {
             animate={{ x: ["100%", "-100%"] }}
             transition={{
               repeat: Infinity,
-           
+
               duration: 15,
               ease: "linear",
             }}
@@ -128,36 +128,51 @@ export function Navbar() {
 
         {/* Navigation items - desktop */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="hidden md:flex items-center justify-center space-x-8 py-4 border-t border-border">
-          {categoriesLoading ? (
-            <div className="text-sm text-muted-foreground">{t('products.loadingCategories')}</div>
-          ) : (
-            categories?.map((category) => (
-              <Link
-                key={category._id}
-                to={`/products?category=${category._id}`}
-                className={cn(
-                  "flex items-center space-x-2 text-sm font-medium transition-colors hover:text-primary group",
-                  isActive(`/products?category=${category._id}`) ? "text-primary" : "text-muted-foreground"
-                )}
-              >
-                {category.image?.secure_url && (
-                  <img
-                    src={category.image.secure_url}
-                    alt={getCategoryName(category)}
-                    className="w-6 h-6 rounded-full object-cover"
-                  />
-                )}
-                <span>{getCategoryName(category)}</span>
-              </Link>
-            ))
-          )}
-        </div></div>
+          <div className="hidden md:flex items-center justify-center space-x-8 py-4 border-t border-border">
+            {categoriesLoading ? (
+              <div className="text-sm text-muted-foreground">{t('products.loadingCategories')}</div>
+            ) : (
+              categories?.map((category) => (
+                <Link
+                  key={category._id}
+                  to={`/products?category=${category._id}`}
+                  className={cn(
+                    "flex items-center space-x-2 text-sm font-medium transition-colors hover:text-primary group",
+                    isActive(`/products?category=${category._id}`) ? "text-primary" : "text-muted-foreground"
+                  )}
+                >
+                  {category.image?.secure_url && (
+                    <img
+                      src={category.image.secure_url}
+                      alt={getCategoryName(category)}
+                      className="w-6 h-6 rounded-full object-cover"
+                    />
+                  )}
+                  <span>{getCategoryName(category)}</span>
+                </Link>
+              ))
+            )}
+          </div></div>
 
         {/* Mobile navigation */}
         {isOpen && (
           <div className="md:hidden border-t border-border">
             <div className="py-4 space-y-2">
+              {/* Mobile Search */}
+              <div className="px-4 pb-4">
+                <form onSubmit={(e) => { handleSearch(e); setIsOpen(false); }} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t('nav.searchPlaceholder')}
+                    className="flex-1 h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  />
+                  <Button type="submit" variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                    <Search className="h-5 w-5" />
+                  </Button>
+                </form>
+              </div>
               {/* All Products Link */}
               <Link
                 to="/products"

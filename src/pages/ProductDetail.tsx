@@ -270,11 +270,11 @@ export default function ProductDetail() {
             {/* Price */}
             <div className="flex items-center gap-4">
               <span className="text-3xl font-bold text-navy">
-                ${product.finalPrice.toFixed(2)}
+                L.E{product.finalPrice.toFixed(2)}
               </span>
               {isOnSale && (
                 <span className="text-xl text-muted-foreground line-through">
-                  ${product.price.toFixed(2)}
+                  L.E{product.price.toFixed(2)}
                 </span>
               )}
             </div>

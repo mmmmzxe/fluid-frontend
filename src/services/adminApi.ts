@@ -330,10 +330,10 @@ export const productApi = {
     const list: Product[] = Array.isArray(raw?.data)
       ? raw.data
       : Array.isArray(raw?.products)
-      ? raw.products
-      : Array.isArray(raw)
-      ? raw
-      : [];
+        ? raw.products
+        : Array.isArray(raw)
+          ? raw
+          : [];
     return { message: raw?.message || 'Done', data: list } as ApiResponse<Product[]>;
   },
 
@@ -397,14 +397,14 @@ export const orderApi = {
     const list: Order[] = Array.isArray(raw?.data)
       ? raw.data
       : Array.isArray(raw?.orders)
-      ? raw.orders
-      : Array.isArray(raw)
-      ? raw
-      : [];
+        ? raw.orders
+        : Array.isArray(raw)
+          ? raw
+          : [];
     return { message: raw?.message || 'Done', data: list } as ApiResponse<Order[]>;
   },
 
-  
+
   getByUser: async (): Promise<ApiResponse<Order[]>> => {
     const response = await api.get('/order/get-orders-by-user');
     return response.data;
@@ -478,6 +478,21 @@ export const userApi = {
     return response.data;
   },
 
+  getAll: async (): Promise<ApiResponse<User[]>> => {
+    const response = await api.get('/user/all-user');
+    const raw = response.data as any;
+    const list: User[] = Array.isArray(raw?.user)
+      ? raw.user
+      : Array.isArray(raw?.data)
+        ? raw.data
+        : Array.isArray(raw?.users)
+          ? raw.users
+          : Array.isArray(raw)
+            ? raw
+            : [];
+    return { message: raw?.message || 'Done', data: list } as ApiResponse<User[]>;
+  },
+
   addToFavorites: async (productId: string): Promise<ApiResponse> => {
     const response = await api.patch(`/user/add-to-favorite/${productId}`);
     return response.data;
@@ -502,10 +517,10 @@ export const subCategoryApi = {
     const list: SubCategory[] = Array.isArray(raw?.data)
       ? raw.data
       : Array.isArray(raw?.subCategories)
-      ? raw.subCategories
-      : Array.isArray(raw)
-      ? raw
-      : [];
+        ? raw.subCategories
+        : Array.isArray(raw)
+          ? raw
+          : [];
     return { message: raw?.message || 'Done', data: list } as ApiResponse<SubCategory[]>;
   },
 
@@ -539,10 +554,10 @@ export const supportApi = {
     const list: SupportTicket[] = Array.isArray(raw?.data)
       ? raw.data
       : Array.isArray(raw?.support)
-      ? raw.support
-      : Array.isArray(raw)
-      ? raw
-      : [];
+        ? raw.support
+        : Array.isArray(raw)
+          ? raw
+          : [];
     return { message: raw?.message || 'Done', data: list } as ApiResponse<SupportTicket[]>;
   },
 
@@ -560,10 +575,10 @@ export const shippingApi = {
     const list: Shipping[] = Array.isArray(raw?.data)
       ? raw.data
       : Array.isArray(raw?.shipping)
-      ? raw.shipping
-      : Array.isArray(raw)
-      ? raw
-      : [];
+        ? raw.shipping
+        : Array.isArray(raw)
+          ? raw
+          : [];
     return { message: raw?.message || 'Done', data: list } as ApiResponse<Shipping[]>;
   },
 

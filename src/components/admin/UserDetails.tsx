@@ -81,7 +81,7 @@ const UserDetails: React.FC<UserDetailsProps> = ({ user, onClose }) => {
                   <div className="text-lg">{user.email}</div>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <span className="font-medium">Role:</span>
@@ -186,34 +186,7 @@ const UserDetails: React.FC<UserDetailsProps> = ({ user, onClose }) => {
             </CardContent>
           </Card>
 
-          {/* Account Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Actions</CardTitle>
-              <CardDescription>
-                Manage this user account
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button variant="outline" className="w-full">
-                  Reset Password
-                </Button>
-                <Button variant="outline" className="w-full">
-                  Send Email
-                </Button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button variant="outline" className="w-full">
-                  View Activity Log
-                </Button>
-                <Button variant="destructive" className="w-full">
-                  Deactivate Account
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+
         </div>
       </DialogContent>
     </Dialog>
