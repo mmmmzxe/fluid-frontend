@@ -148,6 +148,10 @@ export const printInvoice = (order: Order) => {
           <p>${order.address || 'No address provided'}</p>
           ${shippingGov ? `<p>${shippingGov}</p>` : ''}
         </div>
+        <div class="info-block">
+          <h3>Payment Information</h3>
+          <p>Method: ${order.paymentWay ? order.paymentWay.charAt(0).toUpperCase() + order.paymentWay.slice(1) : 'N/A'}</p>
+        </div>
       </div>
 
       <table>
