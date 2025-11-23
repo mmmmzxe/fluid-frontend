@@ -11,6 +11,15 @@ export const printInvoice = (order: Order) => {
   const date = new Date(order.createdAt).toLocaleDateString();
   const orderId = order._id.slice(-8).toUpperCase();
 
+  // Parse shipping info
+  const shippingPrice = typeof (order as any).shippingId === 'object' && (order as any).shippingId !== null
+    ? ((order as any).shippingId as any).price
+    : (Number(order.finalPrice ?? 0) - Number(order.subTotal ?? 0));
+
+  const shippingGov = typeof (order as any).shippingId === 'object' && (order as any).shippingId !== null
+    ? ((order as any).shippingId as any).government
+    : '';
+
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -137,6 +146,7 @@ export const printInvoice = (order: Order) => {
         <div class="info-block">
           <h3>Ship To</h3>
           <p>${order.address || 'No address provided'}</p>
+          ${shippingGov ? `<p>${shippingGov}</p>` : ''}
         </div>
       </div>
 
@@ -177,7 +187,7 @@ export const printInvoice = (order: Order) => {
         </div>
         <div class="total-row">
           <span>Shipping</span>
-          <span>L.E${(Number(order.finalPrice ?? 0) - Number(order.subTotal ?? 0)).toFixed(2)}</span>
+          <span>L.E${Number(shippingPrice ?? 0).toFixed(2)}</span>
         </div>
         <div class="total-row final">
           <span>Total</span>

@@ -202,10 +202,7 @@ const OrderPage: React.FC = () => {
                     <label className="block text-sm font-medium mb-1">{t('auth.email')}</label>
                     <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                   </div>
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium mb-1">{t('order.discountPercent')}</label>
-                    <Input type="number" value={discountPercent} onChange={(e) => setDiscountPercent(Number(e.target.value))} />
-                  </div>
+
                 </div>
               )}
               <div>
