@@ -69,6 +69,15 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
   const customerEmail = order.createdBy?.email || order.email || '';
   const customerPhone = order.phone || order.createdBy?.phone || '';
 
+  // Parse shipping info
+  const shippingPrice = typeof (order as any).shippingId === 'object' && (order as any).shippingId !== null
+    ? ((order as any).shippingId as any).price
+    : (Number(order.finalPrice ?? 0) - Number(order.subTotal ?? 0));
+
+  const shippingGov = typeof (order as any).shippingId === 'object' && (order as any).shippingId !== null
+    ? ((order as any).shippingId as any).government
+    : '';
+
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -125,6 +134,11 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
                 <div>{order.address || '-'}</div>
+                {shippingGov && (
+                  <div className="mt-1 text-muted-foreground">
+                    <span className="font-medium text-gray-700">Government:</span> {shippingGov}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -180,11 +194,11 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                         <h4 className="font-medium">{title}</h4>
                         <div className="flex items-center gap-4 mt-2">
                           <span className="text-sm">Quantity: {qty}</span>
-                          <span className="text-sm">Unit: ${unit.toFixed(2)}</span>
+                          <span className="text-sm">Unit: L.E{unit.toFixed(2)}</span>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-medium">${(unit * qty).toFixed(2)}</div>
+                        <div className="font-medium">L.E{(unit * qty).toFixed(2)}</div>
                       </div>
                     </div>
                   );
@@ -205,7 +219,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping:</span>
-                  <span>L.E{(Number(order.finalPrice ?? 0) - Number(order.subTotal ?? 0)).toFixed(2)}</span>
+                  <span>L.E{Number(shippingPrice ?? 0).toFixed(2)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-medium text-lg">

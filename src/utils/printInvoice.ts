@@ -162,8 +162,8 @@ export const printInvoice = (order: Order) => {
                   ${item.size ? `<div style="font-size: 12px; color: #666;">Size: ${item.size}</div>` : ''}
                 </td>
                 <td class="text-right">${qty}</td>
-                <td class="text-right">$${unit.toFixed(2)}</td>
-                <td class="text-right">$${total.toFixed(2)}</td>
+                <td class="text-right">L.E${unit.toFixed(2)}</td>
+                <td class="text-right">L.E${total.toFixed(2)}</td>
               </tr>
             `;
   }).join('')}
@@ -173,15 +173,15 @@ export const printInvoice = (order: Order) => {
       <div class="totals">
         <div class="total-row">
           <span>Subtotal</span>
-          <span>$${Number(order.subTotal ?? 0).toFixed(2)}</span>
+          <span>L.E${Number(order.subTotal ?? 0).toFixed(2)}</span>
         </div>
         <div class="total-row">
           <span>Shipping</span>
-          <span>$${(Number(order.finalPrice ?? 0) - Number(order.subTotal ?? 0)).toFixed(2)}</span>
+          <span>L.E${(Number(order.finalPrice ?? 0) - Number(order.subTotal ?? 0)).toFixed(2)}</span>
         </div>
         <div class="total-row final">
           <span>Total</span>
-          <span>$${Number(order.finalPrice ?? 0).toFixed(2)}</span>
+          <span>L.E${Number(order.finalPrice ?? 0).toFixed(2)}</span>
         </div>
       </div>
 

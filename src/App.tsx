@@ -34,6 +34,10 @@ import OrderPage from "./pages/Order";
 import { SearchResults } from "./pages/SearchResults";
 import FAQ from "./pages/FAQ";
 import ShippingReturns from "./pages/ShippingReturns";
+import About from "./pages/About";
+import Terms from "./pages/Terms";
+import ProductCare from "./pages/ProductCare";
+import Sitemap from "./pages/Sitemap";
 
 const queryClient = new QueryClient();
 
@@ -46,36 +50,40 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/search" element={<SearchResults />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/favorites" element={<Favorites />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/contact" element={<ContactUs />} />
-            <Route path="/order" element={<OrderPage />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/shipping-returns" element={<ShippingReturns />} />
-            
-            {/* Admin Routes */}
-            <Route path="/admin" element={<AdminDashboard />}>
-              <Route index element={<AdminOverview />} />
-              <Route path="categories" element={<CategoryManagement />} />
-              <Route path="products" element={<ProductManagement />} />
-              <Route path="orders" element={<OrderManagement />} />
-              <Route path="users" element={<UserManagement />} />
-              <Route path="subcategories" element={<SubCategoryManagement />} />
-              <Route path="support" element={<SupportManagement />} />
-              <Route path="shipping" element={<ShippingManagement />} />
-              <Route path="profile" element={<AdminProfile />} />
-            </Route>
-            
-            <Route path="*" element={<NotFound />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/search" element={<SearchResults />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/favorites" element={<Favorites />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/contact" element={<ContactUs />} />
+              <Route path="/order" element={<OrderPage />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/shipping-returns" element={<ShippingReturns />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/product-care" element={<ProductCare />} />
+              <Route path="/sitemap" element={<Sitemap />} />
+
+              {/* Admin Routes */}
+              <Route path="/admin" element={<AdminDashboard />}>
+                <Route index element={<AdminOverview />} />
+                <Route path="categories" element={<CategoryManagement />} />
+                <Route path="products" element={<ProductManagement />} />
+                <Route path="orders" element={<OrderManagement />} />
+                <Route path="users" element={<UserManagement />} />
+                <Route path="subcategories" element={<SubCategoryManagement />} />
+                <Route path="support" element={<SupportManagement />} />
+                <Route path="shipping" element={<ShippingManagement />} />
+                <Route path="profile" element={<AdminProfile />} />
+              </Route>
+
+              <Route path="*" element={<NotFound />} />
             </Routes>
             <ToastContainer
               position="bottom-right"

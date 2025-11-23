@@ -45,20 +45,7 @@ export function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Search icon - left */}
-            <div className="hidden md:flex items-center">
-              <form onSubmit={handleSearch} className="flex items-center">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t('nav.searchPlaceholder')}
-                  className="h-9 w-[200px] rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                />
-                <Button type="submit" variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground ml-1">
-                  <Search className="h-5 w-5" />
-                </Button>
-              </form>
-            </div>
+
 
             {/* Logo - center */}
             <Link to="/" className="flex-shrink-0 flex justify-center items-center">
@@ -137,7 +124,7 @@ export function Navbar() {
                   key={category._id}
                   to={`/products?category=${category._id}`}
                   className={cn(
-                    "flex items-center space-x-2 text-sm font-medium transition-colors hover:text-primary group",
+                    "flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary group",
                     isActive(`/products?category=${category._id}`) ? "text-primary" : "text-muted-foreground"
                   )}
                 >

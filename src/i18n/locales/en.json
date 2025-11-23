@@ -68,7 +68,7 @@
     "freeShipping": "Free Shipping",
     "easyReturns": "Easy Returns",
     "warranty": "2 Year Warranty",
-  "lingerieNoReturn": "Lingerie is non-returnable — we apologize. For hygiene reasons, lingerie items are not eligible for return or exchange. If you receive a defective item, please contact us within 7 days with a clear photo of the issue.",
+    "lingerieNoReturn": "Lingerie is non-returnable — we apologize. For hygiene reasons, lingerie items are not eligible for return or exchange. If you receive a defective item, please contact us within 7 days with a clear photo of the issue.",
     "features": "Features:",
     "premiumFabric": "Premium fabric construction",
     "modernDesign": "Modern, versatile design",
@@ -296,8 +296,8 @@
     "answer5": "We accept all major credit cards, PayPal, and cash on delivery for select locations.",
     "question6": "How can I contact customer support?",
     "answer6": "You can reach our customer support team via email, phone, or the contact form on our website. We're available 24/7 to assist you.",
-  "lingerieQuestion": "Can lingerie items be returned?",
-  "lingerieAnswer": "For hygiene and safety reasons, lingerie items are not eligible for return or exchange. If the item is defective, please contact us within 7 days with a clear photo and we'll assist with an exchange or refund after review.",
+    "lingerieQuestion": "Can lingerie items be returned?",
+    "lingerieAnswer": "For hygiene and safety reasons, lingerie items are not eligible for return or exchange. If the item is defective, please contact us within 7 days with a clear photo and we'll assist with an exchange or refund after review.",
     "stillHaveQuestions": "Still have questions?",
     "contactMessage": "Can't find the answer you're looking for? Please chat to our friendly team."
   },
@@ -323,9 +323,49 @@
     "processingTime": "Processing Time",
     "processingTimeDesc": "Orders are processed within 1-2 business days before shipment.",
     "needHelp": "Need Help?",
-    "needHelpDesc": "Our customer service team is here to help with any questions about shipping or returns."
-    ,
+    "needHelpDesc": "Our customer service team is here to help with any questions about shipping or returns.",
     "lingerieExceptionTitle": "Exception: Lingerie items",
     "lingerieExceptionDesc": "To protect health and safety, all lingerie items are non-returnable and non-exchangeable. If you receive a product with a manufacturing defect, contact us within 7 days of delivery with photos of the defect and our support team will review the case."
+  },
+  "about": {
+    "title": "About Us",
+    "welcome": "Welcome to Extrachic! We are dedicated to providing the best fashion products to our customers. Our mission is to bring style and comfort to your wardrobe.",
+    "history": "Founded in 2018, we have been serving customers with high-quality clothing and accessories. We work directly with producers to ensure fair practices and premium quality."
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "intro": "Please read these terms and conditions carefully before using our service.",
+    "section1Title": "1. Introduction",
+    "section1Content": "These Website Standard Terms and Conditions written on this webpage shall manage your use of our website.",
+    "section2Title": "2. Intellectual Property Rights",
+    "section2Content": "Other than the content you own, under these Terms, Extrachic and/or its licensors own all the intellectual property rights and materials contained in this Website."
+  },
+  "productCare": {
+    "title": "Product Care & Repair",
+    "intro": "To ensure your Extrachic products last a lifetime, please follow these care instructions.",
+    "generalCare": "General Care",
+    "careList": {
+      "item1": "Wash with like colors.",
+      "item2": "Do not bleach.",
+      "item3": "Tumble dry low or hang dry.",
+      "item4": "Iron on low heat if needed."
+    }
+  },
+  "sitemap": {
+    "title": "Sitemap",
+    "shop": "Shop",
+    "account": "Account",
+    "support": "Support",
+    "allProducts": "All Products",
+    "cart": "Cart",
+    "favorites": "Favorites",
+    "login": "Login",
+    "signup": "Sign Up",
+    "myProfile": "My Profile",
+    "contactUs": "Contact Us",
+    "faq": "FAQ",
+    "shippingReturns": "Shipping & Returns",
+    "aboutUs": "About Us",
+    "termsOfService": "Terms of Service"
   }
 }

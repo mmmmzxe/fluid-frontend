@@ -13,7 +13,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Logo & Description */}
         <div>
-         <img src={logo} alt="logo" className=" h-40" />
+          <img src={logo} alt="logo" className=" h-40" />
           <p className=" text-gray-600 text-sm">
             {t('footer.brandDescription')}
           </p>
@@ -43,11 +43,11 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold mb-4">{t('footer.aboutUs').toUpperCase()}</h3>
           <ul className="space-y-2 text-sm text-gray-600">
-            <li><a href="#" className="hover:text-gray-900">{t('footer.ourProducers')}</a></li>
-            <li><a href="#" className="hover:text-gray-900">{t('footer.sitemap')}</a></li>
+            <li><Link to="/products" className="hover:text-gray-900">{t('footer.ourProducers')}</Link></li>
+
             <li><Link to="/faq" className="hover:text-gray-900">{t('footer.faq')}</Link></li>
-            <li><a href="#" className="hover:text-gray-900">{t('footer.aboutUs')}</a></li>
-            <li><a href="#" className="hover:text-gray-900">{t('footer.termsOfService')}</a></li>
+            <li><Link to="/about" className="hover:text-gray-900">{t('footer.aboutUs')}</Link></li>
+            <li><Link to="/terms" className="hover:text-gray-900">{t('footer.termsOfService')}</Link></li>
           </ul>
         </div>
 
@@ -56,9 +56,9 @@ export default function Footer() {
           <h3 className="font-semibold mb-4">{t('footer.customerServices').toUpperCase()}</h3>
           <ul className="space-y-2 text-sm text-gray-600">
             <li><Link to="/contact" className="hover:text-gray-900">{t('footer.contactUs')}</Link></li>
-            <li><a href="#" className="hover:text-gray-900">{t('footer.trackOrder')}</a></li>
-            <li><a href="#" className="hover:text-gray-900">{t('footer.productCare')}</a></li>
-            <li><a href="#" className="hover:text-gray-900">{t('footer.bookAppointment')}</a></li>
+            <li><Link to="/profile" className="hover:text-gray-900">{t('footer.trackOrder')}</Link></li>
+            <li><Link to="/product-care" className="hover:text-gray-900">{t('footer.productCare')}</Link></li>
+            <li><Link to="/contact" className="hover:text-gray-900">{t('footer.bookAppointment')}</Link></li>
             <li><Link to="/shipping-returns" className="hover:text-gray-900">{t('footer.shippingReturns')}</Link></li>
           </ul>
         </div>
@@ -68,8 +68,8 @@ export default function Footer() {
       <div className="bg-primary text-gray-200 text-sm py-4 px-6 flex flex-col md:flex-row justify-between items-center">
         <p>© 2018 Extrachic, Inc. {t('footer.allRightsReserved')}</p>
         <div className="flex space-x-2 mt-2 md:mt-0">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa" className="h-6" />
-          <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="Paypal" className="h-6" />
+          <img src="https://paymob.com/images/logoC.png" alt="Visa" className="h-6" />
+
         </div>
         <a href="#" className="mt-2 md:mt-0 hover:text-white">Scroll To Top ↑</a>
       </div>
