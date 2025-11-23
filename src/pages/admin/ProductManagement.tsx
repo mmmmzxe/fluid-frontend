@@ -6,6 +6,7 @@ import { Plus, Edit, Trash2, Eye, Package, DollarSign, TrendingUp } from 'lucide
 import { toast } from 'sonner';
 import DataTable, { Column } from '@/components/admin/DataTable';
 import ProductForm from '@/components/admin/ProductForm';
+import ProductDetails from '@/components/admin/ProductDetails';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
 import EnhancedStatsCard from '@/components/admin/EnhancedStatsCard';
 import GradientButton from '@/components/admin/GradientButton';
@@ -19,7 +20,9 @@ const ProductManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -117,8 +120,8 @@ const ProductManagement: React.FC = () => {
   };
 
   const handleView = (product: Product) => {
-    // Implement view functionality
-    console.log('View product:', product);
+    setViewingProduct(product);
+    setShowDetails(true);
   };
 
   const filteredProducts = products.filter(product => {
@@ -176,16 +179,7 @@ const ProductManagement: React.FC = () => {
       ),
       sortable: true,
     },
-    {
-      key: 'stock',
-      title: 'Stock',
-      render: (value) => (
-        <Badge variant={value > 10 ? 'default' : value > 0 ? 'secondary' : 'destructive'}>
-          {value || 0} units
-        </Badge>
-      ),
-      sortable: true,
-    },
+
     {
       key: 'category',
       title: 'Category',
@@ -324,6 +318,17 @@ const ProductManagement: React.FC = () => {
             setEditingProduct(null);
           }}
           onSubmit={editingProduct ? handleUpdate : handleCreate}
+        />
+      )}
+
+      {/* Product Details Modal */}
+      {showDetails && viewingProduct && (
+        <ProductDetails
+          product={viewingProduct}
+          onClose={() => {
+            setShowDetails(false);
+            setViewingProduct(null);
+          }}
         />
       )}
 

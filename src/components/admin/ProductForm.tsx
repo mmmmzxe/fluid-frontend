@@ -347,7 +347,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                     name="price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Price ($)</FormLabel>
+                        <FormLabel>Price (L.E)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
