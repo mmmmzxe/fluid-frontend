@@ -10,7 +10,9 @@ import ExploreStyles from "./ExploreStyles";
 import CollectionsHero from "./CollectionsHero";
 
 import Footer from "@/components/Footer";
+
 import TextVideoSection from "./MediaSection";
+import CreativeShowcase from "./CreativeShowcase";
 import { useProducts } from "@/hooks/useApi";
 
 const brandLogos = [
@@ -116,7 +118,7 @@ const Index = () => {
         </div>
       </motion.section>
 
-
+      <CreativeShowcase />
       <ExploreStyles />
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -249,6 +251,9 @@ const Index = () => {
           </div>
         </div>
       </motion.section>
+
+
+
 
 
       {/* Best Sellers */}

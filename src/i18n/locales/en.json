@@ -14,7 +14,13 @@
     "ourCollections": "Our Collections",
     "collections": "Collections",
     "exploreDiverseCollections": "Explore and shop diverse collections from various top brands, all in one place. Find your next signature piece.",
-    "shopNow": "Shop Now"
+    "shopNow": "Shop Now",
+    "creativeShowcase": {
+      "title": "Creative Showcase",
+      "subtitle": "Where Art Meets Fashion",
+      "description": "Discover our exclusive collection of artist-designed apparel that pushes the boundaries of conventional fashion.",
+      "explore": "Explore Gallery"
+    }
   },
   "products": {
     "title": "All Products",

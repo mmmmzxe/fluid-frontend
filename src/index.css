@@ -227,7 +227,9 @@
   }
 }
 
-
+body {
+  overflow-x: hidden;
+}
 
 @layer base {
   * {
