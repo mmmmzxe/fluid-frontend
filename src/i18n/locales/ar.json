@@ -202,7 +202,14 @@
     "loadingCart": "جاري تحميل السلة...",
     "orderSummary": "ملخص الطلب",
     "items": "عناصر",
-    "clearCart": "مسح السلة"
+    "clearCart": "مسح السلة",
+    "updateSuccess": "تم تحديث السلة",
+    "updateError": "فشل تحديث السلة",
+    "removeSuccess": "تم إزالة العنصر من السلة",
+    "removeError": "فشل إزالة العنصر",
+    "clearSuccess": "تم مسح السلة",
+    "clearError": "فشل مسح السلة",
+    "loadError": "تعذر تحميل تفاصيل السلة"
   },
   "favorites": {
     "title": "المفضلة",
@@ -303,7 +310,14 @@
     "orderNumber": "رقم الطلب",
     "orderDate": "تاريخ الطلب",
     "totalAmount": "المبلغ الإجمالي",
-    "viewDetails": "عرض التفاصيل"
+    "viewDetails": "عرض التفاصيل",
+    "requiredFields": "العنوان ورقم الهاتف مطلوبان",
+    "guestRequiredFields": "الاسم الأول، الاسم الأخير، والبريد الإلكتروني مطلوبون لإتمام الطلب كزائر.",
+    "createSuccess": "تم إنشاء الطلب بنجاح",
+    "placeSuccess": "تم تقديم الطلب بنجاح",
+    "redirecting": "جاري التوجيه لبوابة الدفع...",
+    "createError": "فشل إنشاء الطلب",
+    "loadError": "تعذر تحميل تفاصيل الطلب."
   },
   "contact": {
     "title": "اتصل بنا",

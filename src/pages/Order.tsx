@@ -80,7 +80,7 @@ const OrderPage: React.FC = () => {
             setDetailedCart(augmentedItems);
           } catch (error) {
             console.error("Error fetching product details for guest order:", error);
-            toast.error("Could not load order details.");
+            toast.error(t('order.loadError'));
           } finally {
             setIsGuestDetailsLoading(false);
           }
@@ -100,10 +100,10 @@ const OrderPage: React.FC = () => {
 
     // Basic validation
     if (!address.trim() || !phone.trim()) {
-      return toast.error('Address and Phone are required');
+      return toast.error(t('order.requiredFields'));
     }
     if (!isAuthenticated && (!firstName.trim() || !lastName.trim() || !email.trim())) {
-      return toast.error('First Name, Last Name, and Email are required for guest checkout.');
+      return toast.error(t('order.guestRequiredFields'));
     }
 
     setLoading(true);
@@ -121,7 +121,7 @@ const OrderPage: React.FC = () => {
 
       // Step 2: Handle based on payment method
       if (paymentWay === 'cash') {
-        toast.success(isAuthenticated ? 'Order created successfully' : 'Order placed successfully');
+        toast.success(isAuthenticated ? t('order.createSuccess') : t('order.placeSuccess'));
         navigate('/');
         return;
       }
@@ -157,7 +157,7 @@ const OrderPage: React.FC = () => {
         const paymentUrl = paymentResponse?.data?.url;
 
         if (paymentUrl) {
-          toast.success("Redirecting to payment gateway...");
+          toast.success(t('order.redirecting'));
           // Use window.location.href for reliable redirection (instead of window.open which may be blocked)
           window.location.href = paymentUrl;
         } else {
@@ -168,7 +168,7 @@ const OrderPage: React.FC = () => {
       }
 
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to create order');
+      toast.error(err?.message || t('order.createError'));
     } finally {
       setLoading(false);
     }
@@ -223,7 +223,7 @@ const OrderPage: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium mb-1">{t('order.paymentMethod')}</label>
                 <select value={paymentWay} onChange={(e) => setPaymentWay(e.target.value)} className="w-full border rounded-md p-2 bg-background">
-                  <option value="card">{t('order.card')}</option>
+                  
                   <option value="cash">{t('order.cash')}</option>
                 </select>
               </div>

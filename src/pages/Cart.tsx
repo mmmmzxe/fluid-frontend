@@ -62,7 +62,7 @@ const Cart = () => {
             setDetailedCart(augmentedItems);
           } catch (error) {
             console.error("Error fetching product details for guest cart:", error);
-            toast.error("Could not load cart details.");
+            toast.error(t('cart.loadError'));
           } finally {
             setIsGuestDetailsLoading(false);
           }
@@ -109,21 +109,21 @@ const Cart = () => {
       }
 
       if (newQuantity === 0) {
-        toast.success("Item removed from cart");
+        toast.success(t('cart.removeSuccess'));
       } else {
-        toast.success("Cart updated");
+        toast.success(t('cart.updateSuccess'));
       }
     } catch (err: any) {
-      toast.error(err?.message || "Failed to update cart");
+      toast.error(err?.message || t('cart.updateError'));
     }
   };
 
   const handleRemoveItem = async (itemId: string) => {
     try {
       await removeItemFromCart(itemId);
-      toast.success("Item removed from cart");
+      toast.success(t('cart.removeSuccess'));
     } catch (err: any) {
-      toast.error(err?.message || "Failed to remove item");
+      toast.error(err?.message || t('cart.removeError'));
     }
   };
 
@@ -137,9 +137,9 @@ const Cart = () => {
         // Handle authenticated user cart
         await clearUserCart();
       }
-      toast.success("Cart cleared");
+      toast.success(t('cart.clearSuccess'));
     } catch (err: any) {
-      toast.error(err?.message || "Failed to clear cart");
+      toast.error(err?.message || t('cart.clearError'));
     }
   };
 

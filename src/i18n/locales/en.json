@@ -124,6 +124,15 @@
     "of": "of",
     "productsCount": "products",
 
+    "items": "items",
+    "clearCart": "Clear Cart",
+    "updateSuccess": "Cart updated",
+    "updateError": "Failed to update cart",
+    "removeSuccess": "Item removed from cart",
+    "removeError": "Failed to remove item",
+    "clearSuccess": "Cart cleared",
+    "clearError": "Failed to clear cart",
+    "loadError": "Could not load cart details",
     "filters": "Filters",
     "clearAll": "Clear All",
     "categories": "Categories",
@@ -284,7 +293,14 @@
     "orderNumber": "Order Number",
     "orderDate": "Order Date",
     "totalAmount": "Total Amount",
-    "viewDetails": "View Details"
+    "viewDetails": "View Details",
+    "requiredFields": "Address and Phone are required",
+    "guestRequiredFields": "First Name, Last Name, and Email are required for guest checkout.",
+    "createSuccess": "Order created successfully",
+    "placeSuccess": "Order placed successfully",
+    "redirecting": "Redirecting to payment gateway...",
+    "createError": "Failed to create order",
+    "loadError": "Could not load order details."
   },
   "contact": {
     "title": "Contact Us",
