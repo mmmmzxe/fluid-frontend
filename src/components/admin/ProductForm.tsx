@@ -29,10 +29,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { X, Plus, Upload, Loader2, Trash2 } from 'lucide-react';
+import { X, Plus, Upload, Loader2, Trash2, Edit } from 'lucide-react';
 import { compressImage } from '@/utils/imageCompression';
-import { Product, Category, SubCategory } from '@/services/adminApi';
+import { Product, Category, SubCategory, productApi } from '@/services/adminApi';
 import { ColorPicker } from '@/components/ui/color-picker';
+import { toast } from 'sonner';
 
 const productSchema = z.object({
   titleEnglish: z.string().min(1, 'English title is required'),
@@ -48,14 +49,30 @@ const productSchema = z.object({
 
 type ProductFormData = z.infer<typeof productSchema>;
 
+// Variant form types for editing existing variants
+interface EditVariantData {
+  variantId: string;
+  sizeId: string;
+  stock: number;
+  color: string;
+  size: string;
+}
+
+// Variant form types for adding new variants
+interface NewVariantData {
+  color: string;
+  size: Array<{ size: string; stock: string }>;
+}
+
 interface ProductFormProps {
   product?: Product | null;
   categories: Category[];
   onClose: () => void;
   onSubmit: (formData: FormData) => void;
+  onRefresh?: () => void; // Callback to refresh product data after variant operations
 }
 
-const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose, onSubmit: onSubmitProp }) => {
+const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose, onSubmit: onSubmitProp, onRefresh }) => {
   const [mainImageFile, setMainImageFile] = useState<File | null>(null);
   const [subImageFiles, setSubImageFiles] = useState<File[]>([]);
   const [mainImagePreview, setMainImagePreview] = useState<string | null>(
@@ -64,20 +81,52 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
   const [subImagePreviews, setSubImagePreviews] = useState<string[]>(
     product?.subImages?.map(img => img.secure_url) || []
   );
+
+  // State for editing existing variants (with IDs from API)
+  const [existingVariants, setExistingVariants] = useState<Array<{
+    variantId: string;
+    color: string;
+    sizes: Array<{ sizeId: string; size: string; stock: number }>;
+  }>>(
+    (product?.variants || []).map(v => ({
+      variantId: v._id,
+      color: v.color,
+      sizes: (v.size || []).map(s => ({
+        sizeId: s._id,
+        size: s.size || '',
+        stock: s.stock
+      })),
+    }))
+  );
+
+  // State for new variants to add (without IDs)
+  const [newVariants, setNewVariants] = useState<Array<{
+    color: string;
+    size: Array<{ size: string; stock: number }>;
+  }>>([]);
+
+  // Legacy variants state for create mode (when no product exists)
   const [variants, setVariants] = useState<Array<{
     color: string;
     size: Array<{ size: string; stock: number }>;
     stock: number;
   }>>(
-    (product?.variants || []).map(v => ({
-      color: v.color,
-      size: (v.size || []).map(s => ({ size: s.size || '', stock: s.stock })),
-      stock: 0, // default stock; do not read v.stock
-    }))
+    !product ? [] : []
   );
+
+  // Modal states for variant editing
+  const [editingVariant, setEditingVariant] = useState<{
+    variantId: string;
+    sizeId: string;
+    color: string;
+    size: string;
+    stock: number;
+  } | null>(null);
+  const [isEditVariantSubmitting, setIsEditVariantSubmitting] = useState(false);
+  const [isAddVariantSubmitting, setIsAddVariantSubmitting] = useState(false);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
-  // Subcategories are derived from the selected category
 
   const mainImageInputRef = useRef<HTMLInputElement>(null);
   const subImagesInputRef = useRef<HTMLInputElement>(null);
@@ -184,15 +233,31 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
   };
 
   const addVariant = () => {
-    setVariants(prev => [...prev, { color: '', size: [{ size: '', stock: 0 }], stock: 0 }]);
+    if (product) {
+      // Edit mode: add to newVariants
+      setNewVariants(prev => [...prev, { color: '', size: [{ size: '', stock: 0 }] }]);
+    } else {
+      // Create mode: add to variants
+      setVariants(prev => [...prev, { color: '', size: [{ size: '', stock: 0 }], stock: 0 }]);
+    }
   };
 
   const removeVariant = (index: number) => {
     setVariants(prev => prev.filter((_, i) => i !== index));
   };
 
+  const removeNewVariant = (index: number) => {
+    setNewVariants(prev => prev.filter((_, i) => i !== index));
+  };
+
   const updateVariant = (index: number, field: string, value: any) => {
     setVariants(prev => prev.map((variant, i) =>
+      i === index ? { ...variant, [field]: value } : variant
+    ));
+  };
+
+  const updateNewVariant = (index: number, field: string, value: any) => {
+    setNewVariants(prev => prev.map((variant, i) =>
       i === index ? { ...variant, [field]: value } : variant
     ));
   };
@@ -205,8 +270,24 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
     ));
   };
 
+  const addNewVariantSize = (variantIndex: number) => {
+    setNewVariants(prev => prev.map((variant, i) =>
+      i === variantIndex
+        ? { ...variant, size: [...variant.size, { size: '', stock: 0 }] }
+        : variant
+    ));
+  };
+
   const removeVariantSize = (variantIndex: number, sizeIndex: number) => {
     setVariants(prev => prev.filter((variant, i) =>
+      i === variantIndex
+        ? { ...variant, size: variant.size.filter((_, j) => j !== sizeIndex) }
+        : variant
+    ));
+  };
+
+  const removeNewVariantSize = (variantIndex: number, sizeIndex: number) => {
+    setNewVariants(prev => prev.map((variant, i) =>
       i === variantIndex
         ? { ...variant, size: variant.size.filter((_, j) => j !== sizeIndex) }
         : variant
@@ -224,6 +305,76 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
         }
         : variant
     ));
+  };
+
+  const updateNewVariantSize = (variantIndex: number, sizeIndex: number, field: string, value: any) => {
+    setNewVariants(prev => prev.map((variant, i) =>
+      i === variantIndex
+        ? {
+          ...variant,
+          size: variant.size.map((size, j) =>
+            j === sizeIndex ? { ...size, [field]: value } : size
+          )
+        }
+        : variant
+    ));
+  };
+
+  // Handle editing existing variant via PATCH API
+  const handleEditVariant = async () => {
+    if (!editingVariant || !product) return;
+
+    setIsEditVariantSubmitting(true);
+    try {
+      await productApi.editVariant(product._id, {
+        variantId: editingVariant.variantId,
+        sizeId: editingVariant.sizeId,
+        stock: editingVariant.stock,
+        color: editingVariant.color,
+        size: editingVariant.size,
+      });
+      toast.success('Variant updated successfully');
+      setEditingVariant(null);
+      // Refresh product data
+      onRefresh?.();
+    } catch (error) {
+      console.error('Error updating variant:', error);
+      toast.error('Failed to update variant');
+    } finally {
+      setIsEditVariantSubmitting(false);
+    }
+  };
+
+  // Handle adding new variants to existing product via POST API
+  const handleAddNewVariants = async () => {
+    if (!product || newVariants.length === 0) return;
+
+    setIsAddVariantSubmitting(true);
+    try {
+      const variantsPayload = newVariants.map(v => ({
+        color: v.color,
+        size: v.size.map(s => ({
+          size: s.size,
+          stock: String(s.stock),
+        })),
+      }));
+
+      await productApi.addVariant(product._id, { variants: variantsPayload });
+      toast.success('Variants added successfully');
+      setNewVariants([]);
+      // Refresh product data
+      onRefresh?.();
+    } catch (error) {
+      console.error('Error adding variants:', error);
+      toast.error('Failed to add variants');
+    } finally {
+      setIsAddVariantSubmitting(false);
+    }
+  };
+
+  // Open edit modal for a specific variant size
+  const openEditVariantModal = (variantId: string, sizeId: string, color: string, size: string, stock: number) => {
+    setEditingVariant({ variantId, sizeId, color, size, stock });
   };
 
   const _handleSubmit = async (data: ProductFormData) => {
@@ -581,8 +732,149 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4 ">
-                {variants.map((variant, variantIndex) => (
+              <CardContent className="space-y-4">
+                {/* Existing Variants (Edit Mode Only) */}
+                {product && existingVariants.length > 0 && (
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-sm text-muted-foreground">Existing Variants</h4>
+                    {existingVariants.map((variant, variantIndex) => (
+                      <div key={variant.variantId} className="border rounded-lg p-4 space-y-4 bg-muted/30">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-6 h-6 rounded-full border"
+                              style={{ backgroundColor: variant.color }}
+                            />
+                            <span className="font-medium">{variant.color}</span>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          {variant.sizes.map((size) => (
+                            <div key={size.sizeId} className="flex items-center justify-between bg-background p-2 rounded">
+                              <div className="flex items-center gap-4">
+                                <span className="font-medium">Size: {size.size}</span>
+                                <span className="text-muted-foreground">Stock: {size.stock}</span>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openEditVariantModal(variant.variantId, size.sizeId, variant.color, size.size, size.stock)}
+                              >
+                                <Edit className="h-4 w-4 mr-1" />
+                                Edit
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* New Variants (Edit Mode) */}
+                {product && newVariants.length > 0 && (
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-sm text-muted-foreground">New Variants to Add</h4>
+                    {newVariants.map((variant, variantIndex) => (
+                      <div key={variantIndex} className="border rounded-lg p-4 space-y-4 border-dashed border-green-500">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium text-green-600">New Variant</h4>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => removeNewVariant(variantIndex)}
+                            disabled={isCompressing}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <FormLabel>Color</FormLabel>
+                            <ColorPicker
+                              value={variant.color}
+                              onChange={(color) => updateNewVariant(variantIndex, 'color', color)}
+                              placeholder="Enter color"
+                              disabled={isCompressing}
+                            />
+                          </div>
+
+                          <div className="flex items-end">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => addNewVariantSize(variantIndex)}
+                              disabled={isCompressing}
+                            >
+                              <Plus className="mr-2 h-4 w-4" />
+                              Add Size
+                            </Button>
+                          </div>
+                        </div>
+
+                        {variant.size.map((size, sizeIndex) => (
+                          <div key={sizeIndex} className="grid grid-cols-2 gap-4">
+                            <div>
+                              <FormLabel>Size</FormLabel>
+                              <Input
+                                value={size.size}
+                                onChange={(e) => updateNewVariantSize(variantIndex, sizeIndex, 'size', e.target.value)}
+                                placeholder="Enter size"
+                                disabled={isCompressing}
+                              />
+                            </div>
+                            <div className="flex items-end space-x-2">
+                              <div className="flex-1">
+                                <FormLabel>Stock</FormLabel>
+                                <Input
+                                  type="number"
+                                  value={size.stock}
+                                  onChange={(e) => updateNewVariantSize(variantIndex, sizeIndex, 'stock', parseInt(e.target.value) || 0)}
+                                  placeholder="0"
+                                  disabled={isCompressing}
+                                />
+                              </div>
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => removeNewVariantSize(variantIndex, sizeIndex)}
+                                disabled={isCompressing}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      className="w-full bg-green-600 hover:bg-green-700"
+                      onClick={handleAddNewVariants}
+                      disabled={isAddVariantSubmitting || newVariants.some(v => !v.color || v.size.length === 0)}
+                    >
+                      {isAddVariantSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Adding Variants...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Save New Variants
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+
+                {/* Create Mode Variants */}
+                {!product && variants.map((variant, variantIndex) => (
                   <div key={variantIndex} className="border rounded-lg p-4 space-y-4">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium">Variant {variantIndex + 1}</h4>
@@ -660,6 +952,66 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                 ))}
               </CardContent>
             </Card>
+
+            {/* Edit Variant Modal */}
+            {editingVariant && (
+              <Dialog open={!!editingVariant} onOpenChange={() => setEditingVariant(null)}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Edit Variant</DialogTitle>
+                    <DialogDescription>
+                      Update the variant details below.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div>
+                      <FormLabel>Color</FormLabel>
+                      <Input
+                        value={editingVariant.color}
+                        onChange={(e) => setEditingVariant({ ...editingVariant, color: e.target.value })}
+                        placeholder="Enter color"
+                      />
+                    </div>
+                    <div>
+                      <FormLabel>Size</FormLabel>
+                      <Input
+                        value={editingVariant.size}
+                        onChange={(e) => setEditingVariant({ ...editingVariant, size: e.target.value })}
+                        placeholder="Enter size"
+                      />
+                    </div>
+                    <div>
+                      <FormLabel>Stock</FormLabel>
+                      <Input
+                        type="number"
+                        value={editingVariant.stock}
+                        onChange={(e) => setEditingVariant({ ...editingVariant, stock: parseInt(e.target.value) || 0 })}
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setEditingVariant(null)}>
+                      Cancel
+                    </Button>
+                    <Button
+                      className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90"
+                      onClick={handleEditVariant}
+                      disabled={isEditVariantSubmitting}
+                    >
+                      {isEditVariantSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Updating...
+                        </>
+                      ) : (
+                        'Update Variant'
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting || isCompressing}>

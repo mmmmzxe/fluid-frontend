@@ -318,6 +318,20 @@ const ProductManagement: React.FC = () => {
             setEditingProduct(null);
           }}
           onSubmit={editingProduct ? handleUpdate : handleCreate}
+          onRefresh={async () => {
+            // Refresh product data after variant operations
+            if (editingProduct) {
+              try {
+                const response = await productApi.getById(editingProduct._id);
+                if (response.data) {
+                  setEditingProduct(response.data);
+                }
+              } catch (error) {
+                console.error('Error refreshing product:', error);
+              }
+            }
+            fetchProducts();
+          }}
         />
       )}
 
