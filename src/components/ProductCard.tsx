@@ -203,24 +203,31 @@ export function ProductCard({ product, className }: ProductCardProps) {
     e.preventDefault();
 
     if (!isAuthenticated) {
-      toast.error('Please log in to manage favorites');
+      // Guest logic: just toggle in local store
+      if (isWishlisted) {
+        dispatch(removeFromFavorites(product.id));
+        toast.success(t('common.removedFromFavorites', 'Removed from favorites'));
+      } else {
+        dispatch(addToFavorites(product));
+        toast.success(t('common.addedToFavorites', 'Added to favorites'));
+      }
       return;
     }
 
     try {
-      // Call backend to add/remove favorite depending on current state
+      // Authenticated logic: sync with backend
       if (isWishlisted) {
         await userApi.removeFromFavorites(product.id);
         dispatch(removeFromFavorites(product.id));
-        toast.success('Removed from favorites');
+        toast.success(t('common.removedFromFavorites', 'Removed from favorites'));
       } else {
         await userApi.addToFavorites(product.id);
         dispatch(addToFavorites(product));
-        toast.success('Added to favorites');
+        toast.success(t('common.addedToFavorites', 'Added to favorites'));
       }
     } catch (err: any) {
       console.error('Failed to toggle favorite', err);
-      toast.error(err?.response?.data?.message || 'Failed to update favorites');
+      toast.error(err?.response?.data?.message || t('common.error', 'Failed to update favorites'));
     }
   };
 

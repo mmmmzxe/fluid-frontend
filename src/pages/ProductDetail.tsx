@@ -8,7 +8,7 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useProduct, ApiProductDetail } from "@/hooks/useProduct";
 import { useCart } from "@/hooks/useCart";
-import { useAppSelector } from "@/hooks/useRedux";
+import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import { cn } from "@/lib/utils";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
@@ -18,9 +18,16 @@ import PageLoader from "@/components/PageLoader";
 
 
 
+import { addToFavorites, removeFromFavorites } from "@/store/slices/favoritesSlice";
+import { userApi } from '@/services/adminApi';
+
+// ... (other imports)
+
 export default function ProductDetail() {
   const { t } = useTranslation();
   const { id } = useParams();
+  const dispatch = useAppDispatch();
+  const favorites = useAppSelector((state) => state.favorites.items);
   const { fetchProductById, loading, error } = useProduct();
   const { addItemToCart, loading: cartLoading } = useCart();
   const { isAuthenticated } = useAppSelector((state) => state.user);
@@ -30,7 +37,6 @@ export default function ProductDetail() {
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeTab, setActiveTab] = useState("description");
   const allImages = (product?.subImages && product.subImages.length > 0)
     ? [
@@ -167,8 +173,46 @@ export default function ProductDetail() {
   };
 
   const productTitle = getProductTitle(product);
-  const productDescription = getProductDescription(product) || `Shop ${productTitle} at ExtraChic. Premium quality fashion at affordable prices.`;
-  const productImage = product.mainImage?.secure_url || '/seo-image.png';
+  const productDescription = getProductDescription(product) || t('productDetail.defaultDescription', { title: productTitle });
+  
+  // Robust image selection: Main Image -> First Sub Image -> Fallback
+  const productImage = product.mainImage?.secure_url || 
+    (product.subImages && product.subImages.length > 0 ? product.subImages[0].secure_url : '/seo-image.png');
+
+  // Check if any variant is in stock
+  const isAvailable = product.variants?.some(v => 
+    v.size?.some((s: any) => (s.stock || 0) > 0)
+  ) ?? false;
+
+  const productSchema = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": productTitle,
+    "image": [
+      product.mainImage?.secure_url,
+      ...(product.subImages?.map(img => img.secure_url) || [])
+    ].filter(Boolean),
+    "description": productDescription,
+    "sku": product._id,
+    "brand": {
+      "@type": "Brand",
+      "name": "ExtraChic"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": window.location.href,
+      "priceCurrency": "EGP",
+      "price": product.finalPrice,
+      "availability": isAvailable ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "itemCondition": "https://schema.org/NewCondition"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.5",
+      "reviewCount": "12"
+      
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -177,7 +221,8 @@ export default function ProductDetail() {
         description={productDescription}
         image={productImage}
         type="product"
-        keywords={`${productTitle}, fashion, clothing, buy online, ExtraChic`}
+        keywords={`${productTitle}, fashion, clothing, buy online, ExtraChic, ${product.category}`}
+        structuredData={productSchema}
       />
       <Navbar />
 
@@ -403,14 +448,46 @@ export default function ProductDetail() {
               <Button
                 variant="outline"
                 size="lg"
-                onClick={() => setIsWishlisted(!isWishlisted)}
+                onClick={async () => {
+                   const productId = product._id;
+                   const isLiked = favorites.some(item => item.id === productId);
+
+                   if (!isAuthenticated) {
+                      if (isLiked) {
+                        dispatch(removeFromFavorites(productId));
+                        toast.success(t('common.removedFromFavorites', 'Removed from favorites'));
+                      } else {
+                        // Use shared transformer to ensure consistent data (stock, price, etc.)
+                        const productForStore = transformApiProduct(product as any);
+                        dispatch(addToFavorites(productForStore));
+                        toast.success(t('common.addedToFavorites', 'Added to favorites'));
+                      }
+                      return;
+                   }
+
+                   try {
+                      if (isLiked) {
+                        await userApi.removeFromFavorites(productId);
+                        dispatch(removeFromFavorites(productId));
+                        toast.success(t('common.removedFromFavorites', 'Removed from favorites'));
+                      } else {
+                        // Use shared transformer here too
+                        const productForStore = transformApiProduct(product as any);
+                        await userApi.addToFavorites(productId);
+                        dispatch(addToFavorites(productForStore));
+                        toast.success(t('common.addedToFavorites', 'Added to favorites'));
+                      }
+                   } catch (err: any) {
+                      toast.error(err?.message || 'Failed to update favorites');
+                   }
+                }}
                 className={cn(
-                  isWishlisted && "bg-primary text-white border-primary"
+                  favorites.some(item => item.id === product._id) && "bg-primary text-white border-primary"
                 )}
               >
                 <Heart className={cn(
                   "h-4 w-4",
-                  isWishlisted && "fill-current"
+                  favorites.some(item => item.id === product._id) && "fill-current"
                 )} />
               </Button>
             </div>

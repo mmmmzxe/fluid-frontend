@@ -8,15 +8,17 @@ interface SEOProps {
   url?: string;
   type?: string;
   keywords?: string;
+  structuredData?: Record<string, any>;
 }
 
 const SEO: React.FC<SEOProps> = ({
   title,
   description,
-  image = '/seo-image.png',
+  image = '/LogoNav.png',
   url = window.location.href,
   type = 'website',
   keywords,
+  structuredData,
 }) => {
   const { t } = useTranslation();
 
@@ -53,6 +55,13 @@ const SEO: React.FC<SEOProps> = ({
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={metaDescription} />
       <meta name="twitter:image" content={fullImageUrl} />
+
+      {/* Structured Data (JSON-LD) */}
+      {structuredData && (
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
+      )}
     </Helmet>
   );
 };
