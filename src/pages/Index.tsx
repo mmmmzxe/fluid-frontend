@@ -4,6 +4,8 @@ import { ProductCard, transformApiProduct } from "@/components/ProductCard";
 import { Navbar } from "@/components/Navbar";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import SEO from "@/components/SEO";
+import PageLoader from "@/components/PageLoader";
 
 import brandBanner from "@/assets/brand-banner.png";
 import ExploreStyles from "./ExploreStyles";
@@ -58,11 +60,18 @@ const scaleIn = {
 
 const Index = () => {
   const { t } = useTranslation();
-  const { products: apiFeatured } = useProducts();
+  const { products: apiFeatured, loading: isFeaturedLoading } = useProducts();
   const featuredProducts = apiFeatured.map(transformApiProduct).slice(0, 8);
-  const { products: apiProducts } = useProducts({ sortBy: "best-selling" });
+  const { products: apiProducts, loading: isBestSellingLoading } = useProducts({ sortBy: "best-selling" });
   const apiBestSelling = apiProducts;
   const bestSellingProducts = apiBestSelling.map(transformApiProduct).slice(0, 4);
+  
+  const isLoading = isFeaturedLoading || isBestSellingLoading;
+
+  if (isLoading) {
+    return <PageLoader message="Loading homepage..." />;
+  }
+
   return (
     <motion.div
       className="min-h-screen bg-background"
@@ -70,6 +79,11 @@ const Index = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
+      <SEO 
+        title="ExtraChic - Stylish & Affordable Fashion"
+        description="Discover the latest trends in fashion at ExtraChic. Shop stylish and affordable clothing, accessories, and more. Your go-to destination for premium fashion."
+        keywords="fashion, clothing, style, affordable fashion, online shopping, ExtraChic, trendy clothes, accessories"
+      />
       <Navbar />
 
       {/* Hero Section */}

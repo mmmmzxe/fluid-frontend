@@ -14,6 +14,8 @@ import { productApi, Product } from "@/services/adminApi";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { getCategoryName } from "@/lib/i18nHelpers";
+import SEO from "@/components/SEO";
+import PageLoader from "@/components/PageLoader";
 
 export default function Products() {
   const { t } = useTranslation();
@@ -163,8 +165,17 @@ export default function Products() {
     (showNew ? 1 : 0) +
     (priceRange[0] > 0 || priceRange[1] < 50000 ? 1 : 0);
 
+  if (loading && !products) {
+    return <PageLoader message="Loading products..." />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="All Products"
+        description="Browse our complete collection of stylish and affordable fashion products. Find the perfect clothing, accessories, and more at ExtraChic."
+        keywords="products, fashion products, clothing, accessories, shop online, ExtraChic"
+      />
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

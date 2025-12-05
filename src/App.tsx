@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Provider } from "react-redux";
 import { ToastContainer } from "react-toastify";
+import { HelmetProvider } from "react-helmet-async";
 import { store } from "@/store/store";
 import { AppInitializer } from "@/components/AppInitializer";
 import Index from "./pages/Index";
@@ -44,11 +45,12 @@ const queryClient = new QueryClient();
 const App = () => (
   <Provider store={store}>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AppInitializer>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+      <HelmetProvider>
+        <TooltipProvider>
+          <AppInitializer>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/products" element={<Products />} />
@@ -99,6 +101,7 @@ const App = () => (
           </BrowserRouter>
         </AppInitializer>
       </TooltipProvider>
+      </HelmetProvider>
     </QueryClientProvider>
   </Provider>
 );

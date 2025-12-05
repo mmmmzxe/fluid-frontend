@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import { getProductTitle, getProductDescription } from "@/lib/i18nHelpers";
+import SEO from "@/components/SEO";
+import PageLoader from "@/components/PageLoader";
 
 
 
@@ -57,16 +59,7 @@ export default function ProductDetail() {
   }, [id, fetchProductById]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">{t('productDetail.loadingProduct')}</p>
-        </div>
-        <Footer />
-      </div>
-    );
+    return <PageLoader message="Loading product details..." />;
   }
 
   if (error || !product) {
@@ -173,8 +166,19 @@ export default function ProductDetail() {
     }
   };
 
+  const productTitle = getProductTitle(product);
+  const productDescription = getProductDescription(product) || `Shop ${productTitle} at ExtraChic. Premium quality fashion at affordable prices.`;
+  const productImage = product.mainImage?.secure_url || '/seo-image.png';
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title={productTitle}
+        description={productDescription}
+        image={productImage}
+        type="product"
+        keywords={`${productTitle}, fashion, clothing, buy online, ExtraChic`}
+      />
       <Navbar />
 
       {/* Breadcrumb */}
