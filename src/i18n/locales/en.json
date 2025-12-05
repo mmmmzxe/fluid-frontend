@@ -8,12 +8,12 @@
     "exploreNewStyles": "Explore New And Popular Styles",
     "viewAllProducts": "View All Products",
     "brandHeading": "EXTRACHIC",
-    "brandDescription": "Lustrous Yet Understated. The New Evening Wear Collection Exclusively Offered At The Reopened Giorgio Armani Boutique In Los Angeles.",
+    "brandDescription": "Style for Every Moment of Your Life. From the comfort of home to the glamour of a night out, find your perfect look with ExtraChic’s diverse collection.",
     "seeCollection": "See Collection",
     "bestSellers": "Best Sellers",
     "ourCollections": "Our Collections",
     "collections": "Collections",
-    "exploreDiverseCollections": "Explore and shop diverse collections from various top brands, all in one place. Find your next signature piece.",
+    "exploreDiverseCollections": "Welcome to ExtraChic, the fashion hub where style knows no bounds. Explore our intimate collections of lingerie, unwind in cozy homewear, gear up with high-performance sportswear, or dress up with our elegant evening wear.",
     "shopNow": "Shop Now",
     "creativeShowcase": {
       "title": "Creative Showcase",
@@ -22,11 +22,108 @@
       "explore": "Explore Gallery"
     }
   },
+  "categories": {
+    "lingerie": {
+      "title": "Lingerie",
+      "description": "Discover confidence from within with our exquisite lingerie collection. Delicate lace sets and supportive everyday essentials."
+    },
+    "homewear": {
+      "title": "Homewear",
+      "description": "Experience the art of relaxation with our premium homewear. Soft fabrics and relaxed silhouettes for peaceful moments."
+    },
+    "casual": {
+      "title": "Casual Wear",
+      "description": "Effortless style for your everyday hustle. Contemporary trends combined with all-day comfort."
+    },
+    "sportswear": {
+      "title": "Sportswear",
+      "description": "Elevate your workout with dynamic sportswear. Breathable materials and ergonomic designs for an active lifestyle."
+    },
+    "sleepwear": {
+      "title": "Sleepwear & Pajamas",
+      "description": "Sweet dreams begin with comfort. Wrap yourself in cozy sleepwear featuring soft cottons and silks."
+    },
+    "underwear": {
+      "title": "Underwear",
+      "description": "The foundation of every great outfit. Seamless fits, breathable fabrics, and a variety of cuts."
+    },
+    "dresses": {
+      "title": "Dresses",
+      "description": "From brunch dates to boardroom meetings, find a dress for every occasion in stunning prints and classic cuts."
+    },
+    "tops": {
+      "title": "Tops & T-shirts",
+      "description": "Versatile staples for your wardrobe. An array of colors and styles perfect for layering or making a statement."
+    },
+    "shirts": {
+      "title": "Shirts & Blouses",
+      "description": "Add a touch of sophistication with sharp tailoring and fluid fabrics ideal for professional settings."
+    },
+    "hoodies": {
+      "title": "Hoodies & Sweatshirts",
+      "description": "Stay cozy and cool. Leisure staples offering warmth and unmatched comfort for relaxed days."
+    },
+    "jackets": {
+      "title": "Jackets & Coats",
+      "description": "Conquer the cold in style. From sleek blazers to warm puffers, keeping you fashionable in any weather."
+    },
+    "cardigans": {
+      "title": "Cardigans",
+      "description": "The perfect layering piece. Add texture and warmth to any outfit, transitioning seamlessly from season to season."
+    },
+    "pants": {
+      "title": "Jeans & Pants",
+      "description": "Find your perfect fit. From classic denims to trendy wide-legs, we have bottoms to flatter every figure."
+    },
+    "leggings": {
+      "title": "Leggings & Joggers",
+      "description": "Comfort meets style. Flexible bottoms ideal for lounging or active days."
+    },
+    "skirts": {
+      "title": "Skirts",
+      "description": "Twirl into style. From playful minis to flowing maxis, add a feminine touch to your look."
+    },
+    "abayas": {
+      "title": "Abayas",
+      "description": "Elegance and modesty combined. Intricate details and flowing silhouettes for specialized fashion."
+    },
+    "evening": {
+      "title": "Evening Wear",
+      "description": "Shine bright at your next special event. Glamorous sequins, luxurious fabrics, and stunning cuts."
+    },
+    "beachwear": {
+      "title": "Beachwear & Swimwear",
+      "description": "Make a splash. Flattering bikinis, one-pieces, and chic cover-ups for sun, sand, and sea."
+    },
+    "accessories": {
+      "title": "Accessories",
+      "description": "It's all in the details. Complete your outfit with fashionable scarves, cozy socks, and more."
+    }
+  },
+  "about": {
+    "title": "About ExtraChic",
+    "welcome": "ExtraChic is more than just a fashion retailer; we are a destination for women who value quality, variety, and style. We offer specialized collections ranging from lingerie and sportswear to modest fashion and evening wear.",
+    "history": "Founded with the mission to cater to every aspect of a woman's wardrobe, we believe that every woman deserves to feel beautiful and confident. Our team is dedicated to sourcing the finest materials and latest trends.",
+    "whyChooseUsTitle": "Why Choose Us?",
+    "reasons": {
+      "diverse": "Diverse Selection: One-stop shop for everything from pajamas to party dresses.",
+      "quality": "Quality Assurance: We prioritize high-quality fabrics and durable craftsmanship.",
+      "trends": "Trendsetting Styles: Collections constantly updated with global trends.",
+      "sizing": "Inclusive Sizing: Fashion for every body type.",
+      "secure": "Secure & Easy Shopping: Fast shipping and easy returns."
+    }
+  },
+  "seo": {
+    "defaultTitle": "ExtraChic | Women's Fashion, Lingerie, Homewear & Accessories",
+    "defaultDescription": "Shop the latest trends at ExtraChic. Discover lingerie, homewear, casual wear, dresses, and more. Elevate your style with quality fashion for every occasion.",
+    "defaultKeywords": "women's fashion, online clothing, lingerie, homewear, casual wear, dresses, sportswear, pajamas, abayas, swimwear"
+  },
   "products": {
     "title": "All Products",
     "showing": "Showing",
     "of": "of",
     "productsCount": "products",
+
     "filters": "Filters",
     "clearAll": "Clear All",
     "categories": "Categories",
@@ -63,49 +160,30 @@
     "onlyLeftInStock": "Only {count} left in stock",
     "discount": "Discount",
     "category": "Category",
-    "subCategory": "Sub Category",
+    "subCategory": "Sub-Category",
     "relatedProducts": "Related Products",
     "productNotFound": "Product Not Found",
-    "productNotFoundMessage": "The product you're looking for doesn't exist.",
+    "productNotFoundMessage": "The product you are looking for does not exist.",
     "browseAllProducts": "Browse All Products",
     "loadingProduct": "Loading product...",
     "color": "Color",
     "size": "Size",
     "freeShipping": "Free Shipping",
     "easyReturns": "Easy Returns",
-    "warranty": "2 Year Warranty",
-    "lingerieNoReturn": "Lingerie is non-returnable — we apologize. For hygiene reasons, lingerie items are not eligible for return or exchange. If you receive a defective item, please contact us within 7 days with a clear photo of the issue.",
+    "warranty": "2-Year Warranty",
+    "lingerieNoReturn": "Lingerie items are non-returnable due to hygiene reasons. Contact us for defects.",
     "features": "Features:",
-    "premiumFabric": "Premium fabric construction",
-    "modernDesign": "Modern, versatile design",
-    "comfortableFit": "Comfortable fit for all-day wear",
-    "easyCare": "Easy care and maintenance",
-    "multipleSizes": "Available in multiple sizes and colors",
+    "premiumFabric": "Premium Fabric Construction",
+    "modernDesign": "Modern & Versatile Design",
+    "comfortableFit": "Comfortable Fit All Day",
+    "easyCare": "Easy Care & Maintenance",
+    "multipleSizes": "Available in Multiple Sizes & Colors",
     "customerReviews": "Customer Reviews",
     "verified": "Verified",
     "rating": "Rating",
     "review": "Review",
-    "shareThoughts": "Share your thoughts about this product..."
-  },
-  "cart": {
-    "title": "Shopping Cart",
-    "empty": "Your cart is empty",
-    "emptyMessage": "Add some products to get started",
-    "continueShopping": "Continue Shopping",
-    "item": "Item",
-    "price": "Price",
-    "quantity": "Quantity",
-    "total": "Total",
-    "subtotal": "Subtotal",
-    "shipping": "Shipping",
-    "orderTotal": "Order Total",
-    "proceedToCheckout": "Proceed to Checkout",
-    "remove": "Remove",
-    "update": "Update",
-    "loadingCart": "Loading cart...",
-    "orderSummary": "Order Summary",
-    "items": "items",
-    "clearCart": "Clear Cart"
+    "shareThoughts": "Share your thoughts about this product...",
+    "defaultDescription": "This premium {{title}} combines style and comfort for the modern wardrobe. Crafted from high-quality materials, it features a contemporary design that transitions seamlessly from casual to formal settings. The attention to detail and superior construction ensure lasting durability and timeless appeal."
   },
   "favorites": {
     "title": "My Favorites",
@@ -333,11 +411,7 @@
     "lingerieExceptionTitle": "Exception: Lingerie items",
     "lingerieExceptionDesc": "To protect health and safety, all lingerie items are non-returnable and non-exchangeable. If you receive a product with a manufacturing defect, contact us within 7 days of delivery with photos of the defect and our support team will review the case."
   },
-  "about": {
-    "title": "About Us",
-    "welcome": "Welcome to Extrachic! We are dedicated to providing the best fashion products to our customers. Our mission is to bring style and comfort to your wardrobe.",
-    "history": "Founded in 2018, we have been serving customers with high-quality clothing and accessories. We work directly with producers to ensure fair practices and premium quality."
-  },
+
   "terms": {
     "title": "Terms of Service",
     "intro": "Please read these terms and conditions carefully before using our service.",

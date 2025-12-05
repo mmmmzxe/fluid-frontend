@@ -190,7 +190,7 @@ export default function Products() {
 
           <div className="flex items-center gap-4">
             {/* View Mode Toggle */}
-            <div className="flex border border-border rounded-lg p-1">
+            <div className="hidden md:flex border border-border rounded-lg p-1">
               <Button
                 variant={viewMode === "grid" ? "default" : "ghost"}
                 size="sm"

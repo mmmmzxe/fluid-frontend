@@ -93,7 +93,7 @@ export default function ProductDetail() {
     return keys.length > 0 ? String(s[keys[0]]) : 'M';
   }).filter(Boolean).map(String);
 
-  const isOnSale = product.discount && product.discount > 0;
+  const isOnSale = Boolean(product.discount && product.discount > 0);
   const discountPercentage = isOnSale ? product.discount : 0;
 
   const handleAddToCart = async () => {
@@ -242,7 +242,7 @@ export default function ProductDetail() {
                 {product.createdAt && new Date(product.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) && (
                   <Badge variant="secondary" className="bg-navy text-white">{t('products.newArrivals')}</Badge>
                 )}
-                {isOnSale && (
+                {isOnSale && discountPercentage > 0 && (
                   <Badge variant="destructive" className="bg-primary text-white">
                     -{discountPercentage}% {t('productDetail.discount')}
                   </Badge>
@@ -266,7 +266,7 @@ export default function ProductDetail() {
                   ))}
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  4.5 (12 reviews)
+                  4.5 (12 {t('productDetail.reviews').toLowerCase()})
                 </span>
               </div>
             </div>
@@ -338,27 +338,65 @@ export default function ProductDetail() {
                 <div className="flex items-center border border-border rounded-lg">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-2 hover:bg-gray-light"
+                    className="p-2 hover:bg-gray-light disabled:opacity-50"
+                    disabled={!selectedSize}
                   >
                     <Minus className="h-4 w-4" />
                   </button>
                   <span className="px-4 py-2 border-x border-border">{quantity}</span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="p-2 hover:bg-gray-light"
+                    className="p-2 hover:bg-gray-light disabled:opacity-50"
+                    disabled={!selectedSize}
                   >
                     <Plus className="h-4 w-4" />
                   </button>
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  {product.stock ? t('productDetail.onlyLeftInStock').replace('{count}', product.stock.toString()) : t('productDetail.inStock')}
+                <span className={cn("text-sm", 
+                  (() => {
+                    if (!selectedSize) return "text-muted-foreground";
+                    const selectedSizeObj = selectedVariant?.size?.find(s => {
+                      if (s.size) return s.size === selectedSize;
+                      const keys = Object.keys(s).filter(key => key !== 'stock' && key !== '_id');
+                      return keys.length > 0 && String(s[keys[0]]) === selectedSize;
+                    });
+                    const stock = selectedSizeObj?.stock || 0;
+                    return stock > 0 ? "text-green-600 font-medium" : "text-red-600 font-medium";
+                  })()
+                )}>
+                  {(() => {
+                    if (!selectedSize) return t('productDetail.selectSize');
+                    const selectedSizeObj = selectedVariant?.size?.find(s => {
+                      if (s.size) return s.size === selectedSize;
+                      const keys = Object.keys(s).filter(key => key !== 'stock' && key !== '_id');
+                      return keys.length > 0 && String(s[keys[0]]) === selectedSize;
+                    });
+                    const stock = selectedSizeObj?.stock || 0;
+                    if (stock === 0) return t('productDetail.outOfStock');
+                    return stock < 10 && stock > 0
+                      ? t('productDetail.onlyLeftInStock').replace('{count}', stock.toString()) 
+                      : t('productDetail.inStock');
+                  })()}
                 </span>
               </div>
             </div>
 
             {/* Add to Cart */}
             <div className="flex gap-4">
-              <Button size="lg" className="flex-1" onClick={handleAddToCart} disabled={cartLoading}>
+              <Button 
+                size="lg" 
+                className="flex-1" 
+                onClick={handleAddToCart} 
+                disabled={cartLoading || (() => {
+                  if (!selectedSize) return false; // Allow click to show validation
+                  const selectedSizeObj = selectedVariant?.size?.find(s => {
+                    if (s.size) return s.size === selectedSize;
+                    const keys = Object.keys(s).filter(key => key !== 'stock' && key !== '_id');
+                    return keys.length > 0 && String(s[keys[0]]) === selectedSize;
+                  });
+                  return (selectedSizeObj?.stock || 0) === 0;
+                })()}
+              >
                 <ShoppingBag className="h-4 w-4 mr-2" />
                 {cartLoading ? t('productDetail.adding') : t('productDetail.addToCart')}
               </Button>
@@ -420,10 +458,7 @@ export default function ProductDetail() {
             {activeTab === "description" && (
               <div className="prose prose-sm max-w-none">
                 <p className="text-muted-foreground leading-relaxed">
-                  {getProductDescription(product) || `This premium ${getProductTitle(product)} combines style and comfort for the modern wardrobe. 
-                  Crafted from high-quality materials, it features a contemporary design that transitions 
-                  seamlessly from casual to formal settings. The attention to detail and superior 
-                  construction ensure lasting durability and timeless appeal.`}
+                  {getProductDescription(product) || t('productDetail.defaultDescription', { title: getProductTitle(product) })}
                 </p>
 
               </div>

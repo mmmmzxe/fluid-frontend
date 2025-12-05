@@ -111,7 +111,8 @@ const CollectionsHero = () => {
                         alt={`Fashion model ${index + 1}`}
                         className="w-full h-[600px] lg:h-[700px] object-cover transform transition-transform duration-700 group-hover:scale-105"
                         loading={index === 0 ? "eager" : "lazy"}
-                        fetchPriority={index === 0 ? "high" : "auto"}
+                        // @ts-ignore
+                        fetchpriority={index === 0 ? "high" : "auto"}
                       />
                       {/* Gradient Overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--primary))]/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>

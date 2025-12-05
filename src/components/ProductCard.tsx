@@ -34,6 +34,7 @@ export interface Product {
   isNew?: boolean;
   isSale?: boolean;
   colors?: string[];
+  stock?: number;
 }
 
 // API Product interface for backend data
@@ -82,11 +83,20 @@ export const transformApiProduct = (apiProduct: ApiProduct): Product => {
     throw new Error('Invalid product data');
   }
 
-  const isOnSale = apiProduct.discount && apiProduct.discount > 0;
+  const isOnSale = Boolean(apiProduct.discount && apiProduct.discount > 0);
   const originalPrice = isOnSale ? apiProduct.price : undefined;
 
   // Extract colors from variants
   const colors = apiProduct.variants?.map(variant => variant.color) || [];
+
+  // Calculate total stock from variants
+  let totalStock = apiProduct.stock || 0;
+  if (apiProduct.variants && apiProduct.variants.length > 0) {
+    totalStock = apiProduct.variants.reduce((acc, variant) => {
+      const variantStock = variant.size?.reduce((sizeAcc, s) => sizeAcc + (s.stock || 0), 0) || 0;
+      return acc + variantStock;
+    }, 0);
+  }
 
   // Calculate if product is new (created within last 30 days)
   const createdAt = new Date(apiProduct.createdAt);
@@ -107,7 +117,8 @@ export const transformApiProduct = (apiProduct: ApiProduct): Product => {
     reviewCount: Math.floor(Math.random() * 200) + 10, // Mock review count
     isNew: isNew,
     isSale: isOnSale,
-    colors: colors
+    colors: colors,
+    stock: totalStock
   };
 };
 
@@ -224,12 +235,17 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <div className="relative bg-gray-light rounded-lg overflow-hidden">
           {/* Badges */}
           <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
+            {product.stock === 0 && (
+              <Badge variant="destructive" className="bg-gray-500 text-white">
+                {t('productDetail.outOfStock')}
+              </Badge>
+            )}
             {product.isNew && (
               <Badge variant="secondary" className="bg-navy text-white">
                 {t('products.newArrivals').split(' ')[0].toUpperCase()}
               </Badge>
             )}
-            {isOnSale && (
+            {isOnSale && discountPercentage > 0 && (
               <Badge variant="destructive" className="bg-primary text-white">
                 -{discountPercentage}%
               </Badge>
@@ -360,12 +376,14 @@ export function ProductCard({ product, className }: ProductCardProps) {
                     key={idx}
                     onClick={() => {
                       setSelectedColor(v.color);
-                      const firstSize = v.size?.[0];
-                      if (firstSize) {
-                        if (firstSize.size) setSelectedSize(String(firstSize.size));
+                      // Try to find first size with stock > 0, otherwise fallback to first size
+                      const firstAvailableSize = v.size?.find((s: any) => (s.stock || 0) > 0) || v.size?.[0];
+                      
+                      if (firstAvailableSize) {
+                        if (firstAvailableSize.size) setSelectedSize(String(firstAvailableSize.size));
                         else {
-                          const keys = Object.keys(firstSize).filter(k => k !== 'stock' && k !== '_id');
-                          setSelectedSize(keys.length ? String(firstSize[keys[0]]) : "M");
+                          const keys = Object.keys(firstAvailableSize).filter(k => k !== 'stock' && k !== '_id');
+                          setSelectedSize(keys.length ? String(firstAvailableSize[keys[0]]) : "M");
                         }
                       }
                     }}
@@ -391,16 +409,28 @@ export function ProductCard({ product, className }: ProductCardProps) {
                     const keys = Object.keys(s).filter(k => k !== 'stock' && k !== '_id');
                     return keys.length ? String(s[keys[0]]) : 'M';
                   })();
+                  const stock = s.stock || 0;
+                  const isOutOfStock = stock === 0;
+                  
                   return (
                     <button
                       key={i}
-                      onClick={() => setSelectedSize(display)}
+                      disabled={isOutOfStock}
+                      onClick={() => !isOutOfStock && setSelectedSize(display)}
                       className={cn(
-                        "px-3 py-1 rounded border text-sm",
-                        selectedSize === display ? "border-navy" : "border-border hover:border-gray-400"
+                        "px-3 py-1 rounded border text-sm relative overflow-hidden transition-all",
+                        selectedSize === display 
+                          ? "border-navy bg-navy/5" 
+                          : "border-border hover:border-gray-400",
+                        isOutOfStock && "opacity-50 cursor-not-allowed bg-gray-100 hover:border-border"
                       )}
                     >
                       {display}
+                      {isOutOfStock && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                           <div className="w-full h-[1px] bg-gray-400 rotate-45 transform origin-center" />
+                        </div>
+                      )}
                     </button>
                   );
                 })}
