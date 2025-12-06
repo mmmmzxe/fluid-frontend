@@ -209,7 +209,10 @@
     "removeError": "فشل إزالة العنصر",
     "clearSuccess": "تم مسح السلة",
     "clearError": "فشل مسح السلة",
-    "loadError": "تعذر تحميل تفاصيل السلة"
+    "loadError": "تعذر تحميل تفاصيل السلة",
+    "freeShipping": "شحن مجاني",
+    "free": "مجاني",
+    "freeShippingThreshold": "شحن مجاني للطلبات من 2,000 جنيه أو أكثر"
   },
   "favorites": {
     "title": "المفضلة",

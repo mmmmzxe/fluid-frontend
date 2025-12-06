@@ -263,7 +263,8 @@ const Cart = () => {
                   <span>{t('cart.subtotal')} ({finalCart.length} {t('cart.items')})</span>
                   <span>L.E{total.toFixed(2)}</span>
                 </div>
-
+              
+               
                 <div className="border-t pt-2">
                   <div className="flex justify-between font-semibold text-lg">
                     <span>{t('cart.total')}</span>

@@ -480,10 +480,14 @@ export const cartApi = {
     return response.data;
   },
 
-
-
   update: async (data: any): Promise<ApiResponse> => {
     const response = await api.patch('/user/cart', data);
+    return response.data;
+  },
+
+  // Remove specific items from cart using productIds array
+  remove: async (productIds: string[]): Promise<ApiResponse> => {
+    const response = await api.patch('/user/cart', { productIds });
     return response.data;
   },
 

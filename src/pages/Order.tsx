@@ -23,16 +23,16 @@ const OrderPage: React.FC = () => {
   const { fetchProductById } = useProduct();
 
   // Shared fields
-  const [address, setAddress] = useState('nasr city');
-  const [phone, setPhone] = useState('01020692878');
-  const [note, setNote] = useState('order note');
-  const [paymentWay, setPaymentWay] = useState('card');
+  const [address, setAddress] = useState('');
+  const [phone, setPhone] = useState('');
+  const [note, setNote] = useState('');
+  const [paymentWay, setPaymentWay] = useState('cash');
   const [shippingOptions, setShippingOptions] = useState<Shipping[]>([]);
   const [shippingId, setShippingId] = useState<string>('');
   // Guest-only fields
-  const [firstName, setFirstName] = useState('abdullah');
-  const [lastName, setLastName] = useState('mostafa');
-  const [email, setEmail] = useState('abdullahmostafa737@gmail.com');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
   const [discountPercent, setDiscountPercent] = useState<number>(10);
   const [loading, setLoading] = useState(false);
 
@@ -111,6 +111,9 @@ const OrderPage: React.FC = () => {
       let createOrderResponse;
 
       // Step 1: Create the order (for both guests and logged-in users)
+      // Note: shippingId is always required by the API
+      // Free shipping (itemsTotal >= 2000) is handled by the backend
+      
       if (isAuthenticated) {
         const payload = { address, phone, note, paymentWay, shippingId };
         createOrderResponse = await orderApi.create(payload);
@@ -177,7 +180,7 @@ const OrderPage: React.FC = () => {
   const itemsTotal = detailedCart.reduce((sum, it) => sum + ((it.productId?.finalPrice || 0) * (it.quantity || 1)), 0);
   const baseShippingCost = shippingOptions.find(opt => opt._id === shippingId)?.price || 0;
   // Free shipping if order total is 2000 or more
-  const selectedShippingCost = itemsTotal >= 2000 ? 0 : baseShippingCost;
+  const selectedShippingCost = baseShippingCost;
   const finalTotal = itemsTotal + selectedShippingCost;
 
 
@@ -241,7 +244,7 @@ const OrderPage: React.FC = () => {
                   {shippingOptions.length === 0 && <option>{t('order.loadingOptions')}</option>}
                   {shippingOptions.map((opt) => (
                     <option key={opt._id} value={opt._id}>
-                      {opt.government || opt._id} {opt.price ? `- L.E${opt.price}` : ''}
+                      {opt.government || opt._id} 
                     </option>
                   ))}
                 </select>
@@ -293,10 +296,13 @@ const OrderPage: React.FC = () => {
                 <span>{t('cart.subtotal')}</span>
                 <span>L.E{itemsTotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span>{t('cart.shipping')}</span>
-                <span>L.E{selectedShippingCost.toFixed(2)}</span>
-              </div>
+           
+                <div className="flex justify-between text-sm">
+                  <span>{t('cart.shipping')}</span>
+                  <span>L.E{selectedShippingCost.toFixed(2)}</span>
+                </div>
+              
+              
               <div className="flex justify-between font-semibold text-lg">
                 <span>{t('cart.total')}</span>
                 <span>L.E{finalTotal.toFixed(2)}</span>
