@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -98,6 +98,23 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
       })),
     }))
   );
+
+  // Update existingVariants when product prop changes (after refresh)
+  useEffect(() => {
+    if (product?.variants) {
+      setExistingVariants(
+        product.variants.map(v => ({
+          variantId: v._id,
+          color: v.color,
+          sizes: (v.size || []).map(s => ({
+            sizeId: s._id,
+            size: s.size || '',
+            stock: s.stock
+          })),
+        }))
+      );
+    }
+  }, [product?.variants]);
 
   // State for new variants to add (without IDs)
   const [newVariants, setNewVariants] = useState<Array<{
@@ -375,6 +392,125 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
   // Open edit modal for a specific variant size
   const openEditVariantModal = (variantId: string, sizeId: string, color: string, size: string, stock: number) => {
     setEditingVariant({ variantId, sizeId, color, size, stock });
+  };
+
+  // State for adding size to existing variant
+  const [addingSizeToVariant, setAddingSizeToVariant] = useState<{
+    variantId: string;
+    color: string;
+    sizes: Array<{ size: string; stock: string }>;
+  } | null>(null);
+  const [isAddSizeSubmitting, setIsAddSizeSubmitting] = useState(false);
+  const [isDeletingSizeId, setIsDeletingSizeId] = useState<string | null>(null);
+  const [isDeletingVariantId, setIsDeletingVariantId] = useState<string | null>(null);
+
+  // Handle deleting an entire variant from a product
+  const handleDeleteVariant = async (variantId: string) => {
+    if (!product) return;
+
+    setIsDeletingVariantId(variantId);
+    try {
+      await productApi.deleteVariant(product._id, variantId);
+      toast.success('Variant deleted successfully');
+      // Update local state
+      setExistingVariants(prev => prev.filter(v => v.variantId !== variantId));
+      // Refresh product data
+      onRefresh?.();
+    } catch (error) {
+      console.error('Error deleting variant:', error);
+      toast.error('Failed to delete variant');
+    } finally {
+      setIsDeletingVariantId(null);
+    }
+  };
+
+  // Handle deleting a size from an existing variant
+  const handleDeleteSizeOfVariant = async (variantId: string, sizeId: string) => {
+    if (!product) return;
+
+    setIsDeletingSizeId(sizeId);
+    try {
+      await productApi.deleteSizeOfVariant(product._id, variantId, sizeId);
+      toast.success('Size deleted successfully');
+      // Update local state
+      setExistingVariants(prev => prev.map(v => 
+        v.variantId === variantId 
+          ? { ...v, sizes: v.sizes.filter(s => s.sizeId !== sizeId) }
+          : v
+      ));
+      // Refresh product data
+      onRefresh?.();
+    } catch (error) {
+      console.error('Error deleting size:', error);
+      toast.error('Failed to delete size');
+    } finally {
+      setIsDeletingSizeId(null);
+    }
+  };
+
+  // Open modal to add size to existing variant
+  const openAddSizeModal = (variantId: string, color: string) => {
+    setAddingSizeToVariant({
+      variantId,
+      color,
+      sizes: [{ size: '', stock: '' }]
+    });
+  };
+
+  // Add a new size input to the add size modal
+  const addSizeInput = () => {
+    if (!addingSizeToVariant) return;
+    setAddingSizeToVariant({
+      ...addingSizeToVariant,
+      sizes: [...addingSizeToVariant.sizes, { size: '', stock: '' }]
+    });
+  };
+
+  // Update size input in add size modal
+  const updateSizeInput = (index: number, field: 'size' | 'stock', value: string) => {
+    if (!addingSizeToVariant) return;
+    setAddingSizeToVariant({
+      ...addingSizeToVariant,
+      sizes: addingSizeToVariant.sizes.map((s, i) => 
+        i === index ? { ...s, [field]: value } : s
+      )
+    });
+  };
+
+  // Remove size input from add size modal
+  const removeSizeInput = (index: number) => {
+    if (!addingSizeToVariant) return;
+    setAddingSizeToVariant({
+      ...addingSizeToVariant,
+      sizes: addingSizeToVariant.sizes.filter((_, i) => i !== index)
+    });
+  };
+
+  // Handle adding sizes to existing variant via API
+  const handleAddSizeToVariant = async () => {
+    if (!product || !addingSizeToVariant) return;
+
+    const validSizes = addingSizeToVariant.sizes.filter(s => s.size.trim() && s.stock.trim());
+    if (validSizes.length === 0) {
+      toast.error('Please add at least one valid size');
+      return;
+    }
+
+    setIsAddSizeSubmitting(true);
+    try {
+      await productApi.addSizeToVariant(product._id, addingSizeToVariant.variantId, {
+        size: validSizes
+      });
+      toast.success('Sizes added successfully');
+      setAddingSizeToVariant(null);
+      // Refresh product data
+      onRefresh?.();
+    } catch (error) {
+      console.error('Error adding sizes:', error);
+      toast.error('Failed to add sizes');
+    } finally {
+      setIsAddSizeSubmitting(false);
+    }
   };
 
   const _handleSubmit = async (data: ProductFormData) => {
@@ -737,7 +873,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                 {product && existingVariants.length > 0 && (
                   <div className="space-y-4">
                     <h4 className="font-semibold text-sm text-muted-foreground">Existing Variants</h4>
-                    {existingVariants.map((variant, variantIndex) => (
+                    {existingVariants.map((variant) => (
                       <div key={variant.variantId} className="border rounded-lg p-4 space-y-4 bg-muted/30">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -747,6 +883,30 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                             />
                             <span className="font-medium">{variant.color}</span>
                           </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openAddSizeModal(variant.variantId, variant.color)}
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Add Size
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteVariant(variant.variantId)}
+                              disabled={isDeletingVariantId === variant.variantId}
+                            >
+                              {isDeletingVariantId === variant.variantId ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
                         </div>
                         <div className="space-y-2">
                           {variant.sizes.map((size) => (
@@ -755,15 +915,30 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                                 <span className="font-medium">Size: {size.size}</span>
                                 <span className="text-muted-foreground">Stock: {size.stock}</span>
                               </div>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => openEditVariantModal(variant.variantId, size.sizeId, variant.color, size.size, size.stock)}
-                              >
-                                <Edit className="h-4 w-4 mr-1" />
-                                Edit
-                              </Button>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => openEditVariantModal(variant.variantId, size.sizeId, variant.color, size.size, size.stock)}
+                                >
+                                  <Edit className="h-4 w-4 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => handleDeleteSizeOfVariant(variant.variantId, size.sizeId)}
+                                  disabled={isDeletingSizeId === size.sizeId}
+                                >
+                                  {isDeletingSizeId === size.sizeId ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -966,10 +1141,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                   <div className="space-y-4 py-4">
                     <div>
                       <FormLabel>Color</FormLabel>
-                      <Input
+                      <ColorPicker
                         value={editingVariant.color}
-                        onChange={(e) => setEditingVariant({ ...editingVariant, color: e.target.value })}
-                        placeholder="Enter color"
+                        onChange={(color) => setEditingVariant({ ...editingVariant, color })}
+                        placeholder="Choose color"
                       />
                     </div>
                     <div>
@@ -1006,6 +1181,82 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                         </>
                       ) : (
                         'Update Variant'
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
+
+            {/* Add Size to Variant Modal */}
+            {addingSizeToVariant && (
+              <Dialog open={!!addingSizeToVariant} onOpenChange={() => setAddingSizeToVariant(null)}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add Size to Variant</DialogTitle>
+                    <DialogDescription>
+                      Add new sizes to the <span className="font-semibold">{addingSizeToVariant.color}</span> variant.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    {addingSizeToVariant.sizes.map((sizeItem, index) => (
+                      <div key={index} className="flex items-end gap-2">
+                        <div className="flex-1">
+                          <FormLabel>Size</FormLabel>
+                          <Input
+                            value={sizeItem.size}
+                            onChange={(e) => updateSizeInput(index, 'size', e.target.value)}
+                            placeholder="e.g. XL, M, 42"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <FormLabel>Stock</FormLabel>
+                          <Input
+                            type="number"
+                            value={sizeItem.stock}
+                            onChange={(e) => updateSizeInput(index, 'stock', e.target.value)}
+                            placeholder="0"
+                          />
+                        </div>
+                        {addingSizeToVariant.sizes.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => removeSizeInput(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addSizeInput}
+                      className="w-full"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Another Size
+                    </Button>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setAddingSizeToVariant(null)}>
+                      Cancel
+                    </Button>
+                    <Button
+                      className="bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:opacity-90"
+                      onClick={handleAddSizeToVariant}
+                      disabled={isAddSizeSubmitting}
+                    >
+                      {isAddSizeSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Adding...
+                        </>
+                      ) : (
+                        'Add Sizes'
                       )}
                     </Button>
                   </DialogFooter>

@@ -175,7 +175,9 @@ const OrderPage: React.FC = () => {
   };
 
   const itemsTotal = detailedCart.reduce((sum, it) => sum + ((it.productId?.finalPrice || 0) * (it.quantity || 1)), 0);
-  const selectedShippingCost = shippingOptions.find(opt => opt._id === shippingId)?.price || 0;
+  const baseShippingCost = shippingOptions.find(opt => opt._id === shippingId)?.price || 0;
+  // Free shipping if order total is 2000 or more
+  const selectedShippingCost = itemsTotal >= 2000 ? 0 : baseShippingCost;
   const finalTotal = itemsTotal + selectedShippingCost;
 
 

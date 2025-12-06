@@ -383,6 +383,28 @@ export const productApi = {
     return response.data;
   },
 
+  // Delete a variant from a product: DELETE /product/{productId}/deleteVariant/{variantId}
+  deleteVariant: async (productId: string, variantId: string): Promise<ApiResponse<Product>> => {
+    const response = await api.delete(`/product/${productId}/deleteVariant/${variantId}`);
+    return response.data;
+  },
+
+  // Delete a size from a variant: POST /product/deleteSizeOfVariant/{productId}/{variantId}/{sizeId}
+  deleteSizeOfVariant: async (productId: string, variantId: string, sizeId: string): Promise<ApiResponse<Product>> => {
+    const response = await api.post(`/product/deleteSizeOfVariant/${productId}/${variantId}/${sizeId}`);
+    return response.data;
+  },
+
+  // Add size(s) to a variant: POST /product/addSizeToVariant/{productId}/{variantId}
+  addSizeToVariant: async (productId: string, variantId: string, data: { size: Array<{ size: string; stock: string }> }): Promise<ApiResponse<Product>> => {
+    const response = await api.post(`/product/addSizeToVariant/${productId}/${variantId}`, data, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  },
+
   bestSelling: async (): Promise<ApiResponse<Product[]>> => {
     const response = await api.get('/product/best-selling');
     return response.data;
@@ -491,6 +513,16 @@ export const userApi = {
             ? raw
             : [];
     return { message: raw?.message || 'Done', data: list } as ApiResponse<User[]>;
+  },
+
+  getById: async (userId: string): Promise<ApiResponse<User>> => {
+    const response = await api.get(`/user/user-by-id/${userId}`);
+    const raw = response.data as any;
+    // API returns { message: "Done", user: {...} }
+    return { 
+      message: raw?.message || 'Done', 
+      data: raw?.user || raw?.data || raw 
+    } as ApiResponse<User>;
   },
 
   addToFavorites: async (productId: string): Promise<ApiResponse> => {

@@ -39,9 +39,22 @@ const UserManagement: React.FC = () => {
     fetchUsers();
   }, []);
 
-  const handleView = (user: User) => {
-    setSelectedUser(user);
-    setShowDetails(true);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+
+  const handleView = async (user: User) => {
+    setDetailsLoading(true);
+    try {
+      const response = await userApi.getById(user._id);
+      setSelectedUser(response.data || user);
+      setShowDetails(true);
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      // Fallback to the user from the list
+      setSelectedUser(user);
+      setShowDetails(true);
+    } finally {
+      setDetailsLoading(false);
+    }
   };
 
   const getRoleVariant = (role: string): 'success' | 'warning' | 'error' | 'info' | 'purple' => {
