@@ -11,6 +11,7 @@ import { useSignUp } from "@/hooks/useAuth";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import fashionImage from "@/assets/6.webp";
+import { fbPixel } from "@/lib/fbPixel";
 
 const Signup = () => {
   const { t } = useTranslation();
@@ -49,6 +50,13 @@ const Signup = () => {
 
     try {
       await signUp(formData);
+      
+      // Track CompleteRegistration event for Facebook Pixel
+      fbPixel.completeRegistration({
+        content_name: 'Account Registration',
+        status: 'completed',
+      });
+      
       toast.success(t('common.success'));
     } catch (err: any) {
       toast.error(err?.message || t('common.error'));

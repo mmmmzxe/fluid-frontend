@@ -14,6 +14,7 @@ import { useProduct } from '@/hooks/useProduct';
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getProductTitle } from '@/lib/i18nHelpers';
+import { fbPixel } from '@/lib/fbPixel';
 
 const OrderPage: React.FC = () => {
   const { t } = useTranslation();
@@ -94,6 +95,29 @@ const OrderPage: React.FC = () => {
     augmentGuestCart();
   }, [cart, isAuthenticated, fetchProductById]);
 
+  // Track InitiateCheckout event when cart is loaded
+  useEffect(() => {
+    if (detailedCart.length > 0 && !isGuestDetailsLoading) {
+      const contents = detailedCart.map(item => ({
+        id: item.productId?._id || item.productId,
+        quantity: item.quantity || 1,
+      }));
+      
+      const totalValue = detailedCart.reduce(
+        (sum, it) => sum + ((it.productId?.finalPrice || 0) * (it.quantity || 1)),
+        0
+      );
+
+      fbPixel.initiateCheckout({
+        content_ids: contents.map(c => c.id),
+        contents,
+        num_items: detailedCart.length,
+        value: totalValue,
+        currency: 'EGP',
+      });
+    }
+  }, [detailedCart, isGuestDetailsLoading]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,7 +148,21 @@ const OrderPage: React.FC = () => {
 
       // Step 2: Handle based on payment method
       if (paymentWay === 'cash') {
-        toast.success(isAuthenticated ? t('order.createSuccess') : t('order.placeSuccess'));
+        // Track Purchase event for Facebook Pixel
+        const contents = detailedCart.map(item => ({
+          id: item.productId?._id || item.productId,
+          quantity: item.quantity || 1,
+        }));
+        
+        fbPixel.purchase({
+          content_ids: contents.map(c => c.id),
+          contents,
+          value: finalTotal,
+          currency: 'EGP',
+          num_items: detailedCart.length,
+        });
+        
+        toast.success(isAuthenticated ? 'Order created successfully' : 'Order placed successfully');
         navigate('/');
         return;
       }
@@ -160,6 +198,20 @@ const OrderPage: React.FC = () => {
         const paymentUrl = paymentResponse?.data?.url;
 
         if (paymentUrl) {
+          // Track Purchase event for Facebook Pixel (before redirect)
+          const contents = detailedCart.map(item => ({
+            id: item.productId?._id || item.productId,
+            quantity: item.quantity || 1,
+          }));
+          
+          fbPixel.purchase({
+            content_ids: contents.map(c => c.id),
+            contents,
+            value: finalTotal,
+            currency: 'EGP',
+            num_items: detailedCart.length,
+          });
+          
           toast.success(t('order.redirecting'));
           // Use window.location.href for reliable redirection (instead of window.open which may be blocked)
           window.location.href = paymentUrl;

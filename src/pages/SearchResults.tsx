@@ -5,6 +5,7 @@ import { http } from "@/services/http";
 import { Loader2 } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { useTranslation } from "react-i18next";
+import { fbPixel } from "@/lib/fbPixel";
 
 export function SearchResults() {
   const { t } = useTranslation();
@@ -18,7 +19,16 @@ useEffect(() => {
     setLoading(true);
     try {
       const response = await http.get(`/product/all?name=${searchQuery}`);
-      setProducts(Array.isArray(response.data.products) ? response.data.products : []);
+      const productsData = Array.isArray(response.data.products) ? response.data.products : [];
+      setProducts(productsData);
+      
+      // Track Search event for Facebook Pixel
+      if (searchQuery) {
+        fbPixel.search({
+          search_string: searchQuery,
+          content_ids: productsData.map((p: any) => p._id),
+        });
+      }
     } catch (error) {
       console.error("Error fetching search results:", error);
       setProducts([]);

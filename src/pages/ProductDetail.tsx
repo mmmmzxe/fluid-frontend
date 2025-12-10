@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { getProductTitle, getProductDescription } from "@/lib/i18nHelpers";
 import SEO from "@/components/SEO";
 import PageLoader from "@/components/PageLoader";
+import { fbPixel } from "@/lib/fbPixel";
 
 
 
@@ -57,6 +58,15 @@ export default function ProductDetail() {
           }
           const initialMain = productData?.mainImage?.secure_url || "/placeholder.svg";
           setActiveImageUrl(initialMain);
+          
+          // Track ViewContent event for Facebook Pixel
+          fbPixel.viewContent({
+            content_name: getProductTitle(productData),
+            content_ids: [productData._id],
+            content_type: 'product',
+            value: productData.finalPrice,
+            currency: 'EGP',
+          });
         })
         .catch((err) => {
           console.error("Failed to fetch product:", err);
@@ -166,13 +176,21 @@ export default function ProductDetail() {
         await addItemToCart(cartItem);
       }
 
+      
+      // Track AddToCart event for Facebook Pixel
+      fbPixel.addToCart({
+        content_name: getProductTitle(product),
+        content_ids: [product._id],
+        content_type: 'product',
+        value: product.finalPrice * quantity,
+        currency: 'EGP',
+      });
+      
       toast.success(t('productDetail.addToCart'));
     } catch (err: any) {
       toast.error(err?.message || t('common.error'));
     }
-  };
-
-  const productTitle = getProductTitle(product);
+  };  const productTitle = getProductTitle(product);
   const productDescription = getProductDescription(product) || t('productDetail.defaultDescription', { title: productTitle });
   
   // Robust image selection: Main Image -> First Sub Image -> Fallback
@@ -460,6 +478,15 @@ export default function ProductDetail() {
                         // Use shared transformer to ensure consistent data (stock, price, etc.)
                         const productForStore = transformApiProduct(product as any);
                         dispatch(addToFavorites(productForStore));
+                        
+                        // Track AddToWishlist event for Facebook Pixel
+                        fbPixel.addToWishlist({
+                          content_name: getProductTitle(product),
+                          content_ids: [productId],
+                          value: product.finalPrice,
+                          currency: 'USD',
+                        });
+                        
                         toast.success(t('common.addedToFavorites', 'Added to favorites'));
                       }
                       return;
@@ -475,6 +502,15 @@ export default function ProductDetail() {
                         const productForStore = transformApiProduct(product as any);
                         await userApi.addToFavorites(productId);
                         dispatch(addToFavorites(productForStore));
+                        
+                        // Track AddToWishlist event for Facebook Pixel
+                        fbPixel.addToWishlist({
+                          content_name: getProductTitle(product),
+                          content_ids: [productId],
+                          value: product.finalPrice,
+                          currency: 'EGP',
+                        });
+                        
                         toast.success(t('common.addedToFavorites', 'Added to favorites'));
                       }
                    } catch (err: any) {
