@@ -1,13 +1,14 @@
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Provider } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { HelmetProvider } from "react-helmet-async";
 import { store } from "@/store/store";
 import { AppInitializer } from "@/components/AppInitializer";
+import { useEffect } from "react";
+import { fbPixel } from "@/lib/fbPixel";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -42,6 +43,18 @@ import Sitemap from "./pages/Sitemap";
 
 const queryClient = new QueryClient();
 
+// PageView tracker component
+function PageViewTracker() {
+  const location = useLocation();
+  
+  useEffect(() => {
+    // Track PageView on every route change
+    fbPixel.pageView();
+  }, [location.pathname]);
+  
+  return null;
+}
+
 const App = () => (
   <Provider store={store}>
     <QueryClientProvider client={queryClient}>
@@ -49,8 +62,9 @@ const App = () => (
         <TooltipProvider>
           <AppInitializer>
             <Toaster />
-            <Sonner />
+
             <BrowserRouter>
+              <PageViewTracker />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/products" element={<Products />} />
