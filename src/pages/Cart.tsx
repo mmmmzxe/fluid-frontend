@@ -15,7 +15,7 @@ import { getProductTitle } from "@/lib/i18nHelpers";
 const Cart = () => {
   const { t } = useTranslation();
   const { isAuthenticated } = useAppSelector((state) => state.user);
-  const { cart, loading: cartLoadingHook, fetchCart, updateItemQuantity, removeItemFromCart, clearUserCart } = useCart();
+  const { cart, loading: cartLoadingHook, fetchCart, updateItemQuantity, removeItemFromCart, clearUserCart, addItemToCart } = useCart();
   const { fetchProductById } = useProduct();
 
   const [detailedCart, setDetailedCart] = useState([]);
@@ -80,8 +80,9 @@ const Cart = () => {
   }, [cart, isAuthenticated, fetchProductById]);
 
 
-  const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
+  const handleUpdateQuantity = async (itemId: string, newQuantity: number, isIncrement: boolean = false) => {
     if (newQuantity < 0) return;
+    
     try {
       if (!isAuthenticated) {
         // Handle guest cart logic directly with localStorage
@@ -104,8 +105,47 @@ const Cart = () => {
         // Trigger a re-fetch from the hook to update the UI state
         await fetchCart();
       } else {
-        // Handle authenticated user cart logic via the hook
-        await updateItemQuantity(itemId, newQuantity);
+        // Handle authenticated user cart logic
+        if (isIncrement && newQuantity > 0) {
+          // When incrementing, use addItemToCart API with the new total quantity
+          const currentItem = finalCart.find((item: any) => item._id === itemId);
+          if (currentItem) {
+            await addItemToCart({
+              productId: currentItem.productId._id,
+              variantId: currentItem.variantId,
+              sizeId: currentItem.sizeId,
+              quantity: newQuantity, // Send the new total quantity (e.g., 2, 3, 4...)
+              variant: {
+                size: currentItem.variant?.size || '',
+                color: currentItem.variant?.color || '',
+              }
+            });
+            
+            // Always refresh cart after increment
+            await fetchCart();
+          }
+        } else if (newQuantity === 0) {
+          // Remove item when quantity reaches 0
+          await removeItemFromCart(itemId);
+          await fetchCart();
+        } else {
+          // For decrement, use addItemToCart API with the new lower quantity
+          const currentItem = finalCart.find((item: any) => item._id === itemId);
+          if (currentItem) {
+            await addItemToCart({
+              productId: currentItem.productId._id,
+              variantId: currentItem.variantId,
+              sizeId: currentItem.sizeId,
+              quantity: newQuantity, // Send the new total quantity (e.g., 2, 1...)
+              variant: {
+                size: currentItem.variant?.size || '',
+                color: currentItem.variant?.color || '',
+              }
+            });
+            
+            await fetchCart();
+          }
+        }
       }
 
       if (newQuantity === 0) {
@@ -234,7 +274,7 @@ const Cart = () => {
                         variant="outline"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => handleUpdateQuantity(item._id, (item.quantity || 1) - 1)}
+                        onClick={() => handleUpdateQuantity(item._id, (item.quantity || 1) - 1, false)}
                       >
                         <Minus className="h-4 w-4" />
                       </Button>
@@ -243,7 +283,7 @@ const Cart = () => {
                         variant="outline"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => handleUpdateQuantity(item._id, (item.quantity || 1) + 1)}
+                        onClick={() => handleUpdateQuantity(item._id, (item.quantity || 1) + 1, true)}
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
