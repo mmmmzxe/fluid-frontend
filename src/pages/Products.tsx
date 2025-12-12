@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import { getCategoryName } from "@/lib/i18nHelpers";
 import SEO from "@/components/SEO";
 import PageLoader from "@/components/PageLoader";
+import { fbPixel } from "@/lib/fbPixel";
 
 export default function Products() {
   const { t } = useTranslation();
@@ -53,6 +54,17 @@ export default function Products() {
         const res = await productApi.getAllNoCache();
         if (!mounted) return;
         setProducts(res.data || []);
+        
+        // Track ViewContent for browsing products catalog
+        if (res.data && res.data.length > 0) {
+          fbPixel.viewContent({
+            content_name: 'Products Catalog',
+            content_category: 'all_products',
+            content_ids: res.data.slice(0, 10).map((p: Product) => p._id),
+            content_type: 'product',
+            currency: 'EGP',
+          });
+        }
       } catch (e: any) {
         if (!mounted) return;
         setProductsError(e?.message || "Failed to load products");
@@ -71,6 +83,23 @@ export default function Products() {
     }
     return () => { mounted = false; };
   }, []);
+
+  // Track category views from URL parameters
+  useEffect(() => {
+    const categoryParam = searchParams.get("category");
+    if (categoryParam && categories && categories.length > 0 && products && products.length > 0) {
+      const category = categories.find(cat => cat._id === categoryParam);
+      if (category) {
+        const categoryProducts = products.filter(p => p.category === categoryParam);
+        fbPixel.trackCustom('ViewCategory', {
+          content_name: category.name,
+          content_category: category.name,
+          content_ids: categoryProducts.slice(0, 10).map(p => p._id),
+          num_items: categoryProducts.length,
+        });
+      }
+    }
+  }, [searchParams, categories, products]);
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
@@ -143,6 +172,16 @@ export default function Products() {
       // When selecting a category, clear any selected subcategories
       setSelectedCategories(prev => [...prev, categoryId]);
       setSelectedSubCategories([]);
+      
+      // Track category view
+      const category = categories?.find(cat => cat._id === categoryId);
+      if (category) {
+        fbPixel.trackCustom('ViewCategory', {
+          content_name: category.name,
+          content_category: category.name,
+          content_ids: products?.filter(p => p.category === categoryId).slice(0, 10).map(p => p._id) || [],
+        });
+      }
     } else {
       setSelectedCategories(prev => prev.filter(id => id !== categoryId));
     }

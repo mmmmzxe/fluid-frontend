@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import { useProduct } from "@/hooks/useProduct";
 import { useTranslation } from "react-i18next";
 import { getProductTitle } from "@/lib/i18nHelpers";
+import { fbPixel } from "@/lib/fbPixel";
 
 const Cart = () => {
   const { t } = useTranslation();
@@ -79,6 +80,24 @@ const Cart = () => {
     augmentGuestCart();
   }, [cart, isAuthenticated, fetchProductById]);
 
+  // Track ViewCart event when cart has items
+  useEffect(() => {
+    if (detailedCart.length > 0) {
+      const cartValue = detailedCart.reduce((sum, item) => {
+        const price = item.productId?.finalPrice || item.productId?.price || 0;
+        return sum + (price * (item.quantity || 1));
+      }, 0);
+
+      fbPixel.trackCustom('ViewCart', {
+        content_ids: detailedCart.map(item => 
+          typeof item.productId === 'object' ? item.productId._id : item.productId
+        ),
+        num_items: detailedCart.reduce((sum, item) => sum + (item.quantity || 1), 0),
+        value: cartValue,
+        currency: 'EGP',
+      });
+    }
+  }, [detailedCart]);
 
   const handleUpdateQuantity = async (itemId: string, newQuantity: number, isIncrement: boolean = false) => {
     if (newQuantity < 0) return;
@@ -226,7 +245,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen max-h-[100vh] bg-background">
       <Navbar />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

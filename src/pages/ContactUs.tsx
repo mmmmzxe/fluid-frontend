@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
 import { useTranslation } from 'react-i18next';
 import image from '@/assets/6.webp';
+import { fbPixel } from '@/lib/fbPixel';
 
 const ContactUs: React.FC = () => {
   const { t } = useTranslation();
@@ -35,6 +36,13 @@ const ContactUs: React.FC = () => {
     try {
       const payload = { name: nameVal, phone: phoneVal, message: msgVal };
       await supportApi.create(payload as any);
+      
+      // Track lead/contact event
+      fbPixel.lead({
+        content_name: 'Contact Form Submission',
+        content_category: 'support',
+      });
+      
       toast.success('Message sent — we will contact you shortly');
       setName('');
       setPhone('');

@@ -10,7 +10,8 @@ import Footer from "@/components/Footer";
 import { toast } from "react-toastify";
 import { useSignIn } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
-import fashionImage from "@/assets/stylish-girl-sits-chair.jpg"; 
+import fashionImage from "@/assets/stylish-girl-sits-chair.jpg";
+import { fbPixel } from "@/lib/fbPixel"; 
 
 const Login = () => {
   const { t } = useTranslation();
@@ -23,6 +24,13 @@ const Login = () => {
     e.preventDefault();
     try {
       const result = await signIn({ email, password });
+      
+      // Track successful login
+      fbPixel.trackCustom('Login', {
+        method: 'email',
+        user_role: result?.user?.role || 'customer',
+      });
+      
       if (result?.user?.role === 'superAdmin' || result?.user?.role === 'admin') {
         toast.success(t('common.success'));
       } else {

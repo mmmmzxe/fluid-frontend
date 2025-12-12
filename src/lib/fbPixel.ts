@@ -116,6 +116,16 @@ export const fbPixel = {
     }
   },
 
+  // Track contact form submission
+  contact: (data?: {
+    content_name?: string;
+    content_category?: string;
+  }) => {
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('track', 'Contact', data);
+    }
+  },
+
   // Custom event tracking
   trackCustom: (eventName: string, data?: any) => {
     if (typeof window !== 'undefined' && window.fbq) {
