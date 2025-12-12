@@ -12,7 +12,7 @@ export const fbPixel = {
   pageView: () => {
     if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'PageView');
-      window.fbq('trackSingle', '528519375071616', 'PageView');
+      window.fbq('trackSingle', '1528519375071616', 'PageView');
     }
   },
 
@@ -27,7 +27,7 @@ export const fbPixel = {
   }) => {
     if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'ViewContent', data);
-      window.fbq('trackSingle', '528519375071616', 'ViewContent', data);
+      window.fbq('trackSingle', '1528519375071616', 'ViewContent', data);
     }
   },
 
@@ -41,7 +41,7 @@ export const fbPixel = {
   }) => {
     if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'AddToCart', data);
-      window.fbq('trackSingle', '528519375071616', 'AddToCart', data);
+      window.fbq('trackSingle', '1528519375071616', 'AddToCart', data);
     }
   },
 
@@ -55,7 +55,7 @@ export const fbPixel = {
   }) => {
     if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'AddToWishlist', data);
-      window.fbq('trackSingle', '528519375071616', 'AddToWishlist', data);
+      window.fbq('trackSingle', '1528519375071616', 'AddToWishlist', data);
     }
   },
 
@@ -69,7 +69,7 @@ export const fbPixel = {
   }) => {
     if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'InitiateCheckout', data);
-      window.fbq('trackSingle', '528519375071616', 'InitiateCheckout', data);
+      window.fbq('trackSingle', '1528519375071616', 'InitiateCheckout', data);
     }
   },
 
@@ -83,7 +83,7 @@ export const fbPixel = {
   }) => {
     if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'Purchase', data);
-      window.fbq('trackSingle', '528519375071616', 'Purchase', data);
+      window.fbq('trackSingle', '1528519375071616', 'Purchase', data);
     }
   },
 
@@ -95,7 +95,7 @@ export const fbPixel = {
   }) => {
     if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'Search', data);
-      window.fbq('trackSingle', '528519375071616', 'Search', data);
+      window.fbq('trackSingle', '1528519375071616', 'Search', data);
     }
   },
 
@@ -108,7 +108,7 @@ export const fbPixel = {
   }) => {
     if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'CompleteRegistration', data);
-      window.fbq('trackSingle', '528519375071616', 'CompleteRegistration', data);
+      window.fbq('trackSingle', '1528519375071616', 'CompleteRegistration', data);
     }
   },
 
