@@ -1,4 +1,4 @@
-import { FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram } from "react-icons/fa";
+import { FaFacebookF, FaInstagram } from "react-icons/fa";
 import logo from "@/assets/Logo.png";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -17,11 +17,56 @@ export default function Footer() {
           <p className=" text-gray-600 text-sm">
             {t('footer.brandDescription')}
           </p>
-          <div className="flex space-x-4 mt-4 text-gray-600">
-            <a href="#" className="hover:text-gray-900"><FaFacebookF /></a>
-            <a href="#" className="hover:text-gray-900"><FaTwitter /></a>
-            <a href="#" className="hover:text-gray-900"><FaLinkedinIn /></a>
-            <a href="#" className="hover:text-gray-900"><FaInstagram /></a>
+          <div className="mt-6 space-y-3">
+            {/* Kagal Socials */}
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium text-gray-800 min-w-[70px]">Kagal</span>
+              <div className="flex gap-3">
+                <a 
+                  href="https://www.facebook.com/share/1BvAGqvgdN/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-[#1877F2] hover:text-white transition-all duration-300 transform hover:scale-110"
+                  aria-label="Kagal Facebook"
+                >
+                  <FaFacebookF size={14} />
+                </a>
+                <a 
+                  href="https://www.instagram.com/extrachic.eg?igsh=MXR5YTlkazE4NWY3aQ%3D%3D" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-[#E4405F] hover:text-white transition-all duration-300 transform hover:scale-110"
+                  aria-label="Kagal Instagram"
+                >
+                  <FaInstagram size={16} />
+                </a>
+              </div>
+            </div>
+
+            {/* Homeware Socials */}
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium text-gray-800 min-w-[70px]">Homeware</span>
+              <div className="flex gap-3">
+                <a 
+                  href="https://www.facebook.com/share/1ALarwA2N8/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-[#1877F2] hover:text-white transition-all duration-300 transform hover:scale-110"
+                  aria-label="Homeware Facebook"
+                >
+                  <FaFacebookF size={14} />
+                </a>
+                <a 
+                  href="https://www.instagram.com/extrachic__1?igsh=aGRpM2l3d3Jtdnk0" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-[#E4405F] hover:text-white transition-all duration-300 transform hover:scale-110"
+                  aria-label="Homeware Instagram"
+                >
+                  <FaInstagram size={16} />
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 
