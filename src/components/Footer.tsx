@@ -20,7 +20,7 @@ export default function Footer() {
           <div className="mt-6 space-y-3">
             {/* Kagal Socials */}
             <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-gray-800 min-w-[70px]">Kagal</span>
+              <span className="text-sm font-medium text-gray-800 min-w-[70px]">Casual</span>
               <div className="flex gap-3">
                 <a 
                   href="https://www.facebook.com/share/1BvAGqvgdN/" 
