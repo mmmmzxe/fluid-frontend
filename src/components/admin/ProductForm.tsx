@@ -120,7 +120,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
     }))
   );
 
-  // Update existingVariants when product prop changes (after refresh)
+
   useEffect(() => {
     if (product?.variants) {
       setExistingVariants(
