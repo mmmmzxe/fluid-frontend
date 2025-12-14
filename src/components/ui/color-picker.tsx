@@ -132,15 +132,20 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   return (
     <div className="flex gap-2">
       <div className="relative flex-1 group">
-        <div
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border border-white/20 shadow-sm transition-transform group-hover:scale-110"
-          style={{ backgroundColor: value || '#ffffff' }}
-        />
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full overflow-hidden border border-white/20 shadow-sm transition-transform group-hover:scale-105 z-10">
+          <input
+            type="color"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] p-0 border-0 cursor-pointer bg-transparent appearance-none"
+            title="Open system color picker"
+          />
+        </div>
         <Input
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="pl-10 bg-white/50 border-white/20 focus:bg-white focus:ring-purple-500/20 transition-all font-mono text-sm"
+          className="pl-12 bg-white/50 border-white/20 focus:bg-white focus:ring-purple-500/20 transition-all font-mono text-sm"
           disabled={disabled}
         />
       </div>
@@ -187,18 +192,25 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 
             {/* Custom Color Input */}
             <div className="pt-2 border-t border-white/10 space-y-3">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Custom Hex</label>
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Custom Hex & Picker</label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <div
-                    className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-white/20"
-                    style={{ backgroundColor: /^#[0-9A-F]{6}$/i.test(customColor) ? customColor : 'transparent' }}
-                  />
+                  <div className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border border-white/20 overflow-hidden">
+                    <input
+                      type="color"
+                      value={customColor || value || '#000000'}
+                      onChange={(e) => {
+                         setCustomColor(e.target.value);
+                         onChange(e.target.value);
+                      }}
+                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] p-0 border-0 cursor-pointer bg-transparent appearance-none"
+                    />
+                  </div>
                   <Input
                     value={customColor}
                     onChange={(e) => setCustomColor(e.target.value)}
                     placeholder="#000000"
-                    className="pl-7 h-8 text-xs font-mono bg-white/50 border-white/20 focus:bg-white"
+                    className="pl-10 h-9 text-xs font-mono bg-white/50 border-white/20 focus:bg-white"
                   />
                 </div>
                 <Button
@@ -206,9 +218,9 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
                   size="sm"
                   onClick={handleCustomColorSubmit}
                   disabled={!customColor || !/^#[0-9A-F]{6}$/i.test(customColor)}
-                  className="h-8 px-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90 border-0"
+                  className="h-9 px-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90 border-0"
                 >
-                  Add
+                  Set
                 </Button>
               </div>
             </div>
@@ -232,5 +244,6 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
         </PopoverContent>
       </Popover>
     </div>
+    
   );
 };

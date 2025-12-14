@@ -565,6 +565,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
     activeSubImages.forEach((img) => {
       if (img.type === 'new' && img.file) {
         formData.append('subImages', img.file);
+      } else if (img.type === 'existing') {
+        // Send existing subImages as JSON strings so the backend receives them in the body
+        // This helps prevent overwriting with an empty array if the backend expects the full list
+        formData.append('subImages', JSON.stringify({
+          public_id: img.publicId,
+          secure_url: img.url,
+          _id: img.id
+        }));
       }
     });
 
