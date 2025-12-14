@@ -20,6 +20,12 @@
       "subtitle": "Where Art Meets Fashion",
       "description": "Discover our exclusive collection of artist-designed apparel that pushes the boundaries of conventional fashion.",
       "explore": "Explore Gallery"
+    },
+    "stats": {
+      "products": "Products",
+      "rating": "Rating",
+      "new": "New",
+      "arrivals": "Arrivals"
     }
   },
   "categories": {
@@ -101,8 +107,16 @@
     }
   },
   "about": {
-    "title": "About ExtraChic",
-    "welcome": "ExtraChic is more than just a fashion retailer; we are a destination for women who value quality, variety, and style. We offer specialized collections ranging from lingerie and sportswear to modest fashion and evening wear.",
+    "title": "About Us",
+    "welcome": "Extra Chic has been around since 2018. We have 5 branches in El Shorouk City.",
+    "locationsTitle": "Our Locations",
+    "locations": {
+      "valueMall": "Value Mall",
+      "valueMallAddress": "In front of Dar Misr Compound (Southern Gate), El Shorouk City",
+      "alibabaMall": "Ali Baba Mall",
+      "alibabaMallAddress": "Gamal Abdel Nasser St., El Shorouk City",
+      "soon": "And soon everywhere in Egypt"
+    },
     "history": "Founded with the mission to cater to every aspect of a woman's wardrobe, we believe that every woman deserves to feel beautiful and confident. Our team is dedicated to sourcing the finest materials and latest trends.",
     "whyChooseUsTitle": "Why Choose Us?",
     "reasons": {

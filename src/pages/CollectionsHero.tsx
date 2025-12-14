@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { useNavigate } from "react-router-dom";
 
 import image2 from "@/assets/bohemian-woman-elegant-home-wear-reading-book-stylish-living-room.webp";
 import image3 from "@/assets/excited-barefoot-woman-pajama-holding-cup-coffee-full-length-view-joyful-woman-drinking-tea-smiling-home.webp";
@@ -16,6 +17,7 @@ const images = [image6, image5, image2, image3, image4];
 
 const CollectionsHero = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const sliderSettings = {
     dots: true,
     infinite: true,
@@ -65,17 +67,17 @@ const CollectionsHero = () => {
               <div className="group p-4 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-sm border border-[hsl(var(--border))] hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-300 hover:scale-105 hover:shadow-[var(--shadow-elegant)]">
                 <TrendingUp className="w-6 h-6 text-[hsl(var(--primary))] dark:text-[hsl(var(--coral-warm))] mb-2 group-hover:rotate-12 transition-transform" />
                 <div className="text-2xl font-bold text-[hsl(var(--foreground))]">500+</div>
-                <div className="text-xs text-[hsl(var(--muted-foreground))]">Products</div>
+                <div className="text-xs text-[hsl(var(--muted-foreground))]">{t('home.stats.products')}</div>
               </div>
               <div className="group p-4 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-sm border border-[hsl(var(--border))] hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-300 hover:scale-105 hover:shadow-[var(--shadow-elegant)]">
                 <Star className="w-6 h-6 text-[hsl(var(--secondary))] dark:text-[hsl(var(--coral-beige))] mb-2 group-hover:rotate-12 transition-transform" />
                 <div className="text-2xl font-bold text-[hsl(var(--foreground))]">4.9</div>
-                <div className="text-xs text-[hsl(var(--muted-foreground))]">Rating</div>
+                <div className="text-xs text-[hsl(var(--muted-foreground))]">{t('home.stats.rating')}</div>
               </div>
               <div className="group p-4 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-sm border border-[hsl(var(--border))] hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-300 hover:scale-105 hover:shadow-[var(--shadow-elegant)]">
                 <Sparkles className="w-6 h-6 text-[hsl(var(--coral-warm))] dark:text-[hsl(var(--secondary))] mb-2 group-hover:rotate-12 transition-transform" />
-                <div className="text-2xl font-bold text-[hsl(var(--foreground))]">New</div>
-                <div className="text-xs text-[hsl(var(--muted-foreground))]">Arrivals</div>
+                <div className="text-2xl font-bold text-[hsl(var(--foreground))]">{t('home.stats.new')}</div>
+                <div className="text-xs text-[hsl(var(--muted-foreground))]">{t('home.stats.arrivals')}</div>
               </div>
             </div>
 
@@ -83,6 +85,7 @@ const CollectionsHero = () => {
             <div className="pt-4">
               <Button
                 size="lg"
+                onClick={() => navigate('/products')}
                 className="group relative overflow-hidden rounded-full px-10 py-7 text-lg font-semibold  hover:from-[hsl(var(--primary))]/90 hover:via-[hsl(var(--secondary))]/90 hover:to-[hsl(var(--coral-warm))]/90 text-white shadow-[var(--shadow-elegant)] hover:shadow-2xl transition-all duration-300 hover:scale-105 border-0"
               >
                 <span className="relative z-10 flex items-center gap-3">
