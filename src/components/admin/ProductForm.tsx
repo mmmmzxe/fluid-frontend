@@ -74,13 +74,34 @@ interface ProductFormProps {
 
 const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose, onSubmit: onSubmitProp, onRefresh }) => {
   const [mainImageFile, setMainImageFile] = useState<File | null>(null);
-  const [subImageFiles, setSubImageFiles] = useState<File[]>([]);
+  // State for sub images (both existing and new)
   const [mainImagePreview, setMainImagePreview] = useState<string | null>(
     product?.mainImage?.secure_url || null
   );
-  const [subImagePreviews, setSubImagePreviews] = useState<string[]>(
-    product?.subImages?.map(img => img.secure_url) || []
-  );
+
+  const [activeSubImages, setActiveSubImages] = useState<Array<{
+    type: 'existing' | 'new';
+    id: string;
+    url: string;
+    file?: File; // only for new
+    publicId?: string; // only for existing
+  }>>([]);
+  
+  const [deletedSubImages, setDeletedSubImages] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (product?.subImages) {
+      setActiveSubImages(product.subImages.map((img: any) => ({
+        type: 'existing',
+        id: img._id || img.public_id,
+        url: img.secure_url,
+        publicId: img.public_id
+      })));
+    } else {
+      setActiveSubImages([]);
+    }
+    setDeletedSubImages([]);
+  }, [product]);
 
   // State for editing existing variants (with IDs from API)
   const [existingVariants, setExistingVariants] = useState<Array<{
@@ -217,19 +238,25 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
           files.map(file => compressImage(file))
         );
 
-        setSubImageFiles(prev => [...prev, ...compressedFiles]);
-
-        const newPreviews = await Promise.all(
-          compressedFiles.map(file => new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(file);
-          }))
+        const newImages = await Promise.all(
+          compressedFiles.map(async (file) => {
+            const url = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(file);
+            });
+            return {
+              type: 'new' as const,
+              id: Math.random().toString(36).substr(2, 9),
+              url,
+              file
+            };
+          })
         );
-        setSubImagePreviews(prev => [...prev, ...newPreviews]);
+
+        setActiveSubImages(prev => [...prev, ...newImages]);
       } catch (error) {
         console.error('Error compressing images:', error);
-        // Fallback logic could be added here
       } finally {
         setIsCompressing(false);
       }
@@ -245,8 +272,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
   };
 
   const removeSubImage = (index: number) => {
-    setSubImageFiles(prev => prev.filter((_, i) => i !== index));
-    setSubImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setActiveSubImages(prev => {
+      const imgToRemove = prev[index];
+      if (imgToRemove.type === 'existing' && imgToRemove.publicId) {
+        setDeletedSubImages(d => [...d, imgToRemove.publicId!]);
+      }
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const addVariant = () => {
@@ -530,9 +562,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
       formData.append('mainImage', mainImageFile);
     }
 
-    subImageFiles.forEach((file, index) => {
-      formData.append('subImages', file);
+    activeSubImages.forEach((img) => {
+      if (img.type === 'new' && img.file) {
+        formData.append('subImages', img.file);
+      }
     });
+
+    if (deletedSubImages.length > 0) {
+      formData.append('deletedSubImages', JSON.stringify(deletedSubImages));
+    }
 
     if (variants.length > 0) {
       formData.append('variants', JSON.stringify(variants));
@@ -830,12 +868,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
                       </div>
                     </label>
                   </div>
-                  {subImagePreviews.length > 0 && (
+                  {activeSubImages.length > 0 && (
                     <div className="grid grid-cols-4 gap-2 mt-4">
-                      {subImagePreviews.map((preview, index) => (
-                        <div key={index} className="relative">
+                      {activeSubImages.map((img, index) => (
+                        <div key={img.id} className="relative">
                           <img
-                            src={preview}
+                            src={img.url}
                             alt={`Preview ${index + 1}`}
                             className="w-full h-20 object-cover rounded-lg"
                           />
