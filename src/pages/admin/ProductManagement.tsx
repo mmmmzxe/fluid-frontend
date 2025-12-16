@@ -123,6 +123,7 @@ const ProductManagement: React.FC = () => {
     setViewingProduct(product);
     setShowDetails(true);
   };
+  
 
   const filteredProducts = products.filter(product => {
     const titleEnglish = product.titleEnglish || '';
