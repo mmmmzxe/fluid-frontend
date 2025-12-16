@@ -131,17 +131,12 @@ const Index = () => {
           </motion.div>
         </div>
       </motion.section>
-
-      <CreativeShowcase />
+     <TextVideoSection />
+    
       <ExploreStyles />
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: false, amount: 0.3 }}
-        transition={{ duration: 0.8 }}
-      >
-        <TextVideoSection />
-      </motion.div>
+
+   
+  
       {/* Featured Products */}
       <motion.section
         className="py-16 bg-gray-light"
@@ -192,79 +187,8 @@ const Index = () => {
         </div>
       </motion.section>
 
-
-      {/* ZARA-style Hero Section */}
-      <motion.section
-        className="relative h-[80vh] text-white"
-        style={{
-          backgroundImage: `url('${brandBanner}')`,
-          backgroundSize: "cover",
-          backgroundPosition: "left center",
-        }}
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: false, amount: 0.3 }}
-        variants={fadeInUp}
-      >
-        {/* Dark overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-black/60 to-black/50"></div>
-
-        <div className="relative max-w-7xl mx-auto h-full flex items-center px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 w-full">
-            {/* Left side (kept empty for image alignment) */}
-            <div></div>
-
-            {/* Right side text content */}
-            <motion.div
-              className="relative z-10 flex flex-col justify-center space-y-6"
-              variants={fadeInRight}
-            >
-              {/* Big faded ZARA in background */}
-              <motion.h1
-                className="absolute -top-16 -right-10 text-[8rem] lg:text-[12rem] font-bold text-white/10 leading-none z-0 select-none"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 0.1, scale: 1 }}
-                transition={{ duration: 1, delay: 0.5 }}
-              >
-                EXTRACHIC
-              </motion.h1>
-
-              {/* Foreground small ZARA */}
-              <motion.h2
-                className="text-3xl lg:text-4xl font-bold"
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-              >
-                {t('home.brandHeading')}
-              </motion.h2>
-
-              {/* Description */}
-              <motion.p
-                className="text-base lg:text-lg text-gray-300 max-w-md leading-relaxed"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-              >
-                {t('home.exploreDiverseCollections')}
-              </motion.p>
-
-              {/* Button */}
-              <motion.button
-                className="px-6 py-3 w-fit border border-white text-white font-medium hover:bg-white hover:text-black transition"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-                whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-
-                whileTap={{ scale: 0.95 }}
-              >
-                {t('home.seeCollection')}
-              </motion.button>
-            </motion.div>
-          </div>
-        </div>
-      </motion.section>
+  <CreativeShowcase />
+ 
 
 
 
