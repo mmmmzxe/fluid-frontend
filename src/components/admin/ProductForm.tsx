@@ -555,19 +555,50 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
       formData.append('mainImage', mainImageFile);
     }
 
-    activeSubImages.forEach((img) => {
+    // Calculate deleted sub images
+    if (product?.subImages) {
+      const currentPublicIds = activeSubImages
+        .filter(img => img.type === 'existing')
+        .map(img => img.publicId);
+      
+      const deletedSubImages = product.subImages
+        .filter((img: any) => img.public_id && !currentPublicIds.includes(img.public_id))
+        .map((img: any) => img.public_id);
+
+      if (deletedSubImages.length > 0) {
+        formData.append('deletedSubImages', JSON.stringify(deletedSubImages));
+      }
+    }
+
+    // Helper to convert URL to File
+    const urlToFile = async (url: string, filename: string, mimeType: string): Promise<File> => {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return new File([blob], filename, { type: mimeType });
+    };
+
+    // Process all images (new and existing) and append as files
+    await Promise.all(activeSubImages.map(async (img, index) => {
       if (img.type === 'new' && img.file) {
         formData.append('subImages', img.file);
       } else if (img.type === 'existing') {
-        // Send existing subImages as JSON strings so the backend receives them in the body
-        // This helps prevent overwriting with an empty array if the backend expects the full list
-        formData.append('subImages', JSON.stringify({
-          public_id: img.publicId,
-          secure_url: img.url,
-          _id: img.id
-        }));
+        try {
+          // fetch and convert existing image to file
+          const ext = img.url.split('.').pop()?.split('?')[0] || 'jpg';
+          const mimeType = `image/${ext === 'png' ? 'png' : 'jpeg'}`;
+          const filename = `existing-${index}.${ext}`;
+          
+          const file = await urlToFile(img.url, filename, mimeType);
+          formData.append('subImages', file);
+          
+          // We can also send the original public_id if needed by backend to know it's a re-upload,
+          // but usually resending as file is enough for "replace list" logic.
+        } catch (error) {
+          console.error('Error processing existing image:', error);
+          toast.error('Failed to process some existing images');
+        }
       }
-    });
+    }));
 
 
 

@@ -95,7 +95,9 @@ const Index = () => {
         <CollectionsHero />
       </motion.div>
 
-      {/* Brand Logos */}
+ 
+     <TextVideoSection />
+         {/* Brand Logos */}
       <motion.section
         className="py-16 bg-background"
         initial="initial"
@@ -131,8 +133,6 @@ const Index = () => {
           </motion.div>
         </div>
       </motion.section>
-     <TextVideoSection />
-    
       <ExploreStyles />
 
    
