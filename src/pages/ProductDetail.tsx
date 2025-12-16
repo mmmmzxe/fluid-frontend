@@ -259,9 +259,9 @@ export default function ProductDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Product Images */}
           <div className="lg:col-span-2">
-            <div className="grid grid-cols-5 gap-4">
+            <div className="flex flex-col gap-4">
               {/* Big Image */}
-              <div className="col-span-4 aspect-square bg-gray-light rounded-lg overflow-hidden">
+              <div className="aspect-square bg-gray-light rounded-lg overflow-hidden">
                 <img
                   src={activeImageUrl || product.mainImage?.secure_url || '/placeholder.svg'}
                   alt={getProductTitle(product)}
@@ -272,8 +272,8 @@ export default function ProductDetail() {
                 />
               </div>
               {/* Thumbnails */}
-              <div className="col-span-1 flex flex-col gap-4">
-                {allImages.slice(0, 6).map((image, index) => {
+              <div className="grid grid-cols-4 gap-4">
+                {allImages.map((image, index) => {
                   const isActive = (activeImageUrl || product.mainImage?.secure_url || '/placeholder.svg') === image.secure_url;
                   return (
                     <div

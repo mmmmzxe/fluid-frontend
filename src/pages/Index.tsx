@@ -133,10 +133,7 @@ const Index = () => {
           </motion.div>
         </div>
       </motion.section>
-      <ExploreStyles />
-
-   
-  
+        
       {/* Featured Products */}
       <motion.section
         className="py-16 bg-gray-light"
@@ -186,6 +183,10 @@ const Index = () => {
           </motion.div>
         </div>
       </motion.section>
+      <ExploreStyles />
+
+   
+
 
   <CreativeShowcase />
  
