@@ -586,7 +586,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
           // fetch and convert existing image to file
           const ext = img.url.split('.').pop()?.split('?')[0] || 'jpg';
           const mimeType = `image/${ext === 'png' ? 'png' : 'jpeg'}`;
-          const filename = `existing-${index}.${ext}`;
+          // Backend seems to append extension automatically, so we remove it from filename
+          // to prevent .jpg.jpg
+          const filename = `existing-${index}`;
           
           const file = await urlToFile(img.url, filename, mimeType);
           formData.append('subImages', file);
