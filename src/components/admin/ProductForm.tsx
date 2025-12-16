@@ -87,7 +87,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
     publicId?: string; // only for existing
   }>>([]);
   
-  const [deletedSubImages, setDeletedSubImages] = useState<string[]>([]);
+
 
   useEffect(() => {
     if (product?.subImages) {
@@ -100,7 +100,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
     } else {
       setActiveSubImages([]);
     }
-    setDeletedSubImages([]);
   }, [product]);
 
   // State for editing existing variants (with IDs from API)
@@ -272,13 +271,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
   };
 
   const removeSubImage = (index: number) => {
-    setActiveSubImages(prev => {
-      const imgToRemove = prev[index];
-      if (imgToRemove.type === 'existing' && imgToRemove.publicId) {
-        setDeletedSubImages(d => [...d, imgToRemove.publicId!]);
-      }
-      return prev.filter((_, i) => i !== index);
-    });
+    setActiveSubImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const addVariant = () => {
@@ -576,9 +569,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
       }
     });
 
-    if (deletedSubImages.length > 0) {
-      formData.append('deletedSubImages', JSON.stringify(deletedSubImages));
-    }
+
 
     if (variants.length > 0) {
       formData.append('variants', JSON.stringify(variants));
