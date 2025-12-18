@@ -265,7 +265,7 @@ export default function ProductDetail() {
                 <img
                   src={activeImageUrl || product.mainImage?.secure_url || '/placeholder.svg'}
                   alt={getProductTitle(product)}
-                  className="w-full h-1/2 object-contain"
+                  className="w-full h-1/2 object-cover"
                   loading="eager"
                   // @ts-ignore
                   fetchpriority="high"
