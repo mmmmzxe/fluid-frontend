@@ -280,7 +280,7 @@ const OrderPage: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium mb-1">{t('order.paymentMethod')}</label>
                 <select value={paymentWay} onChange={(e) => setPaymentWay(e.target.value)} className="w-full border rounded-md p-2 bg-background">
-                  
+                  <option value="card">{t('order.card')}</option>
                   <option value="cash">{t('order.cash')}</option>
                 </select>
               </div>
