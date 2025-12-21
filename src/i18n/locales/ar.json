@@ -28,6 +28,16 @@
       "arrivals": "حديثاً"
     }
   },
+  "showcase": {
+    "title": "الإبداع",
+    "vision": "والرؤية",
+    "artisticCollection": "مجموعة فنية",
+    "artisticDescription": "حيث كل غرزة تحكي قصة.",
+    "fabricInnovation": "ابتكار الأقمشة",
+    "fabricDescription": "رفاهية مستدامة.",
+    "futureTrends": "صيحات المستقبل",
+    "futureTrendsDescription": "نحدد الموسم القادم."
+  },
   "categories": {
     "lingerie": {
       "title": "لانجري",

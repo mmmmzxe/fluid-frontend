@@ -1,8 +1,10 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { ArrowUpRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const CreativeShowcase = () => {
+    const { t } = useTranslation();
     const containerRef = useRef(null);
     const { scrollYProgress } = useScroll({
         target: containerRef,
@@ -36,9 +38,9 @@ const CreativeShowcase = () => {
                     className="flex justify-between items-end mb-20"
                 >
                     <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-foreground to-foreground/50">
-                        CREATIVE
+                        {t('showcase.title')}
                         <br />
-                        VISION
+                        {t('showcase.vision')}
                     </h2>
                     <motion.div
                         whileHover={{ scale: 1.1, rotate: 45 }}
@@ -66,9 +68,9 @@ const CreativeShowcase = () => {
                         />
                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500" />
                         <div className="absolute bottom-0 left-0 p-8 w-full bg-gradient-to-t from-black/80 to-transparent">
-                            <p className="text-white text-3xl font-bold">Artistic Collection</p>
+                            <p className="text-white text-3xl font-bold">{t('showcase.artisticCollection')}</p>
                             <p className="text-white/80 mt-2 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                                Where every stitch tells a story.
+                                {t('showcase.artisticDescription')}
                             </p>
                         </div>
                     </motion.div>
@@ -88,9 +90,9 @@ const CreativeShowcase = () => {
                         />
                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500" />
                         <div className="absolute bottom-0 left-0 p-8 w-full bg-gradient-to-t from-black/80 to-transparent">
-                            <p className="text-white text-2xl font-bold">Fabric Innovation</p>
+                            <p className="text-white text-2xl font-bold">{t('showcase.fabricInnovation')}</p>
                             <p className="text-white/80 mt-2 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                                Sustainable luxury.
+                                {t('showcase.fabricDescription')}
                             </p>
                         </div>
                     </motion.div>
@@ -110,9 +112,9 @@ const CreativeShowcase = () => {
                         />
                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500" />
                         <div className="absolute bottom-0 left-0 p-8 w-full bg-gradient-to-t from-black/80 to-transparent">
-                            <p className="text-white text-2xl font-bold">Future Trends</p>
+                            <p className="text-white text-2xl font-bold">{t('showcase.futureTrends')}</p>
                             <p className="text-white/80 mt-2 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                                Defining the next season.
+                                {t('showcase.futureTrendsDescription')}
                             </p>
                         </div>
                     </motion.div>

@@ -28,6 +28,16 @@
       "arrivals": "Arrivals"
     }
   },
+  "showcase": {
+    "title": "CREATIVE",
+    "vision": "VISION",
+    "artisticCollection": "Artistic Collection",
+    "artisticDescription": "Where every stitch tells a story.",
+    "fabricInnovation": "Fabric Innovation",
+    "fabricDescription": "Sustainable luxury.",
+    "futureTrends": "Future Trends",
+    "futureTrendsDescription": "Defining the next season."
+  },
   "categories": {
     "lingerie": {
       "title": "Lingerie",

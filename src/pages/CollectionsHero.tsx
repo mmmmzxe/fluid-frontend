@@ -16,8 +16,9 @@ import image6 from "@/assets/woman-wearing-fast-fashion-products.webp";
 const images = [image6, image5, image2, image3, image4];
 
 const CollectionsHero = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const isRTL = i18n.language === 'ar';
   const sliderSettings = {
     dots: true,
     infinite: true,
@@ -25,8 +26,9 @@ const CollectionsHero = () => {
     autoplaySpeed: 4000,
     arrows: false,
     pauseOnHover: true,
-    fade: true,
+    fade: !isRTL,
     speed: 1000,
+    rtl: isRTL,
   };
 
   return (
@@ -105,7 +107,11 @@ const CollectionsHero = () => {
 
             {/* Glassmorphism Frame */}
             <div className="relative p-3 rounded-3xl bg-white/40 dark:bg-white/5 backdrop-blur-md border border-[hsl(var(--border))] shadow-[var(--shadow-elegant)] hover:shadow-2xl transition-all duration-500 group">
-              <Slider {...sliderSettings} className="rounded-2xl overflow-hidden">
+              <Slider
+                key={i18n.language}
+                {...sliderSettings}
+                className="collections-hero-slider rounded-2xl overflow-hidden"
+              >
                 {images.map((src, index) => (
                   <div key={index} className="relative">
                     <div className="relative overflow-hidden rounded-2xl">
