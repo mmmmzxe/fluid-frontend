@@ -213,7 +213,12 @@ const OrderPage: React.FC = () => {
           });
           
           toast.success(t('order.redirecting'));
-          // Use window.location.href for reliable redirection (instead of window.open which may be blocked)
+          
+          // Log the payment URL for debugging purposes
+          console.log('Redirecting to payment URL:', paymentUrl);
+
+          // Use window.location.href for reliable redirection
+          // Note: If you see "Blocked a frame..." errors in the console, they are likely internal to Paymob's Google Pay integration and do not affect the redirection.
           window.location.href = paymentUrl;
         } else {
           console.error("Payment response did not contain a URL:", paymentResponse);
