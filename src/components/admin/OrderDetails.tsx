@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 // [EDIT] Import new icons for payment method
 import { Package, Truck, CheckCircle, XCircle, User, MapPin, CreditCard, Wallet, Printer } from 'lucide-react';
-import { Order } from '@/services/adminApi';
+import { Order, productApi, Product } from '@/services/adminApi';
 import { printInvoice } from '@/utils/printInvoice';
 
 interface OrderDetailsProps {
@@ -35,6 +35,58 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
   onStatusUpdate,
   onCancel,
 }) => {
+  const [productDetails, setProductDetails] = useState<Record<string, Product>>({});
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  // Fetch ALL products once and create a mapping by ID
+  useEffect(() => {
+    const fetchAllProducts = async () => {
+      try {
+        setLoadingProducts(true);
+        
+        // Fetch all products from the API
+        const response = await productApi.getAllNoCache();
+        const allProducts = response.data || [];
+        
+        // Create a mapping of productId -> Product
+        const productsMap: Record<string, Product> = {};
+        allProducts.forEach((product: Product) => {
+          productsMap[product._id] = product;
+        });
+        
+        console.log('Fetched all products:', allProducts.length);
+        console.log('Products map:', productsMap);
+        setProductDetails(productsMap);
+      } catch (error) {
+        console.error('Error fetching all products:', error);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
+    fetchAllProducts();
+  }, []); // Only fetch once when component mounts
+
+  // Helper function to get color and size from product variants
+  const getVariantInfo = (productId: string, variantId?: string, sizeId?: string) => {
+    const product = productDetails[productId];
+    if (!product || !product.variants) {
+      return { color: null, size: null };
+    }
+
+    const variant = product.variants.find(v => v._id === variantId);
+    if (!variant) {
+      return { color: null, size: null };
+    }
+
+    const sizeInfo = variant.size?.find(s => s._id === sizeId);
+    
+    return {
+      color: variant.color || null,
+      size: sizeInfo?.size || null,
+    };
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
@@ -185,6 +237,16 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                   const unit = Number(item.unitPrice ?? item.finalPrice ?? 0);
                   const qty = Number(item.quantity ?? 1);
                   const title = item.name || item.productId || 'Product';
+                  const variantInfo = getVariantInfo(item.productId, item.variantId, item.sizeId);
+                  
+                  console.log(`Order item ${index}:`, {
+                    productId: item.productId,
+                    variantId: item.variantId,
+                    sizeId: item.sizeId,
+                    variantInfo,
+                    hasProduct: !!productDetails[item.productId],
+                  });
+                  
                   return (
                     <div key={index} className="flex items-center space-x-4 p-4 border rounded-lg">
                       <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
@@ -192,9 +254,36 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                       </div>
                       <div className="flex-1">
                         <h4 className="font-medium">{title}</h4>
-                        <div className="flex items-center gap-4 mt-2">
+                        <div className="flex items-center gap-4 mt-2 flex-wrap">
                           <span className="text-sm">Quantity: {qty}</span>
                           <span className="text-sm">Unit: L.E{unit.toFixed(2)}</span>
+                          
+                          {/* Debug Info */}
+                          {loadingProducts && (
+                            <span className="text-xs text-gray-500">Loading...</span>
+                          )}
+                          
+                          {/* Color Display */}
+                          {variantInfo.color && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-600">Color:</span>
+                              <div 
+                                className="w-6 h-6 rounded-full border-2 border-gray-300 shadow-sm"
+                                style={{ backgroundColor: variantInfo.color }}
+                                title={variantInfo.color}
+                              />
+                            </div>
+                          )}
+                          
+                          {/* Size Display */}
+                          {variantInfo.size && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-600">Size:</span>
+                              <Badge variant="outline" className="font-normal">
+                                {variantInfo.size}
+                              </Badge>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="text-right">

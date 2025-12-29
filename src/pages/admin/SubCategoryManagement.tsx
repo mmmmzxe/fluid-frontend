@@ -272,7 +272,7 @@ const SubCategoryManagement: React.FC = () => {
             A list of all product subcategories
           </CardDescription>
         </CardHeader>
-        <CardContent>
+     
           <DataTable
             data={paginatedSubCategories}
             columns={columns}
@@ -291,7 +291,7 @@ const SubCategoryManagement: React.FC = () => {
             }}
             filters={categoryFilters}
           />
-        </CardContent>
+        
       </Card>
 
       {/* SubCategory Form Modal */}

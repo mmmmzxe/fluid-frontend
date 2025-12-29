@@ -206,7 +206,7 @@ const CategoryManagement: React.FC = () => {
             A list of all product categories in your store
           </CardDescription>
         </CardHeader>
-        <CardContent>
+      
           <DataTable
             data={paginatedCategories}
             columns={columns}
@@ -225,7 +225,7 @@ const CategoryManagement: React.FC = () => {
               onPageSizeChange: setPageSize,
             }}
           />
-        </CardContent>
+      
       </Card>
 
       {/* Category Form Modal */}

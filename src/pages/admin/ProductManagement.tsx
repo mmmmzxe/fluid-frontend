@@ -286,7 +286,7 @@ const ProductManagement: React.FC = () => {
             A list of all products in your store
           </CardDescription>
         </CardHeader>
-        <CardContent>
+   
           <DataTable
             data={paginatedProducts}
             columns={columns}
@@ -306,7 +306,7 @@ const ProductManagement: React.FC = () => {
             }}
             filters={categoryFilters}
           />
-        </CardContent>
+    
       </Card>
 
       {/* Product Form Modal */}

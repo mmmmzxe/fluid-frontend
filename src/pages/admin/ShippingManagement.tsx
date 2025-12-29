@@ -179,7 +179,7 @@ const ShippingManagement: React.FC = () => {
             A list of all shipping options available to customers
           </CardDescription>
         </CardHeader>
-        <CardContent>
+      
           <DataTable
             data={paginatedShippingOptions}
             columns={columns}
@@ -197,7 +197,7 @@ const ShippingManagement: React.FC = () => {
               onPageSizeChange: setPageSize,
             }}
           />
-        </CardContent>
+    
       </Card>
 
       {/* Shipping Form Modal */}

@@ -282,7 +282,7 @@ const OrderManagement: React.FC = () => {
             A list of all customer orders
           </CardDescription>
         </CardHeader>
-        <CardContent>
+      
           <DataTable
             data={paginatedOrders}
             columns={columns}
@@ -301,7 +301,7 @@ const OrderManagement: React.FC = () => {
             }}
             filters={statusFilters}
           />
-        </CardContent>
+        
       </Card>
 
       {/* Order Details Modal */}
