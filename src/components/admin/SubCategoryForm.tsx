@@ -38,6 +38,8 @@ const subCategorySchema = z.object({
 
 type SubCategoryFormData = z.infer<typeof subCategorySchema>;
 
+
+
 interface SubCategoryFormProps {
   subCategory?: SubCategory | null;
   categories: Category[];
