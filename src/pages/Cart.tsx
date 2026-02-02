@@ -46,20 +46,68 @@ const Cart = () => {
         if (needsDetails) {
           setIsGuestDetailsLoading(true);
           try {
-            const augmentedItems = await Promise.all(
+            // Use Promise.allSettled to handle individual failures gracefully
+            const results = await Promise.allSettled(
               cart.map(async (item) => {
                 // Check each item. If productId is a string, fetch details.
                 if (typeof item.productId === 'string') {
-                  const productDetails = await fetchProductById(item.productId);
-                  return {
-                    ...item, // Keep quantity, variant, etc.
-                    productId: productDetails, // Replace ID with the full product object.
-                  };
+                  try {
+                    const productDetails = await fetchProductById(item.productId);
+                    return {
+                      ...item, // Keep quantity, variant, etc.
+                      productId: productDetails, // Replace ID with the full product object.
+                    };
+                  } catch (error: any) {
+                    // If product not found (404), return null to filter it out
+                    console.warn(`Product ${item.productId} not found, removing from cart`);
+                    return null;
+                  }
                 }
                 // If it's already an object, return the item as is.
                 return item;
               })
             );
+
+            // Filter out failed items and extract successful results
+            const augmentedItems = results
+              .map((result) => result.status === 'fulfilled' ? result.value : null)
+              .filter((item) => item !== null);
+
+            // Update guest cart in localStorage to remove invalid products
+            const invalidProductIds = new Set<string>();
+            results.forEach((result, index) => {
+              if (result.status === 'rejected' || (result.status === 'fulfilled' && result.value === null)) {
+                const item = cart[index];
+                if (item && typeof item.productId === 'string') {
+                  invalidProductIds.add(item.productId);
+                } else if (item && item._id) {
+                  invalidProductIds.add(item._id);
+                }
+              }
+            });
+
+            if (invalidProductIds.size > 0) {
+              const rawCart = localStorage.getItem('guestCart');
+              if (rawCart) {
+                try {
+                  let guestCart = JSON.parse(rawCart);
+                  guestCart = guestCart.filter((item: any) => {
+                    const itemId = typeof item.productId === 'string' ? item.productId : item.productId?._id;
+                    return !invalidProductIds.has(itemId) && !invalidProductIds.has(item._id);
+                  });
+                  localStorage.setItem('guestCart', JSON.stringify(guestCart));
+                  // Refresh cart from localStorage
+                  await fetchCart();
+                  
+                  if (invalidProductIds.size > 0) {
+                    toast.warning(t('cart.someProductsRemoved') || 'Some products are no longer available and have been removed from your cart');
+                  }
+                } catch (e) {
+                  console.error('Error updating guest cart:', e);
+                }
+              }
+            }
+
             setDetailedCart(augmentedItems);
           } catch (error) {
             console.error("Error fetching product details for guest cart:", error);
@@ -78,7 +126,7 @@ const Cart = () => {
     };
 
     augmentGuestCart();
-  }, [cart, isAuthenticated, fetchProductById]);
+  }, [cart, isAuthenticated, fetchProductById, fetchCart, t]);
 
   // Track ViewCart event when cart has items
   useEffect(() => {

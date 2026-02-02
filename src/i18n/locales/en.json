@@ -244,6 +244,7 @@
     "clearSuccess": "Cart cleared",
     "clearError": "Failed to clear cart",
     "loadError": "Could not load cart details",
+    "someProductsRemoved": "Some products are no longer available and have been removed from your cart",
     "freeShipping": "Free Shipping",
     "free": "FREE",
     "freeShippingThreshold": "Free shipping on orders of L.E 2,000 or more"

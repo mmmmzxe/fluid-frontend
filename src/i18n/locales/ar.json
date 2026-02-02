@@ -234,6 +234,7 @@
     "clearSuccess": "تم مسح السلة",
     "clearError": "فشل مسح السلة",
     "loadError": "تعذر تحميل تفاصيل السلة",
+    "someProductsRemoved": "لم يعد بعض المنتجات متاحة وتم إزالتها من سلة التسوق الخاصة بك",
     "freeShipping": "شحن مجاني",
     "free": "مجاني",
     "freeShippingThreshold": "شحن مجاني للطلبات من 2,000 جنيه أو أكثر"
