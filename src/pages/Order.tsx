@@ -187,10 +187,10 @@ const OrderPage: React.FC = () => {
       // Free shipping (itemsTotal >= 2000) is handled by the backend
       
       if (isAuthenticated) {
-        const payload = { address, phone, note, paymentWay, shippingId };
+        const payload = { address, phone, note: note || '', paymentWay, shippingId };
         createOrderResponse = await orderApi.create(payload);
       } else {
-        const payload = { firstName, lastName, address, phone, note, paymentWay, shippingId, email, discountPercent };
+        const payload = { firstName, lastName, address, phone, note: note || '', paymentWay, shippingId, email, discountPercent };
         createOrderResponse = await checkoutWithoutLogin(payload);
       }
 
