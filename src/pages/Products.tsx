@@ -165,7 +165,15 @@ export default function Products() {
 
     console.log('Final filtered products:', filtered.length);
     return filtered;
-  }, [products, selectedCategories, priceRange, showOnSale, showNew, sortBy]);
+  }, [
+    products,
+    selectedCategories,
+    selectedSubCategories,
+    priceRange,
+    showOnSale,
+    showNew,
+    sortBy,
+  ]);
 
   const handleCategoryChange = (categoryId: string, checked: boolean) => {
     if (checked) {
@@ -306,10 +314,14 @@ export default function Products() {
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="all-products"
-                        checked={selectedCategories.length === 0}
+                        checked={
+                          selectedCategories.length === 0 &&
+                          selectedSubCategories.length === 0
+                        }
                         onCheckedChange={(checked) => {
                           if (checked) {
                             setSelectedCategories([]);
+                            setSelectedSubCategories([]);
                           }
                         }}
                       />
