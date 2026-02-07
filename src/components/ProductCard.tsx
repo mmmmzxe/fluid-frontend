@@ -26,6 +26,7 @@ export interface Product {
   name: string;
   price: number;
   originalPrice?: number;
+  createdAt?: string;
   category: string;
   subCategory?: string;
   image: string;
@@ -109,6 +110,7 @@ export const transformApiProduct = (apiProduct: ApiProduct): Product => {
     name: getProductTitle(apiProduct),
     price: apiProduct.finalPrice || 0,
     originalPrice: originalPrice,
+    createdAt: apiProduct.createdAt,
     category: apiProduct.category || 'uncategorized',
     subCategory: apiProduct.subCategory,
     image: apiProduct.mainImage?.secure_url ||

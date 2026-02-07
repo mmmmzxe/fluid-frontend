@@ -96,7 +96,7 @@ const Index = () => {
       </motion.div>
 
  
-     <TextVideoSection />
+  
          {/* Brand Logos */}
       <motion.section
         className="py-16 bg-background"

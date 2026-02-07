@@ -39,7 +39,7 @@ export default function Products() {
   );
   const [selectedPriceRange, setSelectedPriceRange] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
-  const [sortBy, setSortBy] = useState(searchParams.get("sort") || "featured");
+  const [sortBy, setSortBy] = useState(searchParams.get("sort") || "newest");
   const [showOnSale, setShowOnSale] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
@@ -78,7 +78,7 @@ export default function Products() {
     if (!searchParams.get("category") && !searchParams.get("sort")) {
       setSelectedCategories([]);
       setPriceRange([0, 50000]);
-      setSortBy("featured");
+      setSortBy("newest");
       setShowOnSale(false);
       setShowNew(false);
     }
@@ -157,7 +157,11 @@ export default function Products() {
         filtered.sort((a, b) => b.rating - a.rating);
         break;
       case "newest":
-        filtered.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+        filtered.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
         break;
       default:
         // Featured - keep original order
@@ -203,7 +207,7 @@ export default function Products() {
     setPriceRange([0, 50000]);
     setShowOnSale(false);
     setShowNew(false);
-    setSortBy("featured");
+    setSortBy("newest");
     setSearchParams({});
   };
 
@@ -231,9 +235,15 @@ export default function Products() {
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-navy mb-2">{t('products.title')}</h1>
-            <p className="text-muted-foreground">
-              {t('products.showing')} {filteredProducts.length} {t('products.of')} {products?.length || 0} {t('products.productsCount')}
-            </p>
+            {selectedCategories.length === 0 && selectedSubCategories.length === 0 ? (
+              <p className="text-muted-foreground">
+                {t('products.chooseCategoryFirst')}
+              </p>
+            ) : (
+              <p className="text-muted-foreground">
+                {t('products.showing')} {filteredProducts.length} {t('products.of')} {products?.length || 0} {t('products.productsCount')}
+              </p>
+            )}
           </div>
 
           <div className="flex items-center gap-4">
@@ -293,7 +303,7 @@ export default function Products() {
           <div className="mb-10 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-navy">
-                {t('products.shopByCategory', 'Shop by category')}
+                {t('products.shopByCategory')}
               </h2>
               <Button
                 variant="ghost"
@@ -304,7 +314,7 @@ export default function Products() {
                   setSelectedSubCategories([]);
                 }}
               >
-                {t('products.viewAll', 'View all')}
+                {t('products.viewAll')}
               </Button>
             </div>
 
@@ -321,42 +331,32 @@ export default function Products() {
                     setSelectedSubCategories([]);
                   }}
                   className={cn(
-                    "relative overflow-hidden rounded-xl border bg-card text-left transition hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/40",
-                    expandedCategoryId === category._id && "ring-2 ring-primary/60 border-primary/60"
+                    "flex flex-col items-center gap-2 rounded-xl  text-center transition shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40",
+                    expandedCategoryId === category._id && "ring-2 ring-primary/60"
                   )}
                 >
                   {category.image?.secure_url && (
-                    <div className="h-28 w-full overflow-hidden">
+                    <div className="w-full overflow-hidden rounded-xl  aspect-square">
                       <img
                         src={category.image.secure_url}
                         alt={getCategoryName(category)}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="h-full w-full object-cover"
                       />
                     </div>
                   )}
-                  <div className="p-3 flex flex-col gap-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-medium truncate">
-                        {getCategoryName(category)}
-                      </p>
-                      <span className="text-[11px] text-muted-foreground whitespace-nowrap">
-                        {(category as any)?.subCategories?.length || 0} {t('products.subcategories', 'subs')}
-                      </span>
-                    </div>
-                    <span className="text-[11px] text-muted-foreground">
-                      {products?.filter((p) => (p as any).category === category._id).length || 0} {t('products.items', 'items')}
-                    </span>
-                  </div>
+                  <p className="mt-2 mb-1 text-sm text-muted-foreground truncate">
+                    {getCategoryName(category)}
+                  </p>
                 </button>
               ))}
             </div>
 
             {expandedCategoryId && (
-              <div className="mt-4 space-y-2">
+              <div className="mt-4 space-y-3">
                 <h3 className="text-sm font-semibold text-navy">
-                  {t('products.subcategories', 'Subcategories')}
+                  {t('products.subcategories')}
                 </h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {(categories.find((c) => c._id === expandedCategoryId) as any)?.subCategories?.map((sub: any) => (
                     <button
                       key={sub._id}
@@ -367,11 +367,11 @@ export default function Products() {
                         setSelectedSubCategories([sub._id]);
                       }}
                       className={cn(
-                        "px-3 py-1.5 rounded-full border text-xs font-medium transition hover:bg-primary hover:text-primary-foreground",
-                        selectedSubCategories.includes(sub._id) && "bg-primary text-primary-foreground border-primary"
+                        "flex flex-col items-center justify-center rounded-xl border bg-card px-3 py-3 text-xs font-medium shadow-sm transition hover:shadow-md hover:border-primary/60",
+                        selectedSubCategories.includes(sub._id) && "border-primary bg-primary/5 text-primary"
                       )}
                     >
-                      {getCategoryName(sub)}
+                      <span className="truncate max-w-full">{getCategoryName(sub)}</span>
                     </button>
                   ))}
                 </div>
@@ -407,10 +407,7 @@ export default function Products() {
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="all-products"
-                        checked={
-                          selectedCategories.length === 0 &&
-                          selectedSubCategories.length === 0
-                        }
+                        checked={false}
                         onCheckedChange={(checked) => {
                           if (checked) {
                             setSelectedCategories([]);
@@ -532,6 +529,15 @@ export default function Products() {
                 <Button onClick={() => window.location.reload()}>
                   {t('products.tryAgain')}
                 </Button>
+              </div>
+            ) : (selectedCategories.length === 0 && selectedSubCategories.length === 0) ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <p className="mb-2 text-base font-medium">
+                  {t('products.chooseCategoryFirst')}
+                </p>
+                <p className="text-sm">
+                  {t('products.chooseCategoryHint')}
+                </p>
               </div>
             ) : filteredProducts.length === 0 ? (
               <div className="text-center py-12">
