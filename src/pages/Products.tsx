@@ -43,6 +43,7 @@ export default function Products() {
   const [showOnSale, setShowOnSale] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
+  const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
 
   // Fetch products (no-cache) and set defaults
   useEffect(() => {
@@ -286,6 +287,98 @@ export default function Products() {
             </Button>
           </div>
         </div>
+
+        {/* Category & Subcategory Cards */}
+        {!loading && categories && categories.length > 0 && (
+          <div className="mb-10 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-navy">
+                {t('products.shopByCategory', 'Shop by category')}
+              </h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setExpandedCategoryId(null);
+                  setSelectedCategories([]);
+                  setSelectedSubCategories([]);
+                }}
+              >
+                {t('products.viewAll', 'View all')}
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {categories.map((category) => (
+                <button
+                  key={category._id}
+                  type="button"
+                  onClick={() => {
+                    const isSame = expandedCategoryId === category._id;
+                    const nextExpanded = isSame ? null : category._id;
+                    setExpandedCategoryId(nextExpanded);
+                    setSelectedCategories([category._id]);
+                    setSelectedSubCategories([]);
+                  }}
+                  className={cn(
+                    "relative overflow-hidden rounded-xl border bg-card text-left transition hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/40",
+                    expandedCategoryId === category._id && "ring-2 ring-primary/60 border-primary/60"
+                  )}
+                >
+                  {category.image?.secure_url && (
+                    <div className="h-28 w-full overflow-hidden">
+                      <img
+                        src={category.image.secure_url}
+                        alt={getCategoryName(category)}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                  )}
+                  <div className="p-3 flex flex-col gap-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-medium truncate">
+                        {getCategoryName(category)}
+                      </p>
+                      <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+                        {(category as any)?.subCategories?.length || 0} {t('products.subcategories', 'subs')}
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-muted-foreground">
+                      {products?.filter((p) => (p as any).category === category._id).length || 0} {t('products.items', 'items')}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {expandedCategoryId && (
+              <div className="mt-4 space-y-2">
+                <h3 className="text-sm font-semibold text-navy">
+                  {t('products.subcategories', 'Subcategories')}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {(categories.find((c) => c._id === expandedCategoryId) as any)?.subCategories?.map((sub: any) => (
+                    <button
+                      key={sub._id}
+                      type="button"
+                      onClick={() => {
+                        setExpandedCategoryId(sub.categoryId || expandedCategoryId);
+                        setSelectedCategories([sub.categoryId || expandedCategoryId]);
+                        setSelectedSubCategories([sub._id]);
+                      }}
+                      className={cn(
+                        "px-3 py-1.5 rounded-full border text-xs font-medium transition hover:bg-primary hover:text-primary-foreground",
+                        selectedSubCategories.includes(sub._id) && "bg-primary text-primary-foreground border-primary"
+                      )}
+                    >
+                      {getCategoryName(sub)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Filters Sidebar */}
