@@ -346,10 +346,6 @@ export default function ProductDetail() {
               )}
             </div>
 
-            {/* Lingerie - no returns notice (i18n) */}
-            <div className="mt-2 text-sm rounded-md px-3 py-2 bg-rose-50 text-rose-700">
-              {t('productDetail.lingerieNoReturn')}
-            </div>
 
             {/* Colors */}
             {availableColors.length > 0 && (
