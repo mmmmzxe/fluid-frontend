@@ -204,7 +204,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
       try {
         setIsCompressing(true);
         const file = e.target.files[0];
-        const compressedFile = await compressImage(file);
+        const compressedFile = await compressImage(file, 1024, 0.7);
         setMainImageFile(compressedFile);
 
         const reader = new FileReader();
@@ -234,7 +234,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
         setIsCompressing(true);
         const files = Array.from(e.target.files);
         const compressedFiles = await Promise.all(
-          files.map(file => compressImage(file))
+          files.map(file => compressImage(file, 1024, 0.7))
         );
 
         const newImages = await Promise.all(
