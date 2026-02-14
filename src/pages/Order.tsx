@@ -187,10 +187,10 @@ const OrderPage: React.FC = () => {
       // Free shipping (itemsTotal >= 2000) is handled by the backend
       
       if (isAuthenticated) {
-        const payload = { address, phone, note: note || '', paymentWay, shippingId };
+        const payload = { address, phone, note: note || 'null', paymentWay, shippingId };
         createOrderResponse = await orderApi.create(payload);
       } else {
-        const payload = { firstName, lastName, address, phone, note: note || '', paymentWay, shippingId, email, discountPercent };
+        const payload = { firstName, lastName, address, phone, note: note || 'null', paymentWay, shippingId, email, discountPercent };
         createOrderResponse = await checkoutWithoutLogin(payload);
       }
 
@@ -278,7 +278,9 @@ const OrderPage: React.FC = () => {
       }
 
     } catch (err: any) {
-      toast.error(err?.message || t('order.createError'));
+      console.error("Order submit error:", err);
+      const errorMsg = err?.response?.data?.message || err?.response?.data?.response?.message || err?.message || t('order.createError');
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

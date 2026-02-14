@@ -64,11 +64,12 @@ export const printInvoice = (order: Order) => {
           justify-content: space-between;
           margin-bottom: 40px;
         }
-        .info-block h3 {
+          .info-block h3 {
           margin: 0 0 10px;
           font-size: 14px;
           text-transform: uppercase;
           color: #666;
+          font-weight: bold;
         }
         .info-block p {
           margin: 0;
@@ -83,7 +84,7 @@ export const printInvoice = (order: Order) => {
           padding: 15px;
           background: #f9f9f9;
           border-bottom: 1px solid #eee;
-          font-weight: 600;
+          font-weight: bold;
         }
         td {
           padding: 15px;
@@ -101,6 +102,9 @@ export const printInvoice = (order: Order) => {
           justify-content: space-between;
           padding: 10px 0;
           border-bottom: 1px solid #eee;
+        }
+        .total-row span:first-child {
+          font-weight: bold;
         }
         .total-row.final {
           border-bottom: none;
@@ -150,7 +154,7 @@ export const printInvoice = (order: Order) => {
         </div>
         <div class="info-block">
           <h3>Payment Information</h3>
-          <p>Method: ${order.paymentWay ? order.paymentWay.charAt(0).toUpperCase() + order.paymentWay.slice(1) : 'N/A'}</p>
+          <p><strong>Method:</strong> ${order.paymentWay ? order.paymentWay.charAt(0).toUpperCase() + order.paymentWay.slice(1) : 'N/A'}</p>
         </div>
       </div>
 
@@ -171,7 +175,7 @@ export const printInvoice = (order: Order) => {
     return `
               <tr>
                 <td>
-                  <div>${item.name || item.productId || 'Product'}</div>
+                  <div><strong>${item.name || item.productId || 'Product'}</strong></div>
                   ${item.color ? `<div style="font-size: 12px; color: #666;">Color: ${item.color}</div>` : ''}
                   ${item.size ? `<div style="font-size: 12px; color: #666;">Size: ${item.size}</div>` : ''}
                 </td>
