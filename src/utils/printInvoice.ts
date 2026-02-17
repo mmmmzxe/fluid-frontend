@@ -9,6 +9,7 @@ export const printInvoice = (order: Order) => {
   const customerEmail = order.createdBy?.email || order.email || '';
   const customerPhone = order.phone || order.createdBy?.phone || '';
   const date = new Date(order.createdAt).toLocaleDateString();
+  const time = new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const orderId = order._id.slice(-8).toUpperCase();
 
   // Parse shipping info
@@ -22,149 +23,182 @@ export const printInvoice = (order: Order) => {
 
   const htmlContent = `
     <!DOCTYPE html>
-    <html>
+    <html dir="ltr">
     <head>
-      <title>Invoice #${orderId}</title>
+      <title>Receipt #${orderId}</title>
       <style>
+        @page {
+          margin: 0;
+          size: 80mm auto;
+        }
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
         body {
-          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-          color: #333;
-          line-height: 1.6;
-          padding: 40px;
-          max-width: 800px;
+          width: 80mm;
           margin: 0 auto;
+          padding: 10px;
+          font-family: 'Arial', sans-serif;
+          font-size: 12px;
+          line-height: 1.4;
+          color: #000;
+          background-color: #fff;
         }
         .header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 40px;
-          border-bottom: 2px solid #eee;
-          padding-bottom: 20px;
+          text-align: center;
+          margin-bottom: 10px;
         }
         .logo {
-          font-size: 24px;
+          max-height: 60px;
+          margin-bottom: 5px;
+          filter: grayscale(100%);
+        }
+        .shop-name {
+          font-size: 20px;
           font-weight: bold;
-          color: #333;
+          text-transform: uppercase;
+          margin-bottom: 2px;
         }
-        .invoice-details {
-          text-align: right;
-        }
-        .invoice-details h1 {
-          margin: 0;
-          font-size: 32px;
-          color: #333;
-        }
-        .invoice-details p {
-          margin: 5px 0 0;
-          color: #666;
+        .divider {
+          border-top: 1px dashed #000;
+          margin: 8px 0;
         }
         .info-section {
+          margin-bottom: 10px;
+        }
+        .info-row {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 40px;
+          margin-bottom: 2px;
+          font-size: 11px;
         }
-          .info-block h3 {
-          margin: 0 0 10px;
-          font-size: 14px;
-          text-transform: uppercase;
-          color: #666;
+        .info-label {
           font-weight: bold;
         }
-        .info-block p {
-          margin: 0;
+        .customer-section {
+          margin: 8px 0;
+        }
+        .customer-name {
+          font-weight: bold;
+          text-transform: uppercase;
         }
         table {
           width: 100%;
           border-collapse: collapse;
-          margin-bottom: 40px;
+          margin: 8px 0;
         }
         th {
           text-align: left;
-          padding: 15px;
-          background: #f9f9f9;
-          border-bottom: 1px solid #eee;
+          border-bottom: 1px dashed #000;
+          border-top: 1px dashed #000;
+          padding: 5px 0;
+          font-size: 11px;
           font-weight: bold;
         }
         td {
-          padding: 15px;
-          border-bottom: 1px solid #eee;
+          padding: 5px 0;
+          vertical-align: top;
+          font-size: 11px;
+        }
+        .item-name {
+          font-weight: bold;
+          display: block;
+        }
+        .item-meta {
+          font-size: 10px;
+          margin-top: 1px;
         }
         .text-right {
           text-align: right;
         }
+        .text-center {
+          text-align: center;
+        }
         .totals {
-          margin-left: auto;
-          width: 300px;
+          margin-top: 5px;
         }
         .total-row {
           display: flex;
           justify-content: space-between;
-          padding: 10px 0;
-          border-bottom: 1px solid #eee;
+          padding: 2px 0;
+          font-size: 11px;
         }
-        .total-row span:first-child {
+        .total-row.grand-total {
+          font-size: 15px;
           font-weight: bold;
+          border-top: 1px solid #000;
+          margin-top: 5px;
+          padding-top: 8px;
         }
-        .total-row.final {
-          border-bottom: none;
-          font-size: 18px;
+        .payment-method {
+          margin-top: 8px;
           font-weight: bold;
-          border-top: 2px solid #333;
-          margin-top: 10px;
-          padding-top: 15px;
+          text-align: center;
+          border: 1px solid #000;
+          padding: 4px;
         }
         .footer {
-          margin-top: 60px;
+          margin-top: 20px;
           text-align: center;
-          color: #999;
-          font-size: 12px;
-          border-top: 1px solid #eee;
-          padding-top: 20px;
+          font-size: 10px;
+        }
+        .qr-placeholder {
+          margin-top: 15px;
+          border: 1px solid #eee;
+          width: 60px;
+          height: 60px;
+          margin-inline : auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 8px;
         }
         @media print {
-          body { padding: 0; }
-          .no-print { display: none; }
+          body {
+            width: 80mm;
+          }
         }
       </style>
     </head>
     <body>
       <div class="header">
-        <div class="logo">
-          <img src="${Logo}" alt="Extrachic Logo" style="max-height: 60px;" />
-        </div>
-        <div class="invoice-details">
-          <h1>INVOICE</h1>
-          <p>#${orderId}</p>
-          <p>${date}</p>
+        <img src="${Logo}" alt="Logo" class="logo" />
+        <div class="shop-name">Extrachic</div>
+        <div class="info-row text-center" style="display: block;">
+          ORDER RECEIPT
         </div>
       </div>
 
+      <div class="divider"></div>
+
       <div class="info-section">
-        <div class="info-block">
-          <h3>Bill To</h3>
-          <p><strong>${customerName}</strong></p>
-          <p>${customerEmail}</p>
-          <p>${customerPhone}</p>
+        <div class="info-row">
+          <span class="info-label">Order ID:</span>
+          <span>#${orderId}</span>
         </div>
-        <div class="info-block">
-          <h3>Ship To</h3>
-          <p>${order.address || 'No address provided'}</p>
-          ${shippingGov ? `<p>${shippingGov}</p>` : ''}
+        <div class="info-row">
+          <span class="info-label">Date:</span>
+          <span>${date} ${time}</span>
         </div>
-        <div class="info-block">
-          <h3>Payment Information</h3>
-          <p><strong>Method:</strong> ${order.paymentWay ? order.paymentWay.charAt(0).toUpperCase() + order.paymentWay.slice(1) : 'N/A'}</p>
-        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="customer-section">
+        <div class="customer-name">${customerName}</div>
+        <div>${customerPhone}</div>
+        <div>${order.address || ''}</div>
+        ${shippingGov ? `<div>${shippingGov}</div>` : ''}
       </div>
 
       <table>
         <thead>
           <tr>
             <th>Item</th>
-            <th class="text-right">Quantity</th>
-            <th class="text-right">Price</th>
-            <th class="text-right">Total</th>
+            <th class="text-right" style="width: 40px;">Qty</th>
+            <th class="text-right" style="width: 70px;">Total</th>
           </tr>
         </thead>
         <tbody>
@@ -175,18 +209,24 @@ export const printInvoice = (order: Order) => {
     return `
               <tr>
                 <td>
-                  <div><strong>${item.name || item.productId || 'Product'}</strong></div>
-                  ${item.color ? `<div style="font-size: 12px; color: #666;">Color: ${item.color}</div>` : ''}
-                  ${item.size ? `<div style="font-size: 12px; color: #666;">Size: ${item.size}</div>` : ''}
+                  <span class="item-name">${item.name || item.productId || 'Product'}</span>
+                  ${item.color || item.size ? `
+                    <div class="item-meta">
+                      ${item.color ? `<span>Color: ${item.color}</span>` : ''}
+                      ${item.size ? `<span>Size: ${item.size}</span>` : ''}
+                    </div>
+                  ` : ''}
+                  <div class="item-meta">@ L.E${unit.toFixed(2)}</div>
                 </td>
                 <td class="text-right">${qty}</td>
-                <td class="text-right">L.E${unit.toFixed(2)}</td>
                 <td class="text-right">L.E${total.toFixed(2)}</td>
               </tr>
             `;
   }).join('')}
         </tbody>
       </table>
+
+      <div class="divider"></div>
 
       <div class="totals">
         <div class="total-row">
@@ -197,20 +237,32 @@ export const printInvoice = (order: Order) => {
           <span>Shipping</span>
           <span>L.E${Number(shippingPrice ?? 0).toFixed(2)}</span>
         </div>
-        <div class="total-row final">
-          <span>Total</span>
+        <div class="total-row grand-total">
+          <span>TOTAL</span>
           <span>L.E${Number(order.finalPrice ?? 0).toFixed(2)}</span>
         </div>
       </div>
 
+      ${order.paymentWay ? `
+        <div class="payment-method">
+          METHOD: ${order.paymentWay.toUpperCase()}
+        </div>
+      ` : ''}
+
       <div class="footer">
-        <p>Thank you for your business!</p>
-        <p>If you have any questions about this invoice, please contact support.</p>
+        <p>THANK YOU FOR SHOPPING WITH US!</p>
+        <p>Please keep this receipt for your records.</p>
+        <div class="qr-placeholder">
+          SCAN ME
+        </div>
       </div>
 
       <script>
         window.onload = () => {
           window.print();
+          setTimeout(() => {
+            window.close();
+          }, 500);
         };
       </script>
     </body>
@@ -220,3 +272,4 @@ export const printInvoice = (order: Order) => {
   printWindow.document.write(htmlContent);
   printWindow.document.close();
 };
+
