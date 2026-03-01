@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn, normalizeImageUrl } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import { addToFavorites, removeFromFavorites } from "@/store/slices/favoritesSlice";
 import { userApi } from '@/services/adminApi';
@@ -113,8 +113,10 @@ export const transformApiProduct = (apiProduct: ApiProduct): Product => {
     createdAt: apiProduct.createdAt,
     category: apiProduct.category || 'uncategorized',
     subCategory: apiProduct.subCategory,
-    image: apiProduct.mainImage?.secure_url ||
-      (apiProduct.subImages && apiProduct.subImages.length > 0 ? apiProduct.subImages[0].secure_url : '/placeholder.svg'),
+    image: normalizeImageUrl(
+      apiProduct.mainImage?.secure_url ||
+      (apiProduct.subImages && apiProduct.subImages.length > 0 ? apiProduct.subImages[0].secure_url : undefined)
+    ),
     rating: 4.5, // Default rating since not provided in API
     reviewCount: Math.floor(Math.random() * 200) + 10, // Mock review count
     isNew: isNew,

@@ -11,7 +11,7 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useCategories } from "@/hooks/useApi";
 import { productApi, Product } from "@/services/adminApi";
-import { cn } from "@/lib/utils";
+import { cn, normalizeImageUrl } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { getCategoryName } from "@/lib/i18nHelpers";
 import SEO from "@/components/SEO";
@@ -338,7 +338,7 @@ export default function Products() {
                   {category.image?.secure_url && (
                     <div className="w-full overflow-hidden rounded-xl  aspect-square">
                       <img
-                        src={category.image.secure_url}
+                        src={normalizeImageUrl(category.image.secure_url)}
                         alt={getCategoryName(category)}
                         className="h-full w-full object-cover"
                       />

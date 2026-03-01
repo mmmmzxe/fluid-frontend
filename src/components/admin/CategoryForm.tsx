@@ -25,6 +25,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { Category } from '@/services/adminApi';
 import { compressImage } from '@/utils/imageCompression';
+import { normalizeImageUrl } from '@/lib/utils';
 
 const categorySchema = z.object({
   nameEnglish: z.string().min(1, 'English name is required'),
@@ -42,7 +43,7 @@ interface CategoryFormProps {
 const CategoryForm: React.FC<CategoryFormProps> = ({ category, onClose, onSubmit }) => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(
-    category?.image?.secure_url || null
+    normalizeImageUrl(category?.image?.secure_url) || null
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);

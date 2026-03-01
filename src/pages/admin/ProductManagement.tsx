@@ -13,6 +13,7 @@ import GradientButton from '@/components/admin/GradientButton';
 import EnhancedBadge from '@/components/admin/EnhancedBadge';
 import { productApi, categoryApi, Product, Category } from '@/services/adminApi';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
+import { normalizeImageUrl } from '@/lib/utils';
 
 const ProductManagement: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -142,7 +143,7 @@ const ProductManagement: React.FC = () => {
         <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
           {row.mainImage?.secure_url ? (
             <img
-              src={row.mainImage.secure_url}
+              src={normalizeImageUrl(row.mainImage.secure_url)}
               alt={row.titleEnglish}
               className="w-full h-full object-cover"
             />

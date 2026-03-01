@@ -34,6 +34,7 @@ import { compressImage } from '@/utils/imageCompression';
 import { Product, Category, SubCategory, productApi } from '@/services/adminApi';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { toast } from 'sonner';
+import { normalizeImageUrl } from '@/lib/utils';
 
 const productSchema = z.object({
   titleEnglish: z.string().min(1, 'English title is required'),
@@ -76,7 +77,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
   const [mainImageFile, setMainImageFile] = useState<File | null>(null);
   // State for sub images (both existing and new)
   const [mainImagePreview, setMainImagePreview] = useState<string | null>(
-    product?.mainImage?.secure_url || null
+    normalizeImageUrl(product?.mainImage?.secure_url) || null
   );
 
   const [activeSubImages, setActiveSubImages] = useState<Array<{
@@ -94,7 +95,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, categories, onClose,
       setActiveSubImages(product.subImages.map((img: any) => ({
         type: 'existing',
         id: img._id || img.public_id,
-        url: img.secure_url,
+        url: normalizeImageUrl(img.secure_url),
         publicId: img.public_id
       })));
     } else {

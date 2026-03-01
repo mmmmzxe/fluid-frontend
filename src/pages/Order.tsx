@@ -15,6 +15,7 @@ import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getProductTitle } from '@/lib/i18nHelpers';
 import { fbPixel } from '@/lib/fbPixel';
+import { normalizeImageUrl } from '@/lib/utils';
 
 const OrderPage: React.FC = () => {
   const { t } = useTranslation();
@@ -383,7 +384,7 @@ const OrderPage: React.FC = () => {
                 detailedCart.map((item: any) => (
                   <div key={item._id || `${item.productId}-${item.variantId}-${item.sizeId}`} className="flex gap-3">
                     <img
-                      src={item.productId?.mainImage?.secure_url || '/placeholder.svg'}
+                      src={normalizeImageUrl(item.productId?.mainImage?.secure_url)}
                       alt={getProductTitle(item.productId) || 'Product'}
                       className="w-16 h-16 rounded object-cover"
                       loading="lazy"

@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Search, User, ShoppingBag, Menu, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn, normalizeImageUrl } from "@/lib/utils";
 import { useAppSelector } from "@/hooks/useRedux";
 import { useCategories } from "@/hooks/useApi";
 import logo from "@/assets/LogoText.webp";
@@ -130,7 +130,7 @@ export function Navbar() {
                 >
                   {category.image?.secure_url && (
                     <img
-                      src={category.image.secure_url}
+                      src={normalizeImageUrl(category.image.secure_url)}
                       alt={getCategoryName(category)}
                       className="w-6 h-6 rounded-full object-cover"
                     />
@@ -187,7 +187,7 @@ export function Navbar() {
                   >
                     {category.image?.secure_url && (
                       <img
-                        src={category.image.secure_url}
+                        src={normalizeImageUrl(category.image.secure_url)}
                         alt={getCategoryName(category)}
                         className="w-6 h-6 rounded-full object-cover"
                       />

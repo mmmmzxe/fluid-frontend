@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { User, UserCheck, Mail, Phone, MapPin, Shield, Heart, Package } from 'lucide-react';
 import { User as UserType } from '@/services/adminApi';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { normalizeImageUrl } from '@/lib/utils';
 
 interface UserDetailsProps {
   user: UserType & { favorites?: any[]; phone?: string; address?: string };
@@ -140,7 +141,7 @@ const UserDetails: React.FC<UserDetailsProps> = ({ user, onClose }) => {
                             <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                               {product.mainImage?.secure_url ? (
                                 <img
-                                  src={product.mainImage.secure_url}
+                                  src={normalizeImageUrl(product.mainImage.secure_url)}
                                   alt={product.titleEnglish}
                                   className="w-full h-full object-cover"
                                 />

@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Product } from '@/services/adminApi';
 import { Package, Tag, Palette, Ruler, Box, Calendar, Percent, DollarSign, ShoppingBag, Sparkles } from 'lucide-react';
+import { normalizeImageUrl } from '@/lib/utils';
 
 interface ProductDetailsProps {
     product: Product;
@@ -17,11 +18,11 @@ interface ProductDetailsProps {
 }
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onClose }) => {
-    const [selectedImage, setSelectedImage] = useState(product.mainImage?.secure_url || '');
+    const [selectedImage, setSelectedImage] = useState(normalizeImageUrl(product.mainImage?.secure_url));
 
     const allImages = [
-        product.mainImage?.secure_url,
-        ...(product.subImages?.map(img => img.secure_url) || [])
+        normalizeImageUrl(product.mainImage?.secure_url),
+        ...(product.subImages?.map(img => normalizeImageUrl(img.secure_url)) || [])
     ].filter(Boolean) as string[];
 
     return (

@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 import { useProduct, ApiProductDetail } from "@/hooks/useProduct";
 import { useCart } from "@/hooks/useCart";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
-import { cn } from "@/lib/utils";
+import { cn, normalizeImageUrl } from "@/lib/utils";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import { getProductTitle, getProductDescription } from "@/lib/i18nHelpers";
@@ -41,11 +41,11 @@ export default function ProductDetail() {
   const [activeTab, setActiveTab] = useState("description");
   const allImages = (product?.subImages && product.subImages.length > 0)
     ? [
-      { secure_url: product.mainImage?.secure_url || '/placeholder.svg' },
-      ...product.subImages,
+      { secure_url: normalizeImageUrl(product.mainImage?.secure_url) },
+      ...product.subImages.map(img => ({ secure_url: normalizeImageUrl(img.secure_url) })),
     ]
     : [
-      { secure_url: product?.mainImage?.secure_url || '/placeholder.svg' },
+      { secure_url: normalizeImageUrl(product?.mainImage?.secure_url) },
     ];
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function ProductDetail() {
           if (productData?.variants && productData.variants.length > 0) {
             setSelectedColor(productData.variants[0].color);
           }
-          const initialMain = productData?.mainImage?.secure_url || "/placeholder.svg";
+          const initialMain = normalizeImageUrl(productData?.mainImage?.secure_url);
           setActiveImageUrl(initialMain);
           
           // Track ViewContent event for Facebook Pixel
@@ -194,8 +194,10 @@ export default function ProductDetail() {
   const productDescription = getProductDescription(product) || t('productDetail.defaultDescription', { title: productTitle });
   
   // Robust image selection: Main Image -> First Sub Image -> Fallback
-  const productImage = product.mainImage?.secure_url || 
-    (product.subImages && product.subImages.length > 0 ? product.subImages[0].secure_url : '/seo-image.png');
+  const productImage = normalizeImageUrl(
+    product.mainImage?.secure_url || 
+    (product.subImages && product.subImages.length > 0 ? product.subImages[0].secure_url : '/seo-image.png')
+  );
 
   // Check if any variant is in stock
   const isAvailable = product.variants?.some(v => 
@@ -207,8 +209,8 @@ export default function ProductDetail() {
     "@type": "Product",
     "name": productTitle,
     "image": [
-      product.mainImage?.secure_url,
-      ...(product.subImages?.map(img => img.secure_url) || [])
+      normalizeImageUrl(product.mainImage?.secure_url),
+      ...(product.subImages?.map(img => normalizeImageUrl(img.secure_url)) || [])
     ].filter(Boolean),
     "description": productDescription,
     "sku": product._id,
@@ -263,7 +265,7 @@ export default function ProductDetail() {
               {/* Big Image */}
               <div className="aspect-square bg-gray-light rounded-lg overflow-hidden">
                 <img
-                  src={activeImageUrl || product.mainImage?.secure_url || '/placeholder.svg'}
+                  src={activeImageUrl || normalizeImageUrl(product.mainImage?.secure_url)}
                   alt={getProductTitle(product)}
                   className="w-full h-auto object-cover"
                   loading="eager"
@@ -274,7 +276,7 @@ export default function ProductDetail() {
               {/* Thumbnails */}
               <div className="grid grid-cols-4 gap-4">
                 {allImages.map((image, index) => {
-                  const isActive = (activeImageUrl || product.mainImage?.secure_url || '/placeholder.svg') === image.secure_url;
+                  const isActive = (activeImageUrl || normalizeImageUrl(product.mainImage?.secure_url)) === image.secure_url;
                   return (
                     <div
                       key={index}

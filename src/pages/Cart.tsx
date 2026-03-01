@@ -12,6 +12,7 @@ import { useProduct } from "@/hooks/useProduct";
 import { useTranslation } from "react-i18next";
 import { getProductTitle } from "@/lib/i18nHelpers";
 import { fbPixel } from "@/lib/fbPixel";
+import { normalizeImageUrl } from "@/lib/utils";
 
 const Cart = () => {
   const { t } = useTranslation();
@@ -308,7 +309,7 @@ const Cart = () => {
 
                   <Link to={`/product/${item.productId?._id}`}>
                     <img
-                      src={item.productId?.mainImage?.secure_url || '/placeholder.svg'}
+                      src={normalizeImageUrl(item.productId?.mainImage?.secure_url)}
                       alt={getProductTitle(item.productId) || 'Product'}
                       className="w-20 h-20 object-cover rounded-lg"
                       loading="lazy"

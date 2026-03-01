@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import { getProductTitle } from "@/lib/i18nHelpers";
+import { normalizeImageUrl } from "@/lib/utils";
 
 const Profile = () => {
   const { t } = useTranslation();
@@ -158,7 +159,7 @@ const Profile = () => {
                                         <div key={index} className="flex items-center gap-2">
                                           {item.product?.mainImage?.secure_url && (
                                             <img
-                                              src={item.product.mainImage.secure_url}
+                                              src={normalizeImageUrl(item.product.mainImage.secure_url)}
                                               alt={getProductTitle(item.product) || 'Product'}
                                               className="w-8 h-8 rounded object-cover"
                                               loading="lazy"

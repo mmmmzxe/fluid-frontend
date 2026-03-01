@@ -12,6 +12,7 @@ import GradientButton from '@/components/admin/GradientButton';
 import EnhancedBadge from '@/components/admin/EnhancedBadge';
 import { categoryApi, Category } from '@/services/adminApi';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
+import { normalizeImageUrl } from '@/lib/utils';
 
 const CategoryManagement: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -110,7 +111,7 @@ const CategoryManagement: React.FC = () => {
         <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100">
           {row.image?.secure_url ? (
             <img
-              src={row.image.secure_url}
+              src={normalizeImageUrl(row.image.secure_url)}
               alt={row.nameEnglish}
               className="w-full h-full object-cover"
             />
