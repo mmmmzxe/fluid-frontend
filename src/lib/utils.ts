@@ -20,7 +20,7 @@ export function normalizeImageUrl(url: string | undefined): string {
   
   // If URL starts with /uploads, add domain prefix
   if (url.startsWith('/uploads')) {
-    return `https://www.extrachic.cloud${url}`;
+    return `https://www.extrachic.cloud/api${url}`;
   }
   
   // Otherwise return as is (for local paths like /placeholder.svg)
