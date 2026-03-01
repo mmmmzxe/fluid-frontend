@@ -26,3 +26,4 @@ export function normalizeImageUrl(url: string | undefined): string {
   // Otherwise return as is (for local paths like /placeholder.svg)
   return url;
 }
+
