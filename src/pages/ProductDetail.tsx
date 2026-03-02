@@ -378,7 +378,7 @@ export default function ProductDetail() {
             {/* Sizes */}
             <div>
               <h3 className="font-medium mb-3">{t('productDetail.size')}</h3>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {availableSizes.map((size) => (
                   <button
                     key={size}

@@ -102,7 +102,7 @@ const Index = () => {
         className="py-16 bg-background"
         initial="initial"
         whileInView="animate"
-        viewport={{ once: false, amount: 0.3 }}
+      
         variants={fadeInUp}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -111,7 +111,7 @@ const Index = () => {
             variants={staggerContainer}
             initial="initial"
             whileInView="animate"
-            viewport={{ once: false, amount: 0.2 }}
+           
           >
             {brandLogos.map((brand, index) => (
               <motion.div
@@ -139,7 +139,7 @@ const Index = () => {
         className="py-16 bg-gray-light"
         initial="initial"
         whileInView="animate"
-        viewport={{ once: false, amount: 0.2 }}
+      
         variants={fadeInUp}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -156,13 +156,13 @@ const Index = () => {
             variants={staggerContainer}
             initial="initial"
             whileInView="animate"
-            viewport={{ once: false, amount: 0.1 }}
+           
           >
             {featuredProducts.map((product) => (
               <motion.div
                 key={product.id}
-                variants={fadeInUp}
-                whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                
+               
               >
                 <ProductCard product={product} />
               </motion.div>
@@ -173,7 +173,7 @@ const Index = () => {
             variants={fadeInUp}
             initial="initial"
             whileInView="animate"
-            viewport={{ once: false, amount: 0.5 }}
+           
           >
             <Button asChild variant="outline" size="lg">
               <Link to="/products">
@@ -197,10 +197,10 @@ const Index = () => {
 
       {/* Best Sellers */}
       <motion.section
-        className="py-16 bg-gray-light"
+        className="bg-gray-light"
         initial="initial"
         whileInView="animate"
-        viewport={{ once: false, amount: 0.2 }}
+       
         variants={fadeInUp}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -217,13 +217,13 @@ const Index = () => {
             variants={staggerContainer}
             initial="initial"
             whileInView="animate"
-            viewport={{ once: false, amount: 0.1 }}
+         
           >
             {bestSellingProducts.map((product) => (
               <motion.div
                 key={product.id}
                 variants={fadeInUp}
-                whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                
               >
                 <ProductCard product={product} />
               </motion.div>

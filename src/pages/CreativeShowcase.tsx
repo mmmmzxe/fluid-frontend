@@ -11,20 +11,17 @@ const CreativeShowcase = () => {
         offset: ["start end", "end start"]
     });
 
-    const y1 = useTransform(scrollYProgress, [0, 1], [0, -100]);
-    const y2 = useTransform(scrollYProgress, [0, 1], [0, 100]);
-    const rotate = useTransform(scrollYProgress, [0, 1], [0, 10]);
 
     return (
-        <section ref={containerRef} className="py-32 bg-background overflow-hidden relative">
+        <section ref={containerRef} className=" bg-background overflow-hidden relative">
             {/* Background Abstract Elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <motion.div
-                    style={{ y: y1, rotate }}
+           
                     className="absolute -top-20 -right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl"
                 />
                 <motion.div
-                    style={{ y: y2 }}
+           
                     className="absolute top-1/2 -left-20 w-72 h-72 bg-secondary/5 rounded-full blur-3xl"
                 />
             </div>
@@ -32,9 +29,9 @@ const CreativeShowcase = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Minimal Header */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
+           
+        
+                    
                     className="flex justify-between items-end mb-20"
                 >
                     <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-foreground to-foreground/50">
@@ -43,7 +40,7 @@ const CreativeShowcase = () => {
                         {t('showcase.vision')}
                     </h2>
                     <motion.div
-                        whileHover={{ scale: 1.1, rotate: 45 }}
+              
                         className="hidden md:flex h-24 w-24 rounded-full border-2 border-foreground items-center justify-center cursor-pointer"
                     >
                         <ArrowUpRight className="w-10 h-10" />
@@ -55,10 +52,7 @@ const CreativeShowcase = () => {
 
                     {/* Large Feature Item */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5 }}
+                    
                         className="md:col-span-2 md:row-span-2 relative group overflow-hidden rounded-3xl bg-muted"
                     >
                         <img
@@ -77,10 +71,7 @@ const CreativeShowcase = () => {
 
                     {/* Tall Item */}
                     <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
+           
                         className="md:row-span-2 relative group overflow-hidden rounded-3xl bg-muted"
                     >
                         <img
@@ -99,10 +90,7 @@ const CreativeShowcase = () => {
 
                     {/* Wide Item */}
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.4 }}
+                     
                         className="md:col-span-3 h-64 relative group overflow-hidden rounded-3xl bg-muted"
                     >
                         <img

@@ -38,13 +38,12 @@ const ExploreStyles = () => {
           className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: false, amount: 0.4 }}
-          transition={{ staggerChildren: 0.2 }}
+         
         >
           {/* Hero Image with Enhanced Effects */}
           <motion.div
             variants={fadeUp}
-            transition={{ duration: 0.8 }}
+     
             className="relative order-2 lg:order-1 group"
           >
             {/* Decorative Floating Orbs */}
@@ -78,9 +77,7 @@ const ExploreStyles = () => {
 
                 {/* Floating Badge */}
                 <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5, duration: 0.6 }}
+                 
                   className="absolute top-6 right-6 px-4 py-2 rounded-full bg-white/90 dark:bg-black/60 backdrop-blur-md border border-white/60 dark:border-white/20 shadow-lg"
                 >
                   <div className="flex items-center gap-2">
@@ -104,7 +101,7 @@ const ExploreStyles = () => {
               <motion.div
                 key={index}
                 variants={scaleIn}
-                transition={{ duration: 0.6, delay: index * 0.15 }}
+              
                 className="relative group cursor-pointer"
               >
                 {/* Glassmorphism Card */}
