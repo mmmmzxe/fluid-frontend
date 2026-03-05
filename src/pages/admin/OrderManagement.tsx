@@ -59,7 +59,7 @@ const OrderManagement: React.FC = () => {
       `Are you sure you want to cancel order ${order._id.slice(-8).toUpperCase()}? This action cannot be undone.`,
       async () => {
         try {
-          await orderApi.cancel(order._id);
+          await orderApi.updateStatus(order._id, 'cancelled');
           toast.success('Order cancelled successfully');
           fetchOrders();
         } catch (error) {
