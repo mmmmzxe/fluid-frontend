@@ -1,7 +1,7 @@
 import { Order } from '@/services/adminApi';
 import Logo from '@/assets/Logo.png';
 
-export const printInvoice = (order: Order) => {
+export const printInvoice = (order: Order, deposit: number = 0) => {
   const printWindow = window.open('', '_blank');
   if (!printWindow) return;
 
@@ -241,6 +241,16 @@ export const printInvoice = (order: Order) => {
           <span>TOTAL</span>
           <span>L.E${Number(order.finalPrice ?? 0).toFixed(2)}</span>
         </div>
+        ${deposit > 0 ? `
+        <div class="total-row" style="color: green;">
+          <span>Deposit Paid</span>
+          <span>- L.E${deposit.toFixed(2)}</span>
+        </div>
+        <div class="total-row grand-total" style="border-top: 2px solid #000;">
+          <span>REMAINING</span>
+          <span>L.E${(Number(order.finalPrice ?? 0) - deposit).toFixed(2)}</span>
+        </div>
+        ` : ''}
       </div>
 
       ${order.paymentWay ? `

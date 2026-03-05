@@ -122,7 +122,7 @@ const OrderManagement: React.FC = () => {
     const matchesStatus = !statusFilter || order.status === statusFilter;
 
     return matchesSearch && matchesStatus;
-  });
+  }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const columns: Column<Order>[] = [
     {
@@ -268,7 +268,7 @@ const OrderManagement: React.FC = () => {
         />
         <EnhancedStatsCard
           title="Total Revenue"
-          value={`L.E ${orders.reduce((sum, order) => sum + Number(order.finalPrice || 0), 0).toLocaleString()}`}
+          value={`L.E ${orders.filter(order => order.status === 'delivered').reduce((sum, order) => sum + Number(order.finalPrice || 0), 0).toLocaleString()}`}
           icon={DollarSign}
           gradient="green"
           loading={loading}

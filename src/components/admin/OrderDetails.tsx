@@ -17,8 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 // [EDIT] Import new icons for payment method
-import { Package, Truck, CheckCircle, XCircle, User, MapPin, CreditCard, Wallet, Printer } from 'lucide-react';
+import { Package, Truck, CheckCircle, XCircle, User, MapPin, CreditCard, Wallet, Printer, Plus } from 'lucide-react';
 import { Order, productApi, Product } from '@/services/adminApi';
 import { printInvoice } from '@/utils/printInvoice';
 
@@ -37,6 +38,8 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
 }) => {
   const [productDetails, setProductDetails] = useState<Record<string, Product>>({});
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [deposit, setDeposit] = useState<number>(0);
+  const [depositInput, setDepositInput] = useState<string>('');
 
   // Fetch ALL products once and create a mapping by ID
   useEffect(() => {
@@ -148,11 +151,43 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex justify-end mb-4">
-          <Button variant="outline" onClick={() => printInvoice(order)}>
+        <div className="flex items-center justify-end gap-4 mb-4">
+          <Button variant="outline" onClick={() => printInvoice(order, deposit)}>
             <Printer className="mr-2 h-4 w-4" />
             Print Invoice
           </Button>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              placeholder="Deposit amount"
+              value={depositInput}
+              onChange={(e) => setDepositInput(e.target.value)}
+              className="w-32"
+              min="0"
+            />
+            <Button
+              variant="secondary"
+              onClick={() => {
+                const amount = parseFloat(depositInput);
+                if (!isNaN(amount) && amount > 0) {
+                  setDeposit(amount);
+                  setDepositInput('');
+                }
+              }}
+            >
+              <Plus className="mr-1 h-4 w-4" />
+              Add Deposit
+            </Button>
+            {deposit > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setDeposit(0)}
+              >
+                Clear
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="space-y-6">
@@ -315,6 +350,19 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                   <span>Total:</span>
                   <span>L.E{Number(order.finalPrice ?? 0).toFixed(2)}</span>
                 </div>
+                {deposit > 0 && (
+                  <>
+                    <div className="flex justify-between text-green-600">
+                      <span>Deposit Paid:</span>
+                      <span>- L.E{deposit.toFixed(2)}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between font-bold text-lg text-primary">
+                      <span>Remaining Balance:</span>
+                      <span>L.E{(Number(order.finalPrice ?? 0) - deposit).toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>
