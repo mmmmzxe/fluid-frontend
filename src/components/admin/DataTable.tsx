@@ -198,7 +198,7 @@ function DataTable<T extends Record<string, any>>({
       {/* Table */}
       <div className="rounded-xl border border-white/20 bg-white/40 backdrop-blur-md shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
         <div className="overflow-x-auto">
-          <Table>
+          <Table className="min-w-[800px] md:min-w-full">
             <TableHeader className="bg-purple-50/30 border-b border-white/10">
               <TableRow className="hover:bg-transparent border-white/10">
                 {columns.map((column) => (

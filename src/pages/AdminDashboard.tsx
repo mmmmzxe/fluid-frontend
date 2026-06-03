@@ -90,14 +90,14 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-blue-50/30">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-gradient-to-br from-gray-50 via-purple-50/30 to-blue-50/30">
       <SidebarProvider>
         <AdminSidebar userRole={user.role as "superAdmin" | "admin"} />
         <SidebarInset>
           <AdminHeader user={{ ...user, id: user._id, role: user.role as "superAdmin" | "admin" }} />
-          <div className="flex flex-1 flex-col gap-4 p-6 pt-0 overflow-hidden">
+          <div className="flex flex-1 flex-col gap-4 p-3 md:p-6 pt-0 overflow-hidden min-w-0">
             <AdminBreadcrumb />
-            <div className="flex-1 overflow-auto rounded-xl bg-white/30 backdrop-blur-sm border border-white/20 shadow-sm p-6">
+            <div className="flex-1 overflow-auto rounded-xl bg-white/30 backdrop-blur-sm border border-white/20 shadow-sm p-3 md:p-6 min-w-0">
               <Outlet />
             </div>
           </div>

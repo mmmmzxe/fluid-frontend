@@ -1,7 +1,7 @@
 import { store } from "@/store/store";
 import { logout } from "@/store/slices/userSlice";
-
-const BASE_URL = "/api";
+import { getApiBaseUrl } from '@/lib/apiConfig';
+const BASE_URL = getApiBaseUrl();
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 

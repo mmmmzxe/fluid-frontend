@@ -28,8 +28,15 @@ const OrderManagement: React.FC = () => {
     try {
       setLoading(true);
       const response = await orderApi.getAll();
-      // Assuming the API response is the array directly
-      setOrders(response.data);
+      const fetchedOrders = response.data || [];
+      setOrders(fetchedOrders);
+      
+      // Update selectedOrder if it is currently open
+      setSelectedOrder((currentSelected) => {
+        if (!currentSelected) return null;
+        const updated = fetchedOrders.find((o) => o._id === currentSelected._id);
+        return updated || currentSelected;
+      });
     } catch (error) {
       toast.error('Failed to fetch orders');
       console.error('Error fetching orders:', error);
@@ -230,21 +237,21 @@ const OrderManagement: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 md:space-y-8">
       {/* Header with Gradient */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
             Order Management
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-sm md:text-base text-muted-foreground mt-1 md:mt-2">
             Manage customer orders and track their status
           </p>
         </div>
       </div>
 
       {/* Order Stats */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <EnhancedStatsCard
           title="Total Orders"
           value={orders.length}
@@ -314,6 +321,7 @@ const OrderManagement: React.FC = () => {
           }}
           onStatusUpdate={handleStatusUpdate}
           onCancel={handleCancelOrder}
+          onUpdate={fetchOrders}
         />
       )}
 

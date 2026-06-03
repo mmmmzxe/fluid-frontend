@@ -78,18 +78,18 @@ const AdminOverview: React.FC = () => {
   }, [salesSeries]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 md:space-y-8">
       {/* Header with Gradient */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
             Dashboard Overview
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-sm md:text-base text-muted-foreground mt-1 md:mt-2">
             Welcome back! Here's what's happening with your store today.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 self-start sm:self-auto">
           {role === 'superAdmin' && (
             <GradientButton gradient="purple" onClick={() => navigate('/admin/products')}>
               <Plus className="mr-2 h-4 w-4" />
@@ -104,7 +104,7 @@ const AdminOverview: React.FC = () => {
       </div>
 
       {/* Enhanced Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <EnhancedStatsCard
           title="Total Orders"
           value={totalOrders}

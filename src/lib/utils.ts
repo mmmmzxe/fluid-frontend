@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { getApiBaseUrl } from "@/lib/apiConfig";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -20,7 +21,7 @@ export function normalizeImageUrl(url: string | undefined): string {
   
   // If URL starts with /uploads, add domain prefix
   if (url.startsWith('/uploads')) {
-    return `https://www.extrachic.cloud/api${url}`;
+    return `${getApiBaseUrl()}${url}`;
   }
   
   // Otherwise return as is (for local paths like /placeholder.svg)

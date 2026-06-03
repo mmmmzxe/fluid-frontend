@@ -360,6 +360,15 @@ const OrderPage: React.FC = () => {
                 </select>
               </div>
 
+              <div className="p-4 rounded-xl bg-purple-50/50 border border-purple-100 text-purple-950 text-sm flex items-start gap-3 shadow-sm">
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-purple-100 text-purple-700 font-semibold text-xs">
+                  i
+                </div>
+                <p className="leading-relaxed font-medium">
+                  {t('order.depositNotice')}
+                </p>
+              </div>
+
               <div className="flex justify-end">
                 <Button type="submit" disabled={loading || isGuestDetailsLoading}>
                   {loading

@@ -10,12 +10,14 @@ import PageLoader from "@/components/PageLoader";
 import brandBanner from "@/assets/brand-banner.png";
 import ExploreStyles from "./ExploreStyles";
 import CollectionsHero from "./CollectionsHero";
+import CategorySection from "@/components/CategorySection";
+import CategoryLoader from "@/components/CategoryLoader";
 
 import Footer from "@/components/Footer";
 
 import TextVideoSection from "./MediaSection";
 import CreativeShowcase from "./CreativeShowcase";
-import { useProducts } from "@/hooks/useApi";
+import { useProducts, useCategories } from "@/hooks/useApi";
 
 const brandLogos = [
   { name: "GRAPHIC STUDIO", logo: "GS" },
@@ -68,6 +70,7 @@ const Index = () => {
   
   const isLoading = isFeaturedLoading || isBestSellingLoading;
 
+  const { categories, loading: categoriesLoading } = useCategories();
   if (isLoading) {
     return <PageLoader message="Loading homepage..." />;
   }
@@ -133,8 +136,16 @@ const Index = () => {
           </motion.div>
         </div>
       </motion.section>
-        
-      {/* Featured Products */}
+        {/* Categories with products */}
+        {!categoriesLoading && categories?.slice(0, 3).map((cat) => (
+          <CategoryLoader key={cat._id} category={cat} />
+        ))}
+ 
+      
+
+      <ExploreStyles />
+
+        {/* Featured Products */}
       <motion.section
         className="py-16 bg-gray-light"
         initial="initial"
@@ -183,9 +194,6 @@ const Index = () => {
           </motion.div>
         </div>
       </motion.section>
-      <ExploreStyles />
-
-   
 
 
   <CreativeShowcase />

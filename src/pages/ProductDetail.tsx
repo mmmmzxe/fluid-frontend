@@ -119,18 +119,25 @@ export default function ProductDetail() {
     }
 
     try {
-      const variantId = selectedVariant?._id || product._id;
-      const sizeId = selectedVariant?.size?.find(s => {
+      if (!selectedVariant) {
+        throw new Error('Please select a valid color and size');
+      }
+
+      const sizeObj = selectedVariant.size?.find(s => {
         // Handle both old and new structure
         if (s.size) return s.size === selectedSize;
         const keys = Object.keys(s).filter(key => key !== 'stock' && key !== '_id');
         return keys.length > 0 && s[keys[0]] === selectedSize;
-      })?._id || product._id;
+      });
+
+      if (!sizeObj?._id) {
+        throw new Error('Please select a valid size');
+      }
 
       const cartItem = {
         productId: product._id,
-        variantId,
-        sizeId,
+        variantId: selectedVariant._id,
+        sizeId: sizeObj._id,
         quantity,
         variant: {
           size: selectedSize,

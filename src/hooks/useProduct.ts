@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
+import { getApiBaseUrl } from "@/lib/apiConfig";
 
-const API_BASE = "https://extrachic.cloud/api";
+const API_BASE = getApiBaseUrl();
 
 export interface ApiProductDetail {
   _id: string;

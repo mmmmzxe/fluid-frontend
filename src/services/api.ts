@@ -1,6 +1,8 @@
 // API service functions for backend integration
 
-const API_BASE_URL = '/api';
+import { getApiBaseUrl } from '@/lib/apiConfig';
+
+const API_BASE_URL = getApiBaseUrl();
 
 export interface ApiCategory {
   _id: string;
@@ -121,8 +123,11 @@ export const fetchProducts = async (params?: {
   const response = await fetch(url, {
     headers: {
       'ngrok-skip-browser-warning': 'true',
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache'
+    },
+    // avoid returning 304 Not Modified cached responses
+    cache: 'no-store'
   });
   
   if (!response.ok) {

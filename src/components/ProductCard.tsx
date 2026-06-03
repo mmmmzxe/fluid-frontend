@@ -178,18 +178,21 @@ export function ProductCard({ product, className }: ProductCardProps) {
         return;
       }
       const selectedVariant = detail.variants?.find((v: any) => v.color === selectedColor);
-      const variantId = selectedVariant?._id || detail._id;
       const sizeObj = selectedVariant?.size?.find((s: any) => {
         if (s.size) return s.size === selectedSize;
         const keys = Object.keys(s).filter((k) => k !== 'stock' && k !== '_id');
         return keys.length > 0 && s[keys[0]] === selectedSize;
       });
-      const sizeId = sizeObj?._id || detail._id;
+
+      if (!selectedVariant || !sizeObj?._id) {
+        toast.error("Please choose a valid color and size");
+        return;
+      }
 
       await addItemToCart({
         productId: detail._id,
-        variantId,
-        sizeId,
+        variantId: selectedVariant._id,
+        sizeId: sizeObj._id,
         quantity: 1,
         variant: {
           size: selectedSize,

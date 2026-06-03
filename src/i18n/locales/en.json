@@ -359,7 +359,8 @@
     "placeSuccess": "Order placed successfully",
     "redirecting": "Redirecting to payment gateway...",
     "createError": "Failed to create order",
-    "loadError": "Could not load order details."
+    "loadError": "Could not load order details.",
+    "depositNotice": "Please note: We will call you to confirm your order and arrange a deposit for your order."
   },
   "contact": {
     "title": "Contact Us",

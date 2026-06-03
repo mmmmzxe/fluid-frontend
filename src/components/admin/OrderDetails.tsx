@@ -20,14 +20,16 @@ import {
 import { Input } from '@/components/ui/input';
 // [EDIT] Import new icons for payment method
 import { Package, Truck, CheckCircle, XCircle, User, MapPin, CreditCard, Wallet, Printer, Plus } from 'lucide-react';
-import { Order, productApi, Product } from '@/services/adminApi';
+import { Order, productApi, Product, orderApi } from '@/services/adminApi';
 import { printInvoice } from '@/utils/printInvoice';
+import { toast } from 'sonner';
 
 interface OrderDetailsProps {
   order: Order;
   onClose: () => void;
   onStatusUpdate: (order: Order, status: string) => void;
   onCancel: (order: Order) => void;
+  onUpdate?: () => void;
 }
 
 const OrderDetails: React.FC<OrderDetailsProps> = ({
@@ -35,11 +37,18 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
   onClose,
   onStatusUpdate,
   onCancel,
+  onUpdate,
 }) => {
   const [productDetails, setProductDetails] = useState<Record<string, Product>>({});
   const [loadingProducts, setLoadingProducts] = useState(true);
-  const [deposit, setDeposit] = useState<number>(0);
-  const [depositInput, setDepositInput] = useState<string>('');
+  const [deposit, setDeposit] = useState<number>(order.deposit || 0);
+  const [depositInput, setDepositInput] = useState<string>(order.deposit?.toString() || '0');
+  const [savingDeposit, setSavingDeposit] = useState(false);
+
+  useEffect(() => {
+    setDeposit(order.deposit || 0);
+    setDepositInput(order.deposit?.toString() || '0');
+  }, [order.deposit]);
 
   // Fetch ALL products once and create a mapping by ID
   useEffect(() => {
@@ -151,38 +160,70 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex items-center justify-end gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6 bg-white/40 backdrop-blur-sm p-4 rounded-xl border border-white/20 shadow-sm">
           <Button variant="outline" onClick={() => printInvoice(order, deposit)}>
             <Printer className="mr-2 h-4 w-4" />
             Print Invoice
           </Button>
-          <div className="flex items-center gap-2">
-            <Input
-              type="number"
-              placeholder="Deposit amount"
-              value={depositInput}
-              onChange={(e) => setDepositInput(e.target.value)}
-              className="w-32"
-              min="0"
-            />
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Deposit:</span>
+              <Input
+                type="number"
+                placeholder="Deposit amount"
+                value={depositInput}
+                onChange={(e) => setDepositInput(e.target.value)}
+                className="w-32 bg-white/50 border-white/20 focus:bg-white"
+                min="0"
+              />
+            </div>
             <Button
               variant="secondary"
-              onClick={() => {
+              disabled={savingDeposit}
+              onClick={async () => {
                 const amount = parseFloat(depositInput);
-                if (!isNaN(amount) && amount > 0) {
+                if (isNaN(amount) || amount < 0) {
+                  toast.error('Please enter a valid deposit amount');
+                  return;
+                }
+                try {
+                  setSavingDeposit(true);
+                  await orderApi.updateDeposit(order._id, amount);
                   setDeposit(amount);
-                  setDepositInput('');
+                  toast.success('Deposit updated successfully');
+                  if (onUpdate) {
+                    onUpdate();
+                  }
+                } catch (error) {
+                  console.error('Failed to update deposit:', error);
+                } finally {
+                  setSavingDeposit(false);
                 }
               }}
             >
-              <Plus className="mr-1 h-4 w-4" />
-              Add Deposit
+              {savingDeposit ? 'Saving...' : 'Save Deposit'}
             </Button>
             {deposit > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setDeposit(0)}
+                disabled={savingDeposit}
+                onClick={async () => {
+                  try {
+                    setSavingDeposit(true);
+                    await orderApi.updateDeposit(order._id, 0);
+                    setDeposit(0);
+                    setDepositInput('0');
+                    toast.success('Deposit cleared');
+                    if (onUpdate) {
+                      onUpdate();
+                    }
+                  } catch (error) {
+                    console.error('Failed to clear deposit:', error);
+                  } finally {
+                    setSavingDeposit(false);
+                  }
+                }}
               >
                 Clear
               </Button>

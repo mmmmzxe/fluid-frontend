@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { toast } from 'sonner';
+import { getApiBaseUrl } from '@/lib/apiConfig';
 
 // Types for API responses
 export interface ApiResponse<T = any> {
@@ -146,6 +147,7 @@ export interface Order {
   lastName?: string;
   paidAt?: string;
   email?: string;
+  deposit?: number;
 }
 
 export interface CartItem {
@@ -191,7 +193,7 @@ export interface Shipping {
 // Create axios instance
 const createApiInstance = (): AxiosInstance => {
   const instance = axios.create({
-    baseURL: '/api',
+    baseURL: getApiBaseUrl(),
     headers: {
       'Content-Type': 'application/json',
       'ngrok-skip-browser-warning': 'true',
@@ -454,6 +456,11 @@ export const orderApi = {
 
   updateStatus: async (id: string, status: string): Promise<ApiResponse<Order>> => {
     const response = await api.patch(`/order/${id}/status`, { status });
+    return response.data;
+  },
+
+  updateDeposit: async (id: string, deposit: number): Promise<ApiResponse<Order>> => {
+    const response = await api.patch(`/order/${id}/deposit`, { deposit });
     return response.data;
   },
 

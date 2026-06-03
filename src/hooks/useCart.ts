@@ -184,6 +184,7 @@ export function useCart() {
         productId: typeof it.productId === 'string' ? it.productId : it.productId._id,
         variantId: it.variantId,
         sizeId: it.sizeId,
+        variant: it.variant,
         quantity: it.quantity || 1,
       }));
       const payload = { ...details, products };
