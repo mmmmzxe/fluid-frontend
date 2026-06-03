@@ -24,11 +24,11 @@ echo "📤 Deploying to $HOST..."
 
 # Check if sshpass is installed for password automation
 if command -v sshpass &> /dev/null; then
-    sshpass -p "$PASSWORD" scp -r dist/* $USER@$HOST:$REMOTE_DIR
+    sshpass -p "$PASSWORD" scp -o StrictHostKeyChecking=no -r dist/* $USER@$HOST:$REMOTE_DIR
 else
     echo "⚠️ sshpass not found. You will need to enter the password manually."
     echo "Password: $PASSWORD"
-    scp -r dist/* $USER@$HOST:$REMOTE_DIR
+    scp -o StrictHostKeyChecking=no -r dist/* $USER@$HOST:$REMOTE_DIR
 fi
 
 if [ $? -eq 0 ]; then
