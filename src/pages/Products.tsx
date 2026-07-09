@@ -372,7 +372,7 @@ export default function Products() {
                 <h3 className="text-sm font-semibold text-navy">
                   {t('products.subcategories')}
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                   {(categories.find((c) => c._id === expandedCategoryId) as any)?.subCategories?.map((sub: any) => (
                     <button
                       key={sub._id}
@@ -383,11 +383,26 @@ export default function Products() {
                         setSelectedSubCategories([sub._id]);
                       }}
                       className={cn(
-                        "flex flex-col items-center justify-center text-white rounded-xl border bg-[#e8cec9] px-3 py-3 text-xs font-medium shadow-sm transition hover:shadow-md hover:border-primary/60",
-                        selectedSubCategories.includes(sub._id) && "border-primary bg-primary/5 text-primary"
+                        "flex flex-col items-center gap-2 rounded-xl text-center transition shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 pb-2",
+                        selectedSubCategories.includes(sub._id) && "ring-2 ring-primary/60 bg-primary/5"
                       )}
                     >
-                      <span className="truncate max-w-full">{getCategoryName(sub)}</span>
+                      {sub.image?.secure_url ? (
+                        <div className="w-full overflow-hidden rounded-xl aspect-square">
+                          <img
+                            src={normalizeImageUrl(sub.image.secure_url)}
+                            alt={getCategoryName(sub)}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-full aspect-square rounded-xl bg-[#e8cec9] flex items-center justify-center text-white text-xs font-semibold">
+                          {getCategoryName(sub).substring(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                      <p className="mt-2 mb-1 text-sm text-muted-foreground truncate max-w-full px-2">
+                        {getCategoryName(sub)}
+                      </p>
                     </button>
                   ))}
                 </div>

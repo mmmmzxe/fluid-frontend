@@ -5,7 +5,7 @@ import { ProductCard, transformApiProduct } from "@/components/ProductCard";
 import { useProducts } from "@/hooks/useApi";
 import { getCategoryName } from "@/lib/i18nHelpers";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
+import { cn, normalizeImageUrl } from "@/lib/utils";
 import type { ApiCategory, ApiSubCategory } from "@/services/api";
 
 type Props = {
@@ -61,10 +61,18 @@ export default function CategorySection({ category }: Props) {
                   key={sub._id}
                   value={sub._id}
                   className={cn(
-                    "rounded-full border border-transparent px-4 py-2 data-[state=active]:border-primary data-[state=active]:bg-primary/5 data-[state=active]:shadow-none"
+                    "rounded-full border border-transparent px-4 py-2 data-[state=active]:border-primary data-[state=active]:bg-primary/5 data-[state=active]:shadow-none",
+                    "flex items-center gap-2"
                   )}
                 >
-                  {getCategoryName(sub)}
+                  {sub.image?.secure_url && (
+                    <img
+                      src={normalizeImageUrl(sub.image.secure_url)}
+                      alt={getCategoryName(sub)}
+                      className="w-5 h-5 rounded-full object-cover"
+                    />
+                  )}
+                  <span>{getCategoryName(sub)}</span>
                 </TabsTrigger>
               ))}
             </TabsList>
