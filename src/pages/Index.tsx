@@ -94,7 +94,7 @@ const Index = () => {
  
   
         {/* Categories with products */}
-        {!categoriesLoading && categories?.slice(0, 3).map((cat) => (
+        {!categoriesLoading && categories?.map((cat) => (
           <CategoryLoader key={cat._id} category={cat} />
         ))}
  

@@ -26,7 +26,7 @@ export default function CategorySection({ category }: Props) {
     return product.subCategory === activeTab;
   });
 
-  const products = filteredProducts.map(transformApiProduct).slice(0, 4);
+  const products = filteredProducts.map(transformApiProduct);
 
   if (!loading && apiProducts.length === 0) return null;
 
