@@ -1,5 +1,5 @@
 import { FaFacebookF, FaInstagram } from "react-icons/fa";
-import logo from "@/assets/Logo.png";
+import logo from "@/assets/LogoNav.png";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useCategories } from "@/hooks/useApi";

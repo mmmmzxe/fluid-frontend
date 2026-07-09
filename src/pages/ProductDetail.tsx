@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Star, Heart, ShoppingBag, Minus, Plus, Truck, RotateCcw, Shield, Loader2 } from "lucide-react";
+import { Star, Heart, ShoppingBag, Minus, Plus, Truck, RotateCcw, Shield, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProductCard, transformApiProduct } from "@/components/ProductCard";
@@ -16,8 +16,12 @@ import { getProductTitle, getProductDescription } from "@/lib/i18nHelpers";
 import SEO from "@/components/SEO";
 import PageLoader from "@/components/PageLoader";
 import { fbPixel } from "@/lib/fbPixel";
-
-
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 
 import { addToFavorites, removeFromFavorites } from "@/store/slices/favoritesSlice";
 import { userApi } from '@/services/adminApi';
@@ -25,7 +29,7 @@ import { userApi } from '@/services/adminApi';
 // ... (other imports)
 
 export default function ProductDetail() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const dispatch = useAppDispatch();
   const favorites = useAppSelector((state) => state.favorites.items);
@@ -34,11 +38,13 @@ export default function ProductDetail() {
   const { isAuthenticated } = useAppSelector((state) => state.user);
 
   const [product, setProduct] = useState<ApiProductDetail | null>(null);
-  const [activeImageUrl, setActiveImageUrl] = useState<string>("");
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
+  const isRtl = i18n.language === "ar";
   const allImages = (product?.subImages && product.subImages.length > 0)
     ? [
       { secure_url: normalizeImageUrl(product.mainImage?.secure_url) },
@@ -48,16 +54,29 @@ export default function ProductDetail() {
       { secure_url: normalizeImageUrl(product?.mainImage?.secure_url) },
     ];
 
+  const onCarouselSelect = useCallback((api: CarouselApi) => {
+    if (!api) return;
+    setActiveImageIndex(api.selectedScrollSnap());
+  }, []);
+
+  useEffect(() => {
+    if (!carouselApi) return;
+    onCarouselSelect(carouselApi);
+    carouselApi.on("select", onCarouselSelect);
+    return () => {
+      carouselApi.off("select", onCarouselSelect);
+    };
+  }, [carouselApi, onCarouselSelect]);
+
   useEffect(() => {
     if (id) {
       fetchProductById(id)
         .then((productData) => {
           setProduct(productData);
+          setActiveImageIndex(0);
           if (productData?.variants && productData.variants.length > 0) {
             setSelectedColor(productData.variants[0].color);
           }
-          const initialMain = normalizeImageUrl(productData?.mainImage?.secure_url);
-          setActiveImageUrl(initialMain);
           
           // Track ViewContent event for Facebook Pixel
           fbPixel.viewContent({
@@ -88,7 +107,10 @@ export default function ProductDetail() {
             {error || t('productDetail.productNotFoundMessage')}
           </p>
           <Button asChild>
-            <Link to="/products">{t('productDetail.browseAllProducts')}</Link>
+            <Link to="/products" className="inline-flex items-center gap-1.5">
+              <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
+              {t('productDetail.browseAllProducts')}
+            </Link>
           </Button>
         </div>
         <Footer />
@@ -255,6 +277,13 @@ export default function ProductDetail() {
 
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <Link
+          to="/products"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-navy hover:text-primary transition-colors mb-3"
+        >
+          <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
+          {t('common.back')} {t('nav.allProducts')}
+        </Link>
         <nav className="text-sm text-muted-foreground">
           <Link to="/" className="hover:text-foreground">{t('common.home')}</Link>
           <span className="mx-2">/</span>
@@ -269,30 +298,65 @@ export default function ProductDetail() {
           {/* Product Images */}
           <div className="lg:col-span-2">
             <div className="flex flex-col gap-4">
-              {/* Big Image */}
-              <div className="aspect-square bg-gray-light rounded-lg overflow-hidden">
-                <img
-                  src={activeImageUrl || normalizeImageUrl(product.mainImage?.secure_url)}
-                  alt={getProductTitle(product)}
-                  className="w-full h-auto object-cover"
-                  loading="eager"
-                  // @ts-ignore
-                  fetchpriority="high"
-                />
+              {/* Image Slider */}
+              <div className="relative group">
+                <Carousel
+                  setApi={setCarouselApi}
+                  opts={{ loop: allImages.length > 1, direction: isRtl ? "rtl" : "ltr" }}
+                  className="w-full"
+                >
+                  <CarouselContent className="-ml-0">
+                    {allImages.map((image, index) => (
+                      <CarouselItem key={index} className="pl-0 basis-full">
+                        <div className="aspect-square bg-gray-light rounded-lg overflow-hidden">
+                          <img
+                            src={image.secure_url}
+                            alt={`${getProductTitle(product)} ${index + 1}`}
+                            className="w-full h-full object-cover select-none"
+                            loading={index === 0 ? "eager" : "lazy"}
+                            // @ts-ignore
+                            fetchpriority={index === 0 ? "high" : undefined}
+                            draggable={false}
+                          />
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                </Carousel>
+                {allImages.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      aria-label={t('common.previous', 'Previous image')}
+                      onClick={() => carouselApi?.scrollPrev()}
+                      className="absolute start-3 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-navy shadow-md opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-white"
+                    >
+                      <ChevronLeft className="h-5 w-5 rtl:rotate-180" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={t('common.next', 'Next image')}
+                      onClick={() => carouselApi?.scrollNext()}
+                      className="absolute end-3 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-navy shadow-md opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-white"
+                    >
+                      <ChevronRight className="h-5 w-5 rtl:rotate-180" />
+                    </button>
+                  </>
+                )}
               </div>
               {/* Thumbnails */}
               <div className="grid grid-cols-4 gap-4">
                 {allImages.map((image, index) => {
-                  const isActive = (activeImageUrl || normalizeImageUrl(product.mainImage?.secure_url)) === image.secure_url;
+                  const isActive = activeImageIndex === index;
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={index}
                       className={cn(
                         "aspect-square rounded-lg overflow-hidden cursor-pointer transition-all border",
                         isActive ? "border-navy opacity-100" : "border-transparent opacity-60 hover:opacity-100"
                       )}
-                      onMouseEnter={() => setActiveImageUrl(image.secure_url)}
-                      onClick={() => setActiveImageUrl(image.secure_url)}
+                      onClick={() => carouselApi?.scrollTo(index)}
                     >
                       <img
                         src={image.secure_url}
@@ -300,7 +364,7 @@ export default function ProductDetail() {
                         className="w-full h-full object-cover"
                         loading="lazy"
                       />
-                    </div>
+                    </button>
                   );
                 })}
               </div>
