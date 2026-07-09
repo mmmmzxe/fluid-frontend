@@ -69,7 +69,7 @@ export default function CategorySection({ category }: Props) {
                     <img
                       src={normalizeImageUrl(sub.image.secure_url)}
                       alt={getCategoryName(sub)}
-                      className="w-5 h-5 rounded-full object-cover"
+                      className="w-12 h-12 rounded-full object-cover"
                     />
                   )}
                   <span>{getCategoryName(sub)}</span>
