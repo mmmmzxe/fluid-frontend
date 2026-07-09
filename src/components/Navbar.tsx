@@ -59,7 +59,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 sm:h-10 sm:w-10 text-muted-foreground hover:text-foreground"
+                className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground hover:text-foreground"
                 asChild
               >
                 <Link to="/favorites" className="relative">
@@ -74,7 +74,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 sm:h-10 sm:w-10 text-muted-foreground hover:text-foreground"
+                className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground hover:text-foreground"
                 asChild
               >
                 <Link to={isAuthenticated ? "/profile" : "/login"}>
@@ -84,7 +84,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 sm:h-10 sm:w-10 text-muted-foreground hover:text-foreground"
+                className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground hover:text-foreground"
                 asChild
               >
                 <Link to="/cart" className="relative">
