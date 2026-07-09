@@ -49,8 +49,8 @@ export function Navbar() {
 
             {/* Logo - center */}
             <Link to="/" className="flex-shrink-0 flex justify-center items-center">
-              <img src={logoNav} className="h-16" alt="Logo Nav" />
-              <img src={logo} className="object-cover h-12" alt="Logo" />
+              <img src={logoNav} className="h-36 w-60" alt="Logo Nav" />
+             
             </Link>
 
             {/* Account & Shopping - right */}

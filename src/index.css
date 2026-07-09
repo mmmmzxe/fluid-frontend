@@ -20,7 +20,7 @@
     --primary-foreground: 0 0% 100%;
     --primary-hover: 11 85% 65%;
 
-    --secondary: 343 80% 81%;
+    --secondary: 10 40% 85%;
     --secondary-foreground: 215 25% 15%;
 
     --muted: 210 40% 96%;
@@ -126,7 +126,7 @@
     --primary-foreground: 0 0% 98%;
 
     /* Warm neutral secondary */
-    --secondary: 343 80% 81%;
+    --secondary: 10 40% 85%;
     --secondary-foreground: 0 0% 20%;
 
     /* Soft muted tones */

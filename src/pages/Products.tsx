@@ -42,8 +42,12 @@ export default function Products() {
   const [sortBy, setSortBy] = useState(searchParams.get("sort") || "newest");
   const [showOnSale, setShowOnSale] = useState(false);
   const [showNew, setShowNew] = useState(false);
-  const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
-  const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
+  const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>(
+    searchParams.get("subCategory") ? [searchParams.get("subCategory")!] : []
+  );
+  const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(
+    searchParams.get("category")
+  );
 
   // Fetch products (no-cache) and set defaults
   useEffect(() => {
@@ -85,9 +89,21 @@ export default function Products() {
     return () => { mounted = false; };
   }, []);
 
-  // Track category views from URL parameters
+  // Sync filters from URL parameters
   useEffect(() => {
     const categoryParam = searchParams.get("category");
+    const subCategoryParam = searchParams.get("subCategory");
+
+    if (categoryParam) {
+      setSelectedCategories([categoryParam]);
+      setExpandedCategoryId(categoryParam);
+    }
+    if (subCategoryParam) {
+      setSelectedSubCategories([subCategoryParam]);
+    } else if (categoryParam) {
+      setSelectedSubCategories([]);
+    }
+
     if (categoryParam && categories && categories.length > 0 && products && products.length > 0) {
       const category = categories.find(cat => cat._id === categoryParam);
       if (category) {
@@ -367,7 +383,7 @@ export default function Products() {
                         setSelectedSubCategories([sub._id]);
                       }}
                       className={cn(
-                        "flex flex-col items-center justify-center rounded-xl border bg-card px-3 py-3 text-xs font-medium shadow-sm transition hover:shadow-md hover:border-primary/60",
+                        "flex flex-col items-center justify-center text-white rounded-xl border bg-[#e8cec9] px-3 py-3 text-xs font-medium shadow-sm transition hover:shadow-md hover:border-primary/60",
                         selectedSubCategories.includes(sub._id) && "border-primary bg-primary/5 text-primary"
                       )}
                     >
@@ -551,7 +567,7 @@ export default function Products() {
             ) : (
               <div className={cn(
                 viewMode === "grid"
-                  ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
+                  ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6"
                   : "space-y-6"
               )}>
                 {filteredProducts.map((product) => (

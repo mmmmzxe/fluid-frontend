@@ -45,6 +45,7 @@ export interface ApiProduct {
   discountType?: string;
   stock?: number;
   category: string;
+  subCategory?: string;
   mainImage?: {
     secure_url: string;
     public_id: string;
