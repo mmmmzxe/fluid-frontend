@@ -89,53 +89,10 @@ const Index = () => {
       />
       <Navbar />
 
-      {/* Hero Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
-      >
-        <CollectionsHero />
-      </motion.div>
+
 
  
   
-         {/* Brand Logos */}
-      <motion.section
-        className="py-16 bg-background"
-        initial="initial"
-        whileInView="animate"
-      
-        variants={fadeInUp}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center"
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-           
-          >
-            {brandLogos.map((brand, index) => (
-              <motion.div
-                key={index}
-                className="text-center"
-                variants={scaleIn}
-                whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-              >
-                <div className="flex flex-col items-center space-y-2">
-                  <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center text-xs font-bold text-muted-foreground">
-                    {brand.logo}
-                  </div>
-                  <span className="text-xs text-muted-foreground font-medium">
-                    {brand.name}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </motion.section>
         {/* Categories with products */}
         {!categoriesLoading && categories?.slice(0, 3).map((cat) => (
           <CategoryLoader key={cat._id} category={cat} />
@@ -143,7 +100,7 @@ const Index = () => {
  
       
 
-      <ExploreStyles />
+
 
         {/* Featured Products */}
       <motion.section
@@ -196,8 +153,7 @@ const Index = () => {
       </motion.section>
 
 
-  <CreativeShowcase />
- 
+
 
 
 
