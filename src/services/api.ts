@@ -29,6 +29,11 @@ export interface ApiSubCategory {
   categoryId: string;
   slugEnglish: string;
   slugArabic: string;
+  image?: {
+    secure_url: string;
+    public_id: string;
+    _id?: string;
+  };
   createdAt: string;
   updatedAt: string;
 }

@@ -63,7 +63,9 @@ export interface SubCategory {
   slugEnglish?: string;
   slugArabic?: string;
   image?: {
-    _id: string;
+    secure_url: string;
+    public_id: string;
+    _id?: string;
   };
   createdBy?: any;
   createdAt: string;

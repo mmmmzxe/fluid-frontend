@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, FolderOpen, Layers, TrendingUp } from 'lucide-react';
+import { Plus, Edit, Trash2, FolderOpen, Layers, TrendingUp, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import DataTable, { Column } from '@/components/admin/DataTable';
 import SubCategoryForm from '@/components/admin/SubCategoryForm';
@@ -13,6 +13,7 @@ import EnhancedBadge from '@/components/admin/EnhancedBadge';
 import { subCategoryApi, categoryApi, SubCategory, Category } from '@/services/adminApi';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 import { getCategoryId, getCategoryName } from '@/utils/adminHelpers';
+import { normalizeImageUrl } from '@/lib/utils';
 
 const SubCategoryManagement: React.FC = () => {
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
@@ -125,6 +126,25 @@ const SubCategoryManagement: React.FC = () => {
   });
 
   const columns: Column<SubCategory>[] = [
+    {
+      key: 'image',
+      title: 'Image',
+      render: (value, row) => (
+        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100">
+          {row.image?.secure_url ? (
+            <img
+              src={normalizeImageUrl(row.image.secure_url)}
+              alt={row.nameEnglish}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400">
+              No Image
+            </div>
+          )}
+        </div>
+      ),
+    },
     {
       key: 'nameEnglish',
       title: 'Name (English)',
@@ -250,17 +270,17 @@ const SubCategoryManagement: React.FC = () => {
           loading={loading}
         />
         <EnhancedStatsCard
+          title="With Images"
+          value={subCategories?.filter(s => s.image?.secure_url).length || 0}
+          icon={Eye}
+          gradient="orange"
+          loading={loading}
+        />
+        <EnhancedStatsCard
           title="Avg per Category"
           value={stats.avgPerCategory}
           icon={TrendingUp}
           gradient="green"
-          loading={loading}
-        />
-        <EnhancedStatsCard
-          title="Max in Category"
-          value={stats.maxSubCategoriesInCategory}
-          icon={Layers}
-          gradient="orange"
           loading={loading}
         />
       </div>
