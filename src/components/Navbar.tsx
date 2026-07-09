@@ -59,7 +59,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground hover:text-foreground"
+                className="h-7 w-7 sm:hidden md:flex sm:h-8 sm:w-8 text-muted-foreground hover:text-foreground"
                 asChild
               >
                 <Link to="/favorites" className="relative">
@@ -185,7 +185,21 @@ export function Navbar() {
                   </Button>
                 </form>
               </div>
-
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 sm:flex md:hidden sm:h-8 sm:w-8 text-muted-foreground hover:text-foreground"
+                asChild
+              >
+                <Link to="/favorites" className="relative">
+                  <Heart className="h-5 w-5" />
+                  {favoritesItems.length > 0 && (
+                    <Badge className="absolute text-center flex justify-center -top-1.5 -end-1.5 h-4 min-w-4 px-1 p-0 text-[10px] leading-none">
+                      {favoritesItems.length}
+                    </Badge>
+                  )}
+                </Link>
+              </Button>
               {/* All Products Link */}
               <Link
                 to="/products"
