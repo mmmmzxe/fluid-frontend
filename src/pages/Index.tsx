@@ -68,9 +68,9 @@ const Index = () => {
   const apiBestSelling = apiProducts;
   const bestSellingProducts = apiBestSelling.map(transformApiProduct).slice(0, 4);
   
-  const isLoading = isFeaturedLoading || isBestSellingLoading;
-
   const { categories, loading: categoriesLoading } = useCategories();
+  const isLoading = isFeaturedLoading || isBestSellingLoading || categoriesLoading;
+
   if (isLoading) {
     return <PageLoader message="Loading homepage..." />;
   }

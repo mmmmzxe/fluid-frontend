@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react';
 import { fetchCategories, fetchProducts, ApiCategory, ApiProduct } from '@/services/api';
 
+const sortProductsByNewestFirst = (products: ApiProduct[]) => {
+  return [...products].sort((a, b) => {
+    const timeA = new Date(a.createdAt).getTime();
+    const timeB = new Date(b.createdAt).getTime();
+
+    if (Number.isNaN(timeA) || Number.isNaN(timeB)) {
+      return 0;
+    }
+
+    return timeB - timeA;
+  });
+};
+
 export const useCategories = () => {
   const [categories, setCategories] = useState<ApiCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +58,8 @@ export const useProducts = (params?: {
         setLoading(true);
         setError(null);
         const response = await fetchProducts(params);
-        setProducts(response.data);
+        const sortedProducts = params?.sortBy ? response.data : sortProductsByNewestFirst(response.data);
+        setProducts(sortedProducts);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load products');
       } finally {
