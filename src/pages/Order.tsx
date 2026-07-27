@@ -384,7 +384,7 @@ const OrderPage: React.FC = () => {
                       <div className="mt-2 text-sm bg-white p-3 rounded-lg border border-purple-100 flex flex-col gap-3">
                         <div className="flex items-center gap-2">
                           <img src="https://play-lh.googleusercontent.com/_ks0_XUbrZOkeiXkjaiZEK1S-j1skuQgF1E8S3ff702CoVyaiGnbfXPK74WjgxMk0Q4v2hlhu8WTHxp52Wq0" alt="InstaPay" className="h-6 object-contain" />
-                          <p>InstaPay: <span className="font-bold text-purple-800">011258560748</span></p>
+                          <p>InstaPay: <span className="font-bold text-purple-800">01128560748</span></p>
                         </div>
                         <div className="flex items-center gap-2">
                           <img src="https://drashrafsoliman.com/wp-content/uploads/2022/06/vc.png" alt="Vodafone Cash" className="h-6 object-contain" />
