@@ -150,6 +150,7 @@ export interface Order {
   paidAt?: string;
   email?: string;
   deposit?: number;
+  depositReceipt?: { secure_url: string; public_id: string };
 }
 
 export interface CartItem {
@@ -438,6 +439,14 @@ export const orderApi = {
 
   create: async (data: any): Promise<ApiResponse<Order>> => {
     const response = await api.post('/order', data);
+    return response.data;
+  },
+  uploadReceipt: async (formData: FormData): Promise<ApiResponse<{ receipt: { secure_url: string; public_id: string } }>> => {
+    const response = await api.post('/order/upload-receipt', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
   // داخل كائن orderApi

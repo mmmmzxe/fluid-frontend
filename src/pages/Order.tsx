@@ -37,6 +37,7 @@ const OrderPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [discountPercent, setDiscountPercent] = useState<number>(10);
   const [loading, setLoading] = useState(false);
+  const [depositPhoto, setDepositPhoto] = useState<File | null>(null);
 
   // States for guest cart details
   const [detailedCart, setDetailedCart] = useState<any[]>([]);
@@ -171,31 +172,43 @@ const OrderPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic validation
     if (!address.trim() || !phone.trim()) {
       return toast.error(t('order.requiredFields'));
     }
-    if (!isAuthenticated && (!firstName.trim() || !lastName.trim() || !email.trim())) {
-      return toast.error(t('order.guestRequiredFields'));
+    if (paymentWay !== 'card' && !depositPhoto) {
+      return toast.error("Please upload the deposit receipt to proceed");
     }
 
     setLoading(true);
     try {
       let createOrderResponse;
 
-      // Step 1: Create the order (for both guests and logged-in users)
+      // Step 1: Upload the deposit receipt if needed
+      let receiptData: any = null;
+      if (paymentWay !== 'card' && depositPhoto) {
+        const formData = new FormData();
+        formData.append('receipt', depositPhoto);
+        try {
+          const uploadRes = await orderApi.uploadReceipt(formData);
+          receiptData = uploadRes.data?.receipt || uploadRes.receipt; // Adjust based on actual structure returned
+        } catch (uploadError) {
+          throw new Error("Failed to upload deposit receipt. Please try again.");
+        }
+      }
+
+      // Step 2: Create the order (for both guests and logged-in users)
       // Note: shippingId is always required by the API
       // Free shipping (itemsTotal >= 2000) is handled by the backend
       
       if (isAuthenticated) {
-        const payload = { address, phone, note: note || 'null', paymentWay, shippingId };
+        const payload = { address, phone, note: note || 'null', paymentWay, shippingId, depositReceipt: receiptData };
         createOrderResponse = await orderApi.create(payload);
       } else {
-        const payload = { firstName, lastName, address, phone, note: note || 'null', paymentWay, shippingId, email, discountPercent };
+        const payload = { firstName, lastName, address, phone, note: note || 'null', paymentWay, shippingId, email, discountPercent, depositReceipt: receiptData };
         createOrderResponse = await checkoutWithoutLogin(payload);
       }
 
-      // Step 2: Handle based on payment method
+      // Step 3: Handle based on payment method
       if (paymentWay === 'cash') {
         // Track Purchase event for Facebook Pixel
         const contents = detailedCart.map(item => ({
@@ -360,14 +373,71 @@ const OrderPage: React.FC = () => {
                 </select>
               </div>
 
-              <div className="p-4 rounded-xl bg-purple-50/50 border border-purple-100 text-purple-950 text-sm flex items-start gap-3 shadow-sm">
-                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-purple-100 text-purple-700 font-semibold text-xs">
-                  i
-                </div>
-                <p className="leading-relaxed font-medium">
-                  {t('order.depositNotice')}
-                </p>
-              </div>
+              {paymentWay !== 'card' && (
+                <>
+                  <div className="p-4 rounded-xl bg-purple-50/50 border border-purple-100 text-purple-950 text-sm flex items-start gap-3 shadow-sm">
+                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-purple-100 text-purple-700 font-semibold text-xs mt-0.5">
+                      i
+                    </div>
+                    <div className="leading-relaxed font-medium">
+                      <p>{t('order.depositNotice')}</p>
+                      <div className="mt-2 text-sm bg-white p-3 rounded-lg border border-purple-100 flex flex-col gap-3">
+                        <div className="flex items-center gap-2">
+                          <img src="https://play-lh.googleusercontent.com/_ks0_XUbrZOkeiXkjaiZEK1S-j1skuQgF1E8S3ff702CoVyaiGnbfXPK74WjgxMk0Q4v2hlhu8WTHxp52Wq0" alt="InstaPay" className="h-6 object-contain" />
+                          <p>InstaPay: <span className="font-bold text-purple-800">011258560748</span></p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <img src="https://drashrafsoliman.com/wp-content/uploads/2022/06/vc.png" alt="Vodafone Cash" className="h-6 object-contain" />
+                          <p>Vodafone Cash: <span className="font-bold text-purple-800">01286198016</span></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium">Deposit Receipt (Required) *</label>
+                    <div className="flex flex-col items-center justify-center w-full">
+                      <label 
+                        htmlFor="deposit-upload" 
+                        className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50/50 hover:bg-gray-100/50 transition-colors relative overflow-hidden"
+                      >
+                        {depositPhoto ? (
+                          <div className="relative w-full h-full flex items-center justify-center p-2">
+                            <img 
+                              src={URL.createObjectURL(depositPhoto)} 
+                              alt="Deposit Preview" 
+                              className="max-h-full max-w-full object-contain rounded-md"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center text-white font-medium text-sm backdrop-blur-sm">
+                              Click to change image
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg className="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <p className="mb-1 text-sm text-gray-500 font-semibold">Click to upload deposit receipt</p>
+                            <p className="text-xs text-gray-500">SVG, PNG, JPG or GIF (MAX. 5MB)</p>
+                          </div>
+                        )}
+                        <input 
+                          id="deposit-upload" 
+                          type="file" 
+                          className="hidden" 
+                          accept="image/*"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              setDepositPhoto(e.target.files[0]);
+                            }
+                          }}
+                          required={paymentWay !== 'card'}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div className="flex justify-end">
                 <Button type="submit" disabled={loading || isGuestDetailsLoading}>

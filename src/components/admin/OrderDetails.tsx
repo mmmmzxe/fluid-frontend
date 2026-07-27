@@ -278,23 +278,48 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                 Payment Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div>
-                <span className="font-medium">Method:</span>
-                <span className="ml-2 capitalize bg-gray-100 text-gray-800 px-2 py-1 rounded-md">
-                  {order.paymentWay}
-                </span>
-              </div>
-
-              {order.paidAt ? (
+            <CardContent className="space-y-4 text-sm">
+              <div className="space-y-2">
                 <div>
-                  <span className="font-medium">Paid At:</span>
-                  <span className="ml-2 text-green-700 font-semibold">
-                    {new Date(order.paidAt).toLocaleString()}
+                  <span className="font-medium">Method:</span>
+                  <span className="ml-2 capitalize bg-gray-100 text-gray-800 px-2 py-1 rounded-md">
+                    {order.paymentWay}
                   </span>
                 </div>
-              ) : (
-                <div className="text-red-500 font-medium">Not Paid Yet</div>
+
+                {order.paidAt ? (
+                  <div>
+                    <span className="font-medium">Paid At:</span>
+                    <span className="ml-2 text-green-700 font-semibold">
+                      {new Date(order.paidAt).toLocaleString()}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="text-red-500 font-medium">Not Paid Yet</div>
+                )}
+              </div>
+
+              {order.depositReceipt?.secure_url && (
+                <div className="pt-4 border-t border-gray-100">
+                  <div className="font-medium mb-3 flex items-center gap-2">
+                    <Printer className="h-4 w-4" />
+                    Deposit Receipt
+                  </div>
+                  <div className="relative group rounded-lg overflow-hidden border bg-gray-50 flex items-center justify-center p-2">
+                    <img 
+                      src={order.depositReceipt.secure_url} 
+                      alt="Deposit Receipt" 
+                      className="max-h-64 object-contain rounded-md shadow-sm"
+                      onClick={() => window.open(order.depositReceipt?.secure_url, '_blank')}
+                      style={{ cursor: 'pointer' }}
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                      <span className="text-white font-medium bg-black/50 px-3 py-1 rounded-full text-xs backdrop-blur-sm">
+                        Click to enlarge
+                      </span>
+                    </div>
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
