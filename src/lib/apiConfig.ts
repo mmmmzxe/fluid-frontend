@@ -1,4 +1,4 @@
-const DEFAULT_CLOUD_API_BASE = "http://localhost:5000/api";
+const DEFAULT_CLOUD_API_BASE = "https://extrachic.com/api";
 
 export function getApiBaseUrl() {
 
