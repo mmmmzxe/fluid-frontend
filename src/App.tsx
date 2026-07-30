@@ -9,6 +9,7 @@ import { store } from "@/store/store";
 import { AppInitializer } from "@/components/AppInitializer";
 import { useEffect } from "react";
 import { fbPixel } from "@/lib/fbPixel";
+import { pageview } from "@/lib/gtag";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -50,6 +51,8 @@ function PageViewTracker() {
   useEffect(() => {
     // Track PageView on every route change
     fbPixel.pageView();
+    // Send Google Analytics page_view for SPA route changes
+    pageview(location.pathname);
   }, [location.pathname]);
   
   return null;
