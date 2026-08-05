@@ -186,7 +186,7 @@ export default function ProductDetail() {
         // Check if item with same variant and size exists
         const existingItemIndex = guestCart.findIndex(
           (item: any) =>
-            item.variantId === variantId &&
+            item.variantId === selectedVariant._id &&
             item.variant.size === selectedSize &&
             item.variant.color === selectedColor
         );
