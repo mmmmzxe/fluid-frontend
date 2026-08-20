@@ -310,14 +310,12 @@ const AnnouncementManagement: React.FC = () => {
       </Card>
 
       <ConfirmDialog
-        isOpen={dialogState.isOpen}
+        open={dialogState.open}
+        onOpenChange={closeDialog}
         title={dialogState.title}
-        message={dialogState.message}
-        confirmText={dialogState.confirmText}
-        cancelText={dialogState.cancelText}
-        variant={dialogState.variant}
+        description={dialogState.description}
         onConfirm={dialogState.onConfirm}
-        onClose={closeDialog}
+        variant={dialogState.variant}
       />
     </div>
   );
