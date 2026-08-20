@@ -663,4 +663,58 @@ export const shippingApi = {
   },
 };
 
+// Announcement Ticker API
+export interface Announcement {
+  _id: string;
+  textEn: string;
+  textAr: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export const announcementApi = {
+  getAll: async (): Promise<ApiResponse<Announcement[]>> => {
+    const response = await api.get('/announcement');
+    const raw = response.data as any;
+    const list: Announcement[] = Array.isArray(raw?.announcements)
+      ? raw.announcements
+      : Array.isArray(raw?.data)
+        ? raw.data
+        : Array.isArray(raw)
+          ? raw
+          : [];
+    return { message: raw?.message || 'Done', data: list } as ApiResponse<Announcement[]>;
+  },
+
+  getActive: async (): Promise<ApiResponse<Announcement[]>> => {
+    const response = await api.get('/announcement/active');
+    const raw = response.data as any;
+    const list: Announcement[] = Array.isArray(raw?.announcements)
+      ? raw.announcements
+      : Array.isArray(raw?.data)
+        ? raw.data
+        : Array.isArray(raw)
+          ? raw
+          : [];
+    return { message: raw?.message || 'Done', data: list } as ApiResponse<Announcement[]>;
+  },
+
+  create: async (data: { textEn: string; textAr: string; isActive?: boolean }): Promise<ApiResponse<Announcement>> => {
+    const response = await api.post('/announcement', data);
+    return response.data;
+  },
+
+  update: async (id: string, data: Partial<{ textEn: string; textAr: string; isActive: boolean }>): Promise<ApiResponse<Announcement>> => {
+    const response = await api.patch(`/announcement/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<ApiResponse> => {
+    const response = await api.delete(`/announcement/${id}`);
+    return response.data;
+  },
+};
+
 export default api;
+

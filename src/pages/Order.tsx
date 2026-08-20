@@ -44,106 +44,116 @@ const OrderPage: React.FC = () => {
   const [isGuestDetailsLoading, setIsGuestDetailsLoading] = useState(false);
 
 
-  // Load base cart and shipping options
+  // Load base cart, shipping options, and build detailed cart from fresh data
   useEffect(() => {
-    fetchCart().catch(() => { });
-    (async () => {
-      try {
-        const res = await shippingApi.getAll();
+    let cancelled = false;
+
+    const init = async () => {
+      // Fetch shipping options (parallel with cart fetch)
+      const shippingPromise = shippingApi.getAll().then((res) => {
+        if (cancelled) return;
         const list = res.data || [];
         setShippingOptions(list);
         if (list.length > 0) setShippingId(list[0]._id);
-      } catch (e: any) {
-        // silent
-      }
-    })();
-  }, [fetchCart]);
+      }).catch(() => {});
 
-  // Fetch full product details for guest users
-  useEffect(() => {
-    const augmentGuestCart = async () => {
+      // Always fetch fresh cart first so we don't use stale Redux state
+      let freshCart: any[] = [];
+      try {
+        const result = await fetchCart();
+        if (cancelled) return;
+        freshCart = Array.isArray(result) ? result : [];
+      } catch {
+        if (cancelled) return;
+      }
+
+      await shippingPromise;
+      if (cancelled) return;
+
+      // Now build detailedCart from the fresh data
       if (isAuthenticated) {
-        setDetailedCart(cart);
+        setDetailedCart(freshCart);
         return;
       }
-      if (cart.length > 0) {
-        const needsDetails = cart.some(item => typeof item.productId === 'string');
-        if (needsDetails) {
-          setIsGuestDetailsLoading(true);
-          try {
-            // Use Promise.allSettled to handle individual failures gracefully
-            const results = await Promise.allSettled(
-              cart.map(async (item: any) => {
-                if (typeof item.productId === 'string') {
-                  try {
-                    const productDetails = await fetchProductById(item.productId);
-                    return { ...item, productId: productDetails };
-                  } catch (error: any) {
-                    // If product not found (404), return null to filter it out
-                    console.warn(`Product ${item.productId} not found, removing from cart`);
-                    return null;
-                  }
-                }
-                return item;
-              })
-            );
 
-            // Filter out failed items and extract successful results
-            const augmentedItems = results
-              .map((result) => result.status === 'fulfilled' ? result.value : null)
-              .filter((item) => item !== null);
+      // Guest: productIds may be strings that need details fetched
+      if (freshCart.length === 0) {
+        setDetailedCart([]);
+        return;
+      }
 
-            // Update guest cart in localStorage to remove invalid products
-            const invalidProductIds = new Set<string>();
-            results.forEach((result, index) => {
-              if (result.status === 'rejected' || (result.status === 'fulfilled' && result.value === null)) {
-                const item = cart[index];
-                if (item && typeof item.productId === 'string') {
-                  invalidProductIds.add(item.productId);
-                } else if (item && item._id) {
-                  invalidProductIds.add(item._id);
-                }
-              }
-            });
+      const needsDetails = freshCart.some((item: any) => typeof item.productId === 'string');
+      if (!needsDetails) {
+        setDetailedCart(freshCart);
+        return;
+      }
 
-            if (invalidProductIds.size > 0) {
-              const rawCart = localStorage.getItem('guestCart');
-              if (rawCart) {
-                try {
-                  let guestCart = JSON.parse(rawCart);
-                  guestCart = guestCart.filter((item: any) => {
-                    const itemId = typeof item.productId === 'string' ? item.productId : item.productId?._id;
-                    return !invalidProductIds.has(itemId) && !invalidProductIds.has(item._id);
-                  });
-                  localStorage.setItem('guestCart', JSON.stringify(guestCart));
-                  // Refresh cart from localStorage
-                  await fetchCart();
-                  
-                  if (invalidProductIds.size > 0) {
-                    toast.warning(t('cart.someProductsRemoved') || 'Some products are no longer available and have been removed from your cart');
-                  }
-                } catch (e) {
-                  console.error('Error updating guest cart:', e);
-                }
+      setIsGuestDetailsLoading(true);
+      try {
+        const results = await Promise.allSettled(
+          freshCart.map(async (item: any) => {
+            if (typeof item.productId === 'string') {
+              try {
+                const productDetails = await fetchProductById(item.productId);
+                return { ...item, productId: productDetails };
+              } catch {
+                console.warn(`Product ${item.productId} not found, removing from cart`);
+                return null;
               }
             }
+            return item;
+          })
+        );
 
-            setDetailedCart(augmentedItems);
-          } catch (error) {
-            console.error("Error fetching product details for guest order:", error);
-            toast.error(t('order.loadError'));
-          } finally {
-            setIsGuestDetailsLoading(false);
+        if (cancelled) return;
+
+        const augmentedItems = results
+          .map((result) => result.status === 'fulfilled' ? result.value : null)
+          .filter((item) => item !== null);
+
+        // Remove invalid products from localStorage guest cart
+        const invalidProductIds = new Set<string>();
+        results.forEach((result, index) => {
+          if (result.status === 'rejected' || (result.status === 'fulfilled' && result.value === null)) {
+            const item = freshCart[index];
+            if (item && typeof item.productId === 'string') {
+              invalidProductIds.add(item.productId);
+            } else if (item && item._id) {
+              invalidProductIds.add(item._id);
+            }
           }
-        } else {
-          setDetailedCart(cart);
+        });
+
+        if (invalidProductIds.size > 0) {
+          const rawCart = localStorage.getItem('guestCart');
+          if (rawCart) {
+            try {
+              let guestCart = JSON.parse(rawCart);
+              guestCart = guestCart.filter((item: any) => {
+                const itemId = typeof item.productId === 'string' ? item.productId : item.productId?._id;
+                return !invalidProductIds.has(itemId) && !invalidProductIds.has(item._id);
+              });
+              localStorage.setItem('guestCart', JSON.stringify(guestCart));
+              await fetchCart();
+              toast.warning(t('cart.someProductsRemoved') || 'Some products are no longer available and have been removed from your cart');
+            } catch (e) {
+              console.error('Error updating guest cart:', e);
+            }
+          }
         }
-      } else {
-        setDetailedCart([]);
+
+        if (!cancelled) setDetailedCart(augmentedItems);
+      } catch (error) {
+        console.error("Error fetching product details for guest order:", error);
+        if (!cancelled) toast.error(t('order.loadError'));
+      } finally {
+        if (!cancelled) setIsGuestDetailsLoading(false);
       }
     };
-    augmentGuestCart();
-  }, [cart, isAuthenticated, fetchProductById, fetchCart, t]);
+
+    init();
+    return () => { cancelled = true; };
+  }, [fetchCart, isAuthenticated, fetchProductById, t]);
 
   // Track InitiateCheckout event when cart is loaded
   useEffect(() => {
@@ -175,7 +185,7 @@ const OrderPage: React.FC = () => {
     if (!address.trim() || !phone.trim()) {
       return toast.error(t('order.requiredFields'));
     }
-    if (paymentWay !== 'card' && !depositPhoto) {
+    if ((paymentWay === 'instapay' || paymentWay === 'vodafone_cash') && !depositPhoto) {
       return toast.error("Please upload the deposit receipt to proceed");
     }
 
@@ -185,7 +195,7 @@ const OrderPage: React.FC = () => {
 
       // Step 1: Upload the deposit receipt if needed
       let receiptData: any = null;
-      if (paymentWay !== 'card' && depositPhoto) {
+      if ((paymentWay === 'instapay' || paymentWay === 'vodafone_cash') && depositPhoto) {
         const formData = new FormData();
         formData.append('receipt', depositPhoto);
         try {
@@ -209,7 +219,7 @@ const OrderPage: React.FC = () => {
       }
 
       // Step 3: Handle based on payment method
-      if (paymentWay === 'cash') {
+      if (paymentWay === 'cash' || paymentWay === 'instapay' || paymentWay === 'vodafone_cash') {
         // Track Purchase event for Facebook Pixel
         const contents = detailedCart.map(item => ({
           id: item.productId?._id || item.productId,
@@ -349,10 +359,50 @@ const OrderPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">{t('order.paymentMethod')}</label>
-                <select value={paymentWay} onChange={(e) => setPaymentWay(e.target.value)} className="w-full border rounded-md p-2 bg-background">
-                  <option value="cash">{t('order.cash')}</option>
-                </select>
+                <label className="block text-sm font-medium mb-2">{t('order.paymentMethod')}</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {/* Cash Option */}
+                  <label
+                    htmlFor="pay-cash"
+                    className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                      paymentWay === 'cash'
+                        ? 'border-emerald-500 bg-emerald-50/60 shadow-sm'
+                        : 'border-gray-200 hover:border-emerald-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <input id="pay-cash" type="radio" name="paymentWay" value="cash" checked={paymentWay === 'cash'} onChange={(e) => { setPaymentWay(e.target.value); setDepositPhoto(null); }} className="sr-only" />
+                    <span className="text-2xl">💵</span>
+                    <span className="text-xs font-semibold text-center">{t('order.cash') || 'Cash'}</span>
+                  </label>
+
+                  {/* InstaPay Option */}
+                  <label
+                    htmlFor="pay-instapay"
+                    className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                      paymentWay === 'instapay'
+                        ? 'border-purple-500 bg-purple-50/60 shadow-sm'
+                        : 'border-gray-200 hover:border-purple-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <input id="pay-instapay" type="radio" name="paymentWay" value="instapay" checked={paymentWay === 'instapay'} onChange={(e) => { setPaymentWay(e.target.value); setDepositPhoto(null); }} className="sr-only" />
+                    <img src="https://play-lh.googleusercontent.com/_ks0_XUbrZOkeiXkjaiZEK1S-j1skuQgF1E8S3ff702CoVyaiGnbfXPK74WjgxMk0Q4v2hlhu8WTHxp52Wq0" alt="InstaPay" className="h-7 w-7 object-contain rounded-md" />
+                    <span className="text-xs font-semibold text-center">InstaPay</span>
+                  </label>
+
+                  {/* Vodafone Cash Option */}
+                  <label
+                    htmlFor="pay-vodafone"
+                    className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                      paymentWay === 'vodafone_cash'
+                        ? 'border-red-500 bg-red-50/60 shadow-sm'
+                        : 'border-gray-200 hover:border-red-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <input id="pay-vodafone" type="radio" name="paymentWay" value="vodafone_cash" checked={paymentWay === 'vodafone_cash'} onChange={(e) => { setPaymentWay(e.target.value); setDepositPhoto(null); }} className="sr-only" />
+                    <img src="https://drashrafsoliman.com/wp-content/uploads/2022/06/vc.png" alt="Vodafone Cash" className="h-7 w-7 object-contain rounded-md" />
+                    <span className="text-xs font-semibold text-center">Vodafone Cash</span>
+                  </label>
+                </div>
               </div>
 
               <div>
@@ -372,66 +422,84 @@ const OrderPage: React.FC = () => {
                 </select>
               </div>
 
-              {paymentWay !== 'card' && (
+              {/* Cash: show call-back notice, no upload */}
+              {paymentWay === 'cash' && (
+                <div className="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200 text-emerald-900 text-sm flex items-start gap-3 shadow-sm">
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 font-semibold text-xs mt-0.5">📞</div>
+                  <p className="leading-relaxed font-medium">Please note: We will call you to confirm your order and arrange a deposit for your order.</p>
+                </div>
+              )}
+
+              {/* InstaPay: show account info + required upload */}
+              {paymentWay === 'instapay' && (
                 <>
                   <div className="p-4 rounded-xl bg-purple-50/50 border border-purple-100 text-purple-950 text-sm flex items-start gap-3 shadow-sm">
-                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-purple-100 text-purple-700 font-semibold text-xs mt-0.5">
-                      i
-                    </div>
-                    <div className="leading-relaxed font-medium">
-                      <p>{t('order.depositNotice')}</p>
-                      <div className="mt-2 text-sm bg-white p-3 rounded-lg border border-purple-100 flex flex-col gap-3">
-                        <div className="flex items-center gap-2">
-                          <img src="https://play-lh.googleusercontent.com/_ks0_XUbrZOkeiXkjaiZEK1S-j1skuQgF1E8S3ff702CoVyaiGnbfXPK74WjgxMk0Q4v2hlhu8WTHxp52Wq0" alt="InstaPay" className="h-6 object-contain" />
-                          <p>InstaPay: <span className="font-bold text-purple-800">01128560748</span></p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <img src="https://drashrafsoliman.com/wp-content/uploads/2022/06/vc.png" alt="Vodafone Cash" className="h-6 object-contain" />
-                          <p>Vodafone Cash: <span className="font-bold text-purple-800">01286198016</span></p>
-                        </div>
-                      </div>
+                    <img src="https://play-lh.googleusercontent.com/_ks0_XUbrZOkeiXkjaiZEK1S-j1skuQgF1E8S3ff702CoVyaiGnbfXPK74WjgxMk0Q4v2hlhu8WTHxp52Wq0" alt="InstaPay" className="h-8 w-8 object-contain rounded-md shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold mb-0.5">Transfer to InstaPay</p>
+                      <p className="text-base font-bold text-purple-800 tracking-widest">01128560748</p>
+                      <p className="text-xs text-purple-600 mt-1">After transferring, upload your receipt below.</p>
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium">Deposit Receipt (Required) *</label>
                     <div className="flex flex-col items-center justify-center w-full">
-                      <label 
-                        htmlFor="deposit-upload" 
-                        className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50/50 hover:bg-gray-100/50 transition-colors relative overflow-hidden"
+                      <label
+                        htmlFor="deposit-upload"
+                        className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-purple-300 rounded-xl cursor-pointer bg-purple-50/30 hover:bg-purple-50/60 transition-colors relative overflow-hidden"
                       >
                         {depositPhoto ? (
                           <div className="relative w-full h-full flex items-center justify-center p-2">
-                            <img 
-                              src={URL.createObjectURL(depositPhoto)} 
-                              alt="Deposit Preview" 
-                              className="max-h-full max-w-full object-contain rounded-md"
-                            />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center text-white font-medium text-sm backdrop-blur-sm">
-                              Click to change image
-                            </div>
+                            <img src={URL.createObjectURL(depositPhoto)} alt="Deposit Preview" className="max-h-full max-w-full object-contain rounded-md" />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center text-white font-medium text-sm backdrop-blur-sm">Click to change image</div>
                           </div>
                         ) : (
                           <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <svg className="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                            </svg>
+                            <svg className="w-10 h-10 mb-3 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                             <p className="mb-1 text-sm text-gray-500 font-semibold">Click to upload deposit receipt</p>
-                            <p className="text-xs text-gray-500">SVG, PNG, JPG or GIF (MAX. 5MB)</p>
+                            <p className="text-xs text-gray-500">PNG, JPG or GIF (MAX. 5MB)</p>
                           </div>
                         )}
-                        <input 
-                          id="deposit-upload" 
-                          type="file" 
-                          className="hidden" 
-                          accept="image/*"
-                          onChange={(e) => {
-                            if (e.target.files && e.target.files[0]) {
-                              setDepositPhoto(e.target.files[0]);
-                            }
-                          }}
-                          required={paymentWay !== 'card'}
-                        />
+                        <input id="deposit-upload" type="file" className="hidden" accept="image/*" onChange={(e) => { if (e.target.files && e.target.files[0]) setDepositPhoto(e.target.files[0]); }} required />
+                      </label>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Vodafone Cash: show account info + required upload */}
+              {paymentWay === 'vodafone_cash' && (
+                <>
+                  <div className="p-4 rounded-xl bg-red-50/50 border border-red-100 text-red-950 text-sm flex items-start gap-3 shadow-sm">
+                    <img src="https://drashrafsoliman.com/wp-content/uploads/2022/06/vc.png" alt="Vodafone Cash" className="h-8 w-8 object-contain rounded-md shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold mb-0.5">Transfer to Vodafone Cash</p>
+                      <p className="text-base font-bold text-red-700 tracking-widest">01286198016</p>
+                      <p className="text-xs text-red-500 mt-1">After transferring, upload your receipt below.</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium">Deposit Receipt (Required) *</label>
+                    <div className="flex flex-col items-center justify-center w-full">
+                      <label
+                        htmlFor="deposit-upload"
+                        className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-red-300 rounded-xl cursor-pointer bg-red-50/30 hover:bg-red-50/60 transition-colors relative overflow-hidden"
+                      >
+                        {depositPhoto ? (
+                          <div className="relative w-full h-full flex items-center justify-center p-2">
+                            <img src={URL.createObjectURL(depositPhoto)} alt="Deposit Preview" className="max-h-full max-w-full object-contain rounded-md" />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center text-white font-medium text-sm backdrop-blur-sm">Click to change image</div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg className="w-10 h-10 mb-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            <p className="mb-1 text-sm text-gray-500 font-semibold">Click to upload deposit receipt</p>
+                            <p className="text-xs text-gray-500">PNG, JPG or GIF (MAX. 5MB)</p>
+                          </div>
+                        )}
+                        <input id="deposit-upload" type="file" className="hidden" accept="image/*" onChange={(e) => { if (e.target.files && e.target.files[0]) setDepositPhoto(e.target.files[0]); }} required />
                       </label>
                     </div>
                   </div>

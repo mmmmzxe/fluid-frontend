@@ -30,6 +30,7 @@ import UserManagement from "./pages/admin/UserManagement";
 import SubCategoryManagement from "./pages/admin/SubCategoryManagement";
 import SupportManagement from "./pages/admin/SupportManagement";
 import ShippingManagement from "./pages/admin/ShippingManagement";
+import AnnouncementManagement from "./pages/admin/AnnouncementManagement";
 import AdminProfile from "./pages/admin/AdminProfile";
 import "react-toastify/dist/ReactToastify.css";
 import ContactUs from "./pages/ContactUs";
@@ -99,6 +100,7 @@ const App = () => (
                 <Route path="subcategories" element={<SubCategoryManagement />} />
                 <Route path="support" element={<SupportManagement />} />
                 <Route path="shipping" element={<ShippingManagement />} />
+                <Route path="announcements" element={<AnnouncementManagement />} />
                 <Route path="profile" element={<AdminProfile />} />
               </Route>
 

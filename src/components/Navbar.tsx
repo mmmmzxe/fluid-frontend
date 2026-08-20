@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Search, User, ShoppingBag, Menu, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,9 +11,10 @@ import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { getCategoryName } from "@/lib/i18nHelpers";
+import { announcementApi, Announcement } from "@/services/adminApi";
 
 export function Navbar() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const favoritesItems = useAppSelector((state) => state.favorites.items);
   const { isAuthenticated, cart } = useAppSelector((state) => state.user);
   const { categories, loading: categoriesLoading } = useCategories();
@@ -22,6 +23,17 @@ export function Navbar() {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+
+  useEffect(() => {
+    announcementApi.getActive()
+      .then((res) => {
+        if (res?.data && Array.isArray(res.data)) {
+          setAnnouncements(res.data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +49,17 @@ export function Navbar() {
     if (href !== "/" && location.pathname.startsWith(href.split("?")[0])) return true;
     return false;
   };
+
+  // Build marquee text content dynamically
+  const activeLang = i18n.language === 'ar' ? 'ar' : 'en';
+  const announcementTexts = announcements
+    .filter(a => a.isActive !== false)
+    .map(a => (activeLang === 'ar' ? a.textAr : a.textEn))
+    .filter(Boolean);
+
+  const marqueeString = announcementTexts.length > 0
+    ? announcementTexts.join("  ✦  ")
+    : t("nav.discoverCategories");
 
   return (
     <nav className="bg-background border-b border-border sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
@@ -115,17 +138,17 @@ export function Navbar() {
         {/* Text marquee before categories */}
         <div className="overflow-hidden w-full bg-secondary text-primary-foreground border-t border-border py-1.5 sm:py-2">
           <motion.div
-            className="text-primary-foreground font-medium text-xs sm:text-sm whitespace-nowrap"
+            className="text-primary-foreground font-medium text-xs sm:text-sm whitespace-nowrap flex gap-8 justify-around"
             animate={{ x: ["100%", "-100%"] }}
             transition={{
               repeat: Infinity,
-              duration: 15,
+              duration: 18,
               ease: "linear",
             }}
           >
-            {t("nav.discoverCategories")}
-            {t("nav.discoverCategories")}
-            {t("nav.discoverCategories")}
+            <span>{marqueeString}</span>
+            <span>{marqueeString}</span>
+            <span>{marqueeString}</span>
           </motion.div>
         </div>
 
