@@ -99,13 +99,10 @@ const AnnouncementManagement: React.FC = () => {
   };
 
   const handleDelete = (id: string) => {
-    confirm({
-      title: 'Delete Announcement',
-      message: 'Are you sure you want to delete this marquee text ticker?',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      variant: 'danger',
-      onConfirm: async () => {
+    confirm(
+      'Delete Announcement',
+      'Are you sure you want to delete this marquee text ticker?',
+      async () => {
         try {
           await announcementApi.delete(id);
           toast.success('Announcement deleted successfully');
@@ -115,7 +112,8 @@ const AnnouncementManagement: React.FC = () => {
           console.error('Error deleting announcement:', error);
         }
       },
-    });
+      'destructive'
+    );
   };
 
   const filteredAnnouncements = announcements.filter(
@@ -128,33 +126,39 @@ const AnnouncementManagement: React.FC = () => {
 
   const columns: Column<Announcement>[] = [
     {
-      header: 'Index',
-      accessorKey: '_id',
-      cell: (_row, index) => <span className="font-semibold text-xs text-muted-foreground">Text #{index + 1}</span>,
+      key: '_id',
+      title: 'Index',
+      render: (_value, row) => {
+        const index = announcements.findIndex(a => a._id === row._id);
+        return <span className="font-semibold text-xs text-muted-foreground">Text #{index + 1}</span>;
+      },
     },
     {
-      header: 'English Text (EN)',
-      accessorKey: 'textEn',
-      cell: (row) => <span className="font-medium text-sm text-foreground">{row.textEn}</span>,
+      key: 'textEn',
+      title: 'English Text (EN)',
+      sortable: true,
+      render: (value) => <span className="font-medium text-sm text-foreground">{value}</span>,
     },
     {
-      header: 'Arabic Text (AR)',
-      accessorKey: 'textAr',
-      cell: (row) => <span className="font-medium text-sm text-foreground font-arabic">{row.textAr}</span>,
+      key: 'textAr',
+      title: 'Arabic Text (AR)',
+      sortable: true,
+      render: (value) => <span className="font-medium text-sm text-foreground font-arabic">{value}</span>,
     },
     {
-      header: 'Status',
-      accessorKey: 'isActive',
-      cell: (row) => (
+      key: 'isActive',
+      title: 'Status',
+      sortable: true,
+      render: (value, row) => (
         <Badge
           className={`cursor-pointer transition-colors ${
-            row.isActive
+            value
               ? 'bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/25 border-emerald-200'
               : 'bg-rose-500/15 text-rose-700 hover:bg-rose-500/25 border-rose-200'
           }`}
           onClick={() => handleToggleStatus(row)}
         >
-          {row.isActive ? (
+          {value ? (
             <span className="flex items-center gap-1">
               <CheckCircle className="h-3 w-3" /> Active
             </span>
@@ -167,9 +171,9 @@ const AnnouncementManagement: React.FC = () => {
       ),
     },
     {
-      header: 'Actions',
-      accessorKey: '_id',
-      cell: (row) => (
+      key: 'actions',
+      title: 'Actions',
+      render: (_value, row) => (
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
