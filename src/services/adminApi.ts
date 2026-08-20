@@ -225,14 +225,23 @@ const createApiInstance = (): AxiosInstance => {
       return response;
     },
     (error) => {
-      if (error.response?.status === 401) {
+      const msg = error.response?.data?.message || error.response?.data?.error || error.message || '';
+      const isJwtExpired =
+        error.response?.status === 401 ||
+        msg === 'jwt expired' ||
+        (typeof msg === 'string' && msg.toLowerCase().includes('jwt expired'));
+
+      if (isJwtExpired) {
         localStorage.removeItem('accessToken');
-        window.location.href = '/login';
-        toast.error('Session expired. Please login again.');
+        localStorage.removeItem('userData');
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+          toast.error('Session expired. Please login again.');
+        }
       } else if (error.response?.status >= 500) {
         toast.error('Server error. Please try again later.');
-      } else if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
+      } else if (msg) {
+        toast.error(msg);
       } else {
         toast.error('An error occurred. Please try again.');
       }

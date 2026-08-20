@@ -61,9 +61,17 @@ const AdminDashboard: React.FC = () => {
           dispatch(login({ user: mappedUser, token }));
           currentUser = mappedUser;
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching profile:', error);
-        // Don't show error if we already have user data
+        const errMsg = error?.message || '';
+        if (errMsg.includes('jwt expired') || error?.status === 401) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('userData');
+          dispatch(logout());
+          toast.error('Session expired. Please log in again.');
+          navigate('/login');
+          return;
+        }
         if (!currentUser) {
           toast.error('Failed to fetch user profile');
         }
