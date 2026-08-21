@@ -727,11 +727,20 @@ export const announcementApi = {
 
 // ─── Social Media Orders ──────────────────────────────────────────────────────
 
+export interface EditHistoryItem {
+  editedBy: string;
+  editedByUserId?: string | { _id: string; name: string };
+  editedAt: string;
+  summary: string;
+  previousState?: Record<string, any>;
+}
+
 export interface SocialOrder {
   _id: string;
-  createdBy: 'Fatma' | 'Mariam' | 'Zeinab';
+  createdBy: 'Fatma' | 'Mariam' | 'Zeinab' | 'Sara';
   createdByUserId: string | { _id: string; name: string; email: string };
   status: 'pending' | 'confirmed' | 'cancelled';
+  editHistory?: EditHistoryItem[];
   productName: string;
   productImage?: { secure_url: string; public_id: string };
   price: number;
@@ -760,6 +769,14 @@ export const socialOrderApi = {
   /** Create a social order — accepts multipart/form-data for image upload */
   create: async (formData: FormData): Promise<ApiResponse<SocialOrder>> => {
     const response = await api.post('/social-orders', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  /** Edit an order details — accepts multipart/form-data */
+  update: async (id: string, formData: FormData): Promise<ApiResponse<SocialOrder>> => {
+    const response = await api.patch(`/social-orders/${id}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
