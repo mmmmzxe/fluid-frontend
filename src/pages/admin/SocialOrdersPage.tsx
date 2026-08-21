@@ -613,57 +613,109 @@ function SellerStatsView({ stats, loading }: SellerStatsViewProps) {
     );
   }
 
-  const total = stats.reduce((acc, s) => acc + s.count, 0);
+  const totalCreated = stats.reduce((acc, s) => acc + (s.count || 0), 0);
+  const totalConfirmed = stats.reduce((acc, s) => acc + (s.confirmedCount || 0), 0);
+  const totalPending = stats.reduce((acc, s) => acc + (s.pendingCount || 0), 0);
+  const totalCancelled = stats.reduce((acc, s) => acc + (s.cancelledCount || 0), 0);
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      {/* Seller Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {stats.map((stat) => {
           const colors = SELLER_COLORS[stat.seller] ?? SELLER_COLORS['Fatma'];
-          const pct = total > 0 ? Math.round((stat.count / total) * 100) : 0;
+          const pct = totalCreated > 0 ? Math.round((stat.count / totalCreated) * 100) : 0;
           return (
             <div
               key={stat.seller}
-              className={`relative overflow-hidden rounded-2xl ${colors.bg} ring-1 ${colors.ring} p-6 flex flex-col gap-3`}
+              className={`relative overflow-hidden rounded-2xl ${colors.bg} ring-1 ${colors.ring} p-6 flex flex-col justify-between gap-4 shadow-sm`}
             >
-              {/* Decorative circle */}
+              {/* Decorative background circle */}
               <div className={`absolute -top-6 -right-6 h-24 w-24 rounded-full bg-gradient-to-br ${colors.gradient} opacity-10`} />
 
-              <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${colors.gradient} text-white text-lg font-bold shadow-md`}>
-                {stat.seller[0]}
-              </div>
               <div>
-                <p className={`text-sm font-semibold ${colors.text}`}>{stat.seller}</p>
-                <p className="text-3xl font-bold text-gray-800 mt-0.5">{stat.count.toLocaleString()}</p>
-                <p className="text-xs text-gray-500 mt-0.5">Orders Created</p>
-              </div>
-              {total > 0 && (
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs text-gray-500">
-                    <span>Share</span>
-                    <span>{pct}%</span>
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${colors.gradient} text-white text-lg font-bold shadow-md`}>
+                    {stat.seller[0]}
                   </div>
-                  <div className="h-1.5 rounded-full bg-white/60">
-                    <div
-                      className={`h-full rounded-full bg-gradient-to-r ${colors.gradient} transition-all duration-700`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${colors.bg} ${colors.text} ring-1 ${colors.ring}`}>
+                    {pct}% of Total
+                  </span>
                 </div>
-              )}
+                
+                <h3 className={`text-lg font-bold ${colors.text}`}>{stat.seller}</h3>
+                <p className="text-3xl font-extrabold text-gray-900 mt-1">{stat.count.toLocaleString()}</p>
+                <p className="text-xs text-gray-500 font-medium">Total Orders Created</p>
+              </div>
+
+              {/* Status Breakdown Pills */}
+              <div className="space-y-2 pt-3 border-t border-gray-200/60">
+                <div className="flex items-center justify-between text-xs py-1 px-2.5 rounded-lg bg-emerald-50 text-emerald-800 font-medium border border-emerald-100">
+                  <span className="flex items-center gap-1.5">
+                    <Check className="h-3.5 w-3.5 text-emerald-600" /> Confirmed
+                  </span>
+                  <span className="font-bold text-emerald-900">{(stat.confirmedCount || 0).toLocaleString()}</span>
+                </div>
+
+                <div className="flex items-center justify-between text-xs py-1 px-2.5 rounded-lg bg-amber-50 text-amber-800 font-medium border border-amber-100">
+                  <span className="flex items-center gap-1.5">
+                    <Loader2 className="h-3.5 w-3.5 text-amber-500 animate-spin" /> Pending
+                  </span>
+                  <span className="font-bold text-amber-900">{(stat.pendingCount || 0).toLocaleString()}</span>
+                </div>
+
+                <div className="flex items-center justify-between text-xs py-1 px-2.5 rounded-lg bg-rose-50 text-rose-800 font-medium border border-rose-100">
+                  <span className="flex items-center gap-1.5">
+                    <X className="h-3.5 w-3.5 text-rose-500" /> Cancelled
+                  </span>
+                  <span className="font-bold text-rose-900">{(stat.cancelledCount || 0).toLocaleString()}</span>
+                </div>
+              </div>
             </div>
           );
         })}
       </div>
 
-      {/* Summary */}
-      <div className="rounded-2xl border border-gray-100 bg-white p-5 flex items-center gap-4">
-        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white">
-          <TrendingUp className="h-5 w-5" />
+      {/* Summary Banner */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="rounded-2xl border border-gray-100 bg-white p-5 flex items-center gap-4 shadow-sm">
+          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white flex-shrink-0">
+            <TrendingUp className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Total Created</p>
+            <p className="text-2xl font-bold text-gray-800">{totalCreated.toLocaleString()}</p>
+          </div>
         </div>
-        <div>
-          <p className="text-sm text-gray-500">Total Social Media Orders</p>
-          <p className="text-2xl font-bold text-gray-800">{total.toLocaleString()}</p>
+
+        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-5 flex items-center gap-4 shadow-sm">
+          <div className="h-12 w-12 rounded-xl bg-emerald-500 flex items-center justify-center text-white flex-shrink-0">
+            <Check className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-xs text-emerald-700 font-medium uppercase tracking-wide">Confirmed</p>
+            <p className="text-2xl font-bold text-emerald-900">{totalConfirmed.toLocaleString()}</p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-amber-100 bg-amber-50/50 p-5 flex items-center gap-4 shadow-sm">
+          <div className="h-12 w-12 rounded-xl bg-amber-500 flex items-center justify-center text-white flex-shrink-0">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+          <div>
+            <p className="text-xs text-amber-700 font-medium uppercase tracking-wide">Pending</p>
+            <p className="text-2xl font-bold text-amber-900">{totalPending.toLocaleString()}</p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-5 flex items-center gap-4 shadow-sm">
+          <div className="h-12 w-12 rounded-xl bg-rose-500 flex items-center justify-center text-white flex-shrink-0">
+            <X className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-xs text-rose-700 font-medium uppercase tracking-wide">Cancelled</p>
+            <p className="text-2xl font-bold text-rose-900">{totalCancelled.toLocaleString()}</p>
+          </div>
         </div>
       </div>
     </div>

@@ -751,6 +751,9 @@ export interface SocialOrder {
 export interface SellerStat {
   seller: string;
   count: number;
+  confirmedCount: number;
+  pendingCount: number;
+  cancelledCount: number;
 }
 
 export const socialOrderApi = {
