@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -12,7 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from '@/components/ui/sidebar';
+} from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
   Package,
@@ -26,14 +26,14 @@ import {
   User,
   Megaphone,
   Share2,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useAppDispatch } from '@/hooks/useRedux';
-import { logout } from '@/store/slices/userSlice';
-import { useNavigate } from 'react-router-dom';
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAppDispatch } from "@/hooks/useRedux";
+import { logout } from "@/store/slices/userSlice";
+import { useNavigate } from "react-router-dom";
 
 interface AdminSidebarProps {
-  userRole: 'superAdmin' | 'admin';
+  userRole: "superAdmin" | "admin";
 }
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
@@ -43,72 +43,72 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
 
   const handleLogout = () => {
     dispatch(logout());
-    localStorage.removeItem('accessToken');
-    navigate('/login');
+    localStorage.removeItem("accessToken");
+    navigate("/login");
   };
 
   // Define menu items based on role
   const getMenuItems = () => {
     const allItems = [
       {
-        title: 'Dashboard',
-        url: '/admin',
+        title: "Dashboard",
+        url: "/admin",
         icon: LayoutDashboard,
-        roles: ['superAdmin'],
+        roles: ["superAdmin"],
       },
       {
-        title: 'Categories',
-        url: '/admin/categories',
+        title: "Categories",
+        url: "/admin/categories",
         icon: FolderOpen,
-        roles: ['superAdmin'],
+        roles: ["superAdmin"],
       },
       {
-        title: 'Products',
-        url: '/admin/products',
+        title: "Products",
+        url: "/admin/products",
         icon: Package,
-        roles: ['superAdmin'],
+        roles: ["superAdmin"],
       },
       {
-        title: 'Orders',
-        url: '/admin/orders',
+        title: "Orders",
+        url: "/admin/orders",
         icon: ShoppingCart,
-        roles: ['superAdmin', 'admin'],
+        roles: ["superAdmin"],
       },
       {
-        title: 'Users',
-        url: '/admin/users',
+        title: "Users",
+        url: "/admin/users",
         icon: Users,
-        roles: ['superAdmin'],
+        roles: ["superAdmin"],
       },
       {
-        title: 'SubCategories',
-        url: '/admin/subcategories',
+        title: "SubCategories",
+        url: "/admin/subcategories",
         icon: FolderOpen,
-        roles: ['superAdmin'],
+        roles: ["superAdmin"],
       },
       {
-        title: 'Support',
-        url: '/admin/support',
+        title: "Support",
+        url: "/admin/support",
         icon: HeadphonesIcon,
-        roles: ['superAdmin', 'admin'],
+        roles: ["superAdmin"],
       },
       {
-        title: 'Shipping',
-        url: '/admin/shipping',
+        title: "Shipping",
+        url: "/admin/shipping",
         icon: Truck,
-        roles: ['superAdmin'],
+        roles: ["superAdmin"],
       },
       {
-        title: 'Announcements',
-        url: '/admin/announcements',
+        title: "Announcements",
+        url: "/admin/announcements",
         icon: Megaphone,
-        roles: ['superAdmin', 'admin'],
+        roles: ["superAdmin"],
       },
       {
-        title: 'Social Media Orders',
-        url: '/admin/social-orders',
+        title: "Social Media Orders",
+        url: "/admin/social-orders",
         icon: Share2,
-        roles: ['superAdmin', 'admin'],
+        roles: ["superAdmin", "admin"],
       },
     ];
 
@@ -129,7 +129,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
               Extrachic
             </span>
             <span className="truncate text-xs text-muted-foreground font-medium">
-              {userRole === 'superAdmin' ? 'Super Administrator' : 'Administrator'}
+              {userRole === "superAdmin"
+                ? "Super Administrator"
+                : "Administrator"}
             </span>
           </div>
         </div>
@@ -142,7 +144,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
           <SidebarGroupContent>
             <SidebarMenu className="px-2 space-y-1">
               {menuItems.map((item) => {
-                const isActive = location.pathname === item.url || location.pathname.startsWith(`${item.url}/`);
+                const isActive =
+                  location.pathname === item.url ||
+                  location.pathname.startsWith(`${item.url}/`);
                 return (
                   <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton
@@ -151,14 +155,17 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
                       tooltip={item.title}
                       className={`
                         transition-all duration-200 ease-in-out rounded-lg h-10
-                        ${isActive
-                          ? 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-purple-700 font-medium shadow-sm border border-purple-100'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-white/60'
+                        ${
+                          isActive
+                            ? "bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-purple-700 font-medium shadow-sm border border-purple-100"
+                            : "text-muted-foreground hover:text-foreground hover:bg-white/60"
                         }
                       `}
                     >
                       <Link to={item.url} className="flex items-center gap-3">
-                        <item.icon className={`h-4 w-4 ${isActive ? 'text-purple-600' : 'text-muted-foreground/70'}`} />
+                        <item.icon
+                          className={`h-4 w-4 ${isActive ? "text-purple-600" : "text-muted-foreground/70"}`}
+                        />
                         <span>{item.title}</span>
                         {isActive && (
                           <div className="ml-auto h-1.5 w-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
@@ -185,7 +192,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
                 </div>
                 <div className="flex flex-col items-start text-sm">
                   <span className="font-medium">Profile</span>
-                  <span className="text-xs text-muted-foreground">Account Settings</span>
+                  <span className="text-xs text-muted-foreground">
+                    Account Settings
+                  </span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -208,5 +217,3 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
 };
 
 export default AdminSidebar;
-
-

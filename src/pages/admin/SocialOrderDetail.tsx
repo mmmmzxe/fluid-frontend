@@ -128,7 +128,7 @@ const SocialOrderDetail: React.FC = () => {
   const totalPrice = order.price * order.quantity;
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="w-full space-y-6">
       {/* Back + Title */}
       <div className="flex items-center gap-3">
         <Button
@@ -217,37 +217,39 @@ const SocialOrderDetail: React.FC = () => {
       )}
 
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* ── Product Card ──────────────────────────────────── */}
-        <div className="rounded-2xl border border-purple-100 bg-white p-5 shadow-sm space-y-1">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600">
-              <Package className="h-4 w-4" />
+        <div className="rounded-2xl border border-purple-100 bg-white p-6 shadow-sm space-y-2 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600">
+                <Package className="h-4 w-4" />
+              </div>
+              <h2 className="font-semibold text-gray-800">Product</h2>
             </div>
-            <h2 className="font-semibold text-gray-800">Product</h2>
+
+            {/* Product image */}
+            {order.productImage?.secure_url ? (
+              <div className="mb-5 flex justify-center bg-gray-50/80 rounded-xl p-3 border border-gray-100">
+                <img
+                  src={order.productImage.secure_url}
+                  alt={order.productName}
+                  className="max-h-64 w-full object-contain rounded-lg shadow-sm"
+                />
+              </div>
+            ) : (
+              <div className="mb-4 h-32 w-full rounded-xl bg-gray-50 border border-dashed border-gray-200 flex items-center justify-center">
+                <ImageIcon className="h-8 w-8 text-gray-300" />
+              </div>
+            )}
+
+            <InfoRow icon={Tag} label="Product Name" value={order.productName} iconColor="text-purple-400" />
+            <InfoRow icon={Hash} label="Price" value={`${order.price.toLocaleString()} EGP`} iconColor="text-purple-400" />
+            <InfoRow icon={Hash} label="Quantity" value={order.quantity} iconColor="text-purple-400" />
+            <InfoRow icon={Palette} label="Color" value={order.color} iconColor="text-purple-400" />
+            <InfoRow icon={Ruler} label="Size" value={order.size} iconColor="text-purple-400" />
+            <InfoRow icon={FileText} label="Product Notes" value={order.productNotes} iconColor="text-purple-400" />
           </div>
-
-          {/* Product image */}
-          {order.productImage?.secure_url ? (
-            <div className="mb-4">
-              <img
-                src={order.productImage.secure_url}
-                alt={order.productName}
-                className="h-48 w-full object-cover rounded-xl border border-gray-100"
-              />
-            </div>
-          ) : (
-            <div className="mb-4 h-32 w-full rounded-xl bg-gray-50 border border-dashed border-gray-200 flex items-center justify-center">
-              <ImageIcon className="h-8 w-8 text-gray-300" />
-            </div>
-          )}
-
-          <InfoRow icon={Tag} label="Product Name" value={order.productName} iconColor="text-purple-400" />
-          <InfoRow icon={Hash} label="Price" value={`${order.price.toLocaleString()} EGP`} iconColor="text-purple-400" />
-          <InfoRow icon={Hash} label="Quantity" value={order.quantity} iconColor="text-purple-400" />
-          <InfoRow icon={Palette} label="Color" value={order.color} iconColor="text-purple-400" />
-          <InfoRow icon={Ruler} label="Size" value={order.size} iconColor="text-purple-400" />
-          <InfoRow icon={FileText} label="Product Notes" value={order.productNotes} iconColor="text-purple-400" />
 
           {/* Total */}
           <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">

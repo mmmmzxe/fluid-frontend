@@ -148,231 +148,237 @@ function CreateOrderForm({ sellerName, isSuperAdmin, onCreated }: CreateFormProp
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* ── Product Section ───────────────────────────────────────── */}
-      <div className="rounded-2xl border border-purple-100 bg-gradient-to-br from-purple-50/60 to-blue-50/40 p-6 space-y-5">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-600 text-white">
-            <Package className="h-4 w-4" />
-          </div>
-          <h3 className="text-base font-semibold text-gray-800">Product Information</h3>
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* ── Product Section ───────────────────────────────────────── */}
+        <div className="rounded-2xl border border-purple-100 bg-gradient-to-br from-purple-50/60 to-blue-50/40 p-6 space-y-5 flex flex-col justify-between">
+          <div className="space-y-5">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-600 text-white">
+                <Package className="h-4 w-4" />
+              </div>
+              <h3 className="text-base font-semibold text-gray-800">Product Information</h3>
+            </div>
 
-        {/* Image upload */}
-        <div>
-          <Label className="text-sm font-medium text-gray-700 mb-2 block">Product Image</Label>
-          {imagePreview ? (
-            <div className="relative inline-block">
-              <img
-                src={imagePreview}
-                alt="preview"
-                className="h-36 w-36 rounded-xl object-cover border border-purple-200 shadow-sm"
+            {/* Image upload */}
+            <div>
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">Product Image</Label>
+              {imagePreview ? (
+                <div className="relative inline-block">
+                  <img
+                    src={imagePreview}
+                    alt="preview"
+                    className="h-36 w-36 rounded-xl object-cover border border-purple-200 shadow-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center rounded-full bg-red-500 text-white shadow hover:bg-red-600 transition-colors"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : (
+                <div
+                  className="flex flex-col items-center justify-center gap-2 h-36 w-full rounded-xl border-2 border-dashed border-purple-200 bg-white cursor-pointer hover:border-purple-400 hover:bg-purple-50/30 transition-all"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="h-6 w-6 text-purple-400" />
+                  <span className="text-sm text-gray-500">Click to upload image</span>
+                  <span className="text-xs text-gray-400">PNG, JPG up to 10MB</span>
+                </div>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageChange}
               />
-              <button
-                type="button"
-                onClick={removeImage}
-                className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center rounded-full bg-red-500 text-white shadow hover:bg-red-600 transition-colors"
-              >
-                <X className="h-3 w-3" />
-              </button>
             </div>
-          ) : (
-            <div
-              className="flex flex-col items-center justify-center gap-2 h-36 w-full rounded-xl border-2 border-dashed border-purple-200 bg-white cursor-pointer hover:border-purple-400 hover:bg-purple-50/30 transition-all"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Upload className="h-6 w-6 text-purple-400" />
-              <span className="text-sm text-gray-500">Click to upload image</span>
-              <span className="text-xs text-gray-400">PNG, JPG up to 10MB</span>
-            </div>
-          )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleImageChange}
-          />
-        </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="so-productName" className="text-sm font-medium text-gray-700 mb-1 block">
-              Product Name <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="so-productName"
-              placeholder="e.g. Floral Summer Dress"
-              value={form.productName}
-              onChange={(e) => handleChange('productName', e.target.value)}
-              className="bg-white border-purple-200 focus:border-purple-400 focus:ring-purple-400/20"
-            />
-          </div>
-          <div>
-            <Label htmlFor="so-price" className="text-sm font-medium text-gray-700 mb-1 block">
-              Price (EGP) <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="so-price"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="0.00"
-              value={form.price}
-              onChange={(e) => handleChange('price', e.target.value)}
-              className="bg-white border-purple-200 focus:border-purple-400 focus:ring-purple-400/20"
-            />
-          </div>
-          <div>
-            <Label htmlFor="so-color" className="text-sm font-medium text-gray-700 mb-1 block">Color</Label>
-            <Input
-              id="so-color"
-              placeholder="e.g. Rose Gold"
-              value={form.color}
-              onChange={(e) => handleChange('color', e.target.value)}
-              className="bg-white border-purple-200"
-            />
-          </div>
-          <div>
-            <Label htmlFor="so-size" className="text-sm font-medium text-gray-700 mb-1 block">Size</Label>
-            <Input
-              id="so-size"
-              placeholder="e.g. M, L, XL or 38"
-              value={form.size}
-              onChange={(e) => handleChange('size', e.target.value)}
-              className="bg-white border-purple-200"
-            />
-          </div>
-          <div>
-            <Label htmlFor="so-quantity" className="text-sm font-medium text-gray-700 mb-1 block">
-              Quantity <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="so-quantity"
-              type="number"
-              min="1"
-              placeholder="1"
-              value={form.quantity}
-              onChange={(e) => handleChange('quantity', e.target.value)}
-              className="bg-white border-purple-200"
-            />
-          </div>
-        </div>
-        <div>
-          <Label htmlFor="so-productNotes" className="text-sm font-medium text-gray-700 mb-1 block">Product Notes</Label>
-          <Textarea
-            id="so-productNotes"
-            rows={2}
-            placeholder="Any additional product details..."
-            value={form.productNotes}
-            onChange={(e) => handleChange('productNotes', e.target.value)}
-            className="bg-white border-purple-200 resize-none"
-          />
-        </div>
-      </div>
-
-      {/* ── Customer / Delivery Section ───────────────────────────── */}
-      <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/60 to-indigo-50/40 p-6 space-y-5">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-            <User className="h-4 w-4" />
-          </div>
-          <h3 className="text-base font-semibold text-gray-800">Customer & Delivery Information</h3>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="so-customerName" className="text-sm font-medium text-gray-700 mb-1 block">
-              Customer Name <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="so-customerName"
-              placeholder="Full name"
-              value={form.customerName}
-              onChange={(e) => handleChange('customerName', e.target.value)}
-              className="bg-white border-blue-200 focus:border-blue-400"
-            />
-          </div>
-          <div>
-            <Label htmlFor="so-customerPhone" className="text-sm font-medium text-gray-700 mb-1 block">
-              Phone Number <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="so-customerPhone"
-              placeholder="01XXXXXXXXX"
-              value={form.customerPhone}
-              onChange={(e) => handleChange('customerPhone', e.target.value)}
-              className="bg-white border-blue-200"
-            />
-          </div>
-          <div>
-            <Label htmlFor="so-city" className="text-sm font-medium text-gray-700 mb-1 block">
-              City / Area <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="so-city"
-              placeholder="e.g. Cairo, Alexandria"
-              value={form.city}
-              onChange={(e) => handleChange('city', e.target.value)}
-              className="bg-white border-blue-200"
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <Label htmlFor="so-customerAddress" className="text-sm font-medium text-gray-700 mb-1 block">
-              Delivery Address <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="so-customerAddress"
-              placeholder="Street, building, apartment..."
-              value={form.customerAddress}
-              onChange={(e) => handleChange('customerAddress', e.target.value)}
-              className="bg-white border-blue-200"
-            />
-          </div>
-        </div>
-        <div>
-          <Label htmlFor="so-deliveryNotes" className="text-sm font-medium text-gray-700 mb-1 block">Delivery Notes</Label>
-          <Textarea
-            id="so-deliveryNotes"
-            rows={2}
-            placeholder="Any special delivery instructions..."
-            value={form.deliveryNotes}
-            onChange={(e) => handleChange('deliveryNotes', e.target.value)}
-            className="bg-white border-blue-200 resize-none"
-          />
-        </div>
-      </div>
-
-      {/* ── Created By ───────────────────────────────────────────── */}
-      <div className="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50/60 to-orange-50/40 p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-white">
-            <User className="h-4 w-4" />
-          </div>
-          <h3 className="text-base font-semibold text-gray-800">Created By</h3>
-        </div>
-        {isSuperAdmin ? (
-          <Select value={selectedSeller} onValueChange={(v) => setSelectedSeller(v as SellerName)}>
-            <SelectTrigger id="so-createdBy" className="bg-white border-amber-200 w-full max-w-xs">
-              <SelectValue placeholder="Select seller" />
-            </SelectTrigger>
-            <SelectContent>
-              {SELLER_NAMES.map((n) => (
-                <SelectItem key={n} value={n}>{n}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-400/30 text-amber-700 font-bold text-lg">
-              {sellerName[0]}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="so-productName" className="text-sm font-medium text-gray-700 mb-1 block">
+                  Product Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="so-productName"
+                  placeholder="e.g. Floral Summer Dress"
+                  value={form.productName}
+                  onChange={(e) => handleChange('productName', e.target.value)}
+                  className="bg-white border-purple-200 focus:border-purple-400 focus:ring-purple-400/20"
+                />
+              </div>
+              <div>
+                <Label htmlFor="so-price" className="text-sm font-medium text-gray-700 mb-1 block">
+                  Price (EGP) <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="so-price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={form.price}
+                  onChange={(e) => handleChange('price', e.target.value)}
+                  className="bg-white border-purple-200 focus:border-purple-400 focus:ring-purple-400/20"
+                />
+              </div>
+              <div>
+                <Label htmlFor="so-color" className="text-sm font-medium text-gray-700 mb-1 block">Color</Label>
+                <Input
+                  id="so-color"
+                  placeholder="e.g. Rose Gold"
+                  value={form.color}
+                  onChange={(e) => handleChange('color', e.target.value)}
+                  className="bg-white border-purple-200"
+                />
+              </div>
+              <div>
+                <Label htmlFor="so-size" className="text-sm font-medium text-gray-700 mb-1 block">Size</Label>
+                <Input
+                  id="so-size"
+                  placeholder="e.g. M, L, XL or 38"
+                  value={form.size}
+                  onChange={(e) => handleChange('size', e.target.value)}
+                  className="bg-white border-purple-200"
+                />
+              </div>
+              <div>
+                <Label htmlFor="so-quantity" className="text-sm font-medium text-gray-700 mb-1 block">
+                  Quantity <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="so-quantity"
+                  type="number"
+                  min="1"
+                  placeholder="1"
+                  value={form.quantity}
+                  onChange={(e) => handleChange('quantity', e.target.value)}
+                  className="bg-white border-purple-200"
+                />
+              </div>
             </div>
             <div>
-              <p className="font-semibold text-gray-800">{sellerName}</p>
-              <p className="text-xs text-gray-500">Logged-in seller (auto-assigned)</p>
+              <Label htmlFor="so-productNotes" className="text-sm font-medium text-gray-700 mb-1 block">Product Notes</Label>
+              <Textarea
+                id="so-productNotes"
+                rows={2}
+                placeholder="Any additional product details..."
+                value={form.productNotes}
+                onChange={(e) => handleChange('productNotes', e.target.value)}
+                className="bg-white border-purple-200 resize-none"
+              />
             </div>
           </div>
-        )}
+        </div>
+
+        {/* ── Customer / Delivery & Seller Section ─────────────────── */}
+        <div className="space-y-6 flex flex-col justify-between">
+          <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/60 to-indigo-50/40 p-6 space-y-5">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
+                <User className="h-4 w-4" />
+              </div>
+              <h3 className="text-base font-semibold text-gray-800">Customer & Delivery Information</h3>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="so-customerName" className="text-sm font-medium text-gray-700 mb-1 block">
+                  Customer Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="so-customerName"
+                  placeholder="Full name"
+                  value={form.customerName}
+                  onChange={(e) => handleChange('customerName', e.target.value)}
+                  className="bg-white border-blue-200 focus:border-blue-400"
+                />
+              </div>
+              <div>
+                <Label htmlFor="so-customerPhone" className="text-sm font-medium text-gray-700 mb-1 block">
+                  Phone Number <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="so-customerPhone"
+                  placeholder="01XXXXXXXXX"
+                  value={form.customerPhone}
+                  onChange={(e) => handleChange('customerPhone', e.target.value)}
+                  className="bg-white border-blue-200"
+                />
+              </div>
+              <div>
+                <Label htmlFor="so-city" className="text-sm font-medium text-gray-700 mb-1 block">
+                  City / Area <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="so-city"
+                  placeholder="e.g. Cairo, Alexandria"
+                  value={form.city}
+                  onChange={(e) => handleChange('city', e.target.value)}
+                  className="bg-white border-blue-200"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <Label htmlFor="so-customerAddress" className="text-sm font-medium text-gray-700 mb-1 block">
+                  Delivery Address <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="so-customerAddress"
+                  placeholder="Street, building, apartment..."
+                  value={form.customerAddress}
+                  onChange={(e) => handleChange('customerAddress', e.target.value)}
+                  className="bg-white border-blue-200"
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="so-deliveryNotes" className="text-sm font-medium text-gray-700 mb-1 block">Delivery Notes</Label>
+              <Textarea
+                id="so-deliveryNotes"
+                rows={2}
+                placeholder="Any special delivery instructions..."
+                value={form.deliveryNotes}
+                onChange={(e) => handleChange('deliveryNotes', e.target.value)}
+                className="bg-white border-blue-200 resize-none"
+              />
+            </div>
+          </div>
+
+          {/* ── Created By ───────────────────────────────────────────── */}
+          <div className="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50/60 to-orange-50/40 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-white">
+                <User className="h-4 w-4" />
+              </div>
+              <h3 className="text-base font-semibold text-gray-800">Created By</h3>
+            </div>
+            {isSuperAdmin ? (
+              <Select value={selectedSeller} onValueChange={(v) => setSelectedSeller(v as SellerName)}>
+                <SelectTrigger id="so-createdBy" className="bg-white border-amber-200 w-full max-w-xs">
+                  <SelectValue placeholder="Select seller" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SELLER_NAMES.map((n) => (
+                    <SelectItem key={n} value={n}>{n}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-400/30 text-amber-700 font-bold text-lg">
+                  {sellerName[0]}
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-800">{sellerName}</p>
+                  <p className="text-xs text-gray-500">Logged-in seller (auto-assigned)</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Submit */}
@@ -798,7 +804,7 @@ const SocialOrdersPage: React.FC = () => {
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -857,7 +863,7 @@ const SocialOrdersPage: React.FC = () => {
             />
           )}
           {adminTab === 'create' && (
-            <div className="max-w-2xl">
+            <div className="w-full">
               <CreateOrderForm
                 sellerName={sellerName}
                 isSuperAdmin={false}
