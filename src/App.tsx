@@ -42,6 +42,8 @@ import About from "./pages/About";
 import Terms from "./pages/Terms";
 import ProductCare from "./pages/ProductCare";
 import Sitemap from "./pages/Sitemap";
+import SocialOrdersPage from "./pages/admin/SocialOrdersPage";
+import SocialOrderDetail from "./pages/admin/SocialOrderDetail";
 
 const queryClient = new QueryClient();
 
@@ -102,6 +104,8 @@ const App = () => (
                 <Route path="shipping" element={<ShippingManagement />} />
                 <Route path="announcements" element={<AnnouncementManagement />} />
                 <Route path="profile" element={<AdminProfile />} />
+                <Route path="social-orders" element={<SocialOrdersPage />} />
+                <Route path="social-orders/:id" element={<SocialOrderDetail />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />

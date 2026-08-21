@@ -25,6 +25,7 @@ import {
   LogOut,
   User,
   Megaphone,
+  Share2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppDispatch } from '@/hooks/useRedux';
@@ -101,6 +102,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
         title: 'Announcements',
         url: '/admin/announcements',
         icon: Megaphone,
+        roles: ['superAdmin', 'admin'],
+      },
+      {
+        title: 'Social Media Orders',
+        url: '/admin/social-orders',
+        icon: Share2,
         roles: ['superAdmin', 'admin'],
       },
     ];

@@ -725,5 +725,72 @@ export const announcementApi = {
   },
 };
 
-export default api;
+// ─── Social Media Orders ──────────────────────────────────────────────────────
 
+export interface SocialOrder {
+  _id: string;
+  createdBy: 'Fatma' | 'Mariam' | 'Zeinab';
+  createdByUserId: string | { _id: string; name: string; email: string };
+  productName: string;
+  productImage?: { secure_url: string; public_id: string };
+  price: number;
+  color?: string;
+  size?: string;
+  quantity: number;
+  productNotes?: string;
+  customerName: string;
+  customerPhone: string;
+  customerAddress: string;
+  city: string;
+  deliveryNotes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SellerStat {
+  seller: string;
+  count: number;
+}
+
+export const socialOrderApi = {
+  /** Create a social order — accepts multipart/form-data for image upload */
+  create: async (formData: FormData): Promise<ApiResponse<SocialOrder>> => {
+    const response = await api.post('/social-orders', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  /** SuperAdmin: get all orders from all sellers */
+  getAll: async (): Promise<ApiResponse<SocialOrder[]>> => {
+    const response = await api.get('/social-orders');
+    const raw = response.data as any;
+    const list: SocialOrder[] = Array.isArray(raw?.data) ? raw.data : [];
+    return { message: raw?.message || 'Done', data: list };
+  },
+
+  /** Admin seller: get only their own orders */
+  getMyOrders: async (): Promise<ApiResponse<SocialOrder[]>> => {
+    const response = await api.get('/social-orders/my-orders');
+    const raw = response.data as any;
+    const list: SocialOrder[] = Array.isArray(raw?.data) ? raw.data : [];
+    return { message: raw?.message || 'Done', data: list };
+  },
+
+  /** SuperAdmin: get per-seller order counts */
+  getStats: async (): Promise<ApiResponse<SellerStat[]>> => {
+    const response = await api.get('/social-orders/stats');
+    const raw = response.data as any;
+    const list: SellerStat[] = Array.isArray(raw?.data) ? raw.data : [];
+    return { message: raw?.message || 'Done', data: list };
+  },
+
+  /** Get a single order by ID (admins restricted to their own) */
+  getById: async (id: string): Promise<ApiResponse<SocialOrder>> => {
+    const response = await api.get(`/social-orders/${id}`);
+    const raw = response.data as any;
+    return { message: raw?.message || 'Done', data: raw?.data ?? raw };
+  },
+};
+
+export default api;

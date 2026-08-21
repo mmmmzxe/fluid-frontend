@@ -84,9 +84,9 @@ const AdminDashboard: React.FC = () => {
         return;
       }
 
-      // Redirect admins (not superAdmin) from /admin to /admin/orders by default
+      // Redirect admins (not superAdmin) from /admin to /admin/social-orders by default
       if (currentUser.role === 'admin' && location.pathname === '/admin') {
-        navigate('/admin/orders', { replace: true });
+        navigate('/admin/social-orders', { replace: true });
       }
     };
 
