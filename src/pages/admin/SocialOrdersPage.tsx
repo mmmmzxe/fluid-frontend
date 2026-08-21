@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '@/hooks/useRedux';
 import { socialOrderApi, SocialOrder, SellerStat } from '@/services/adminApi';
@@ -20,6 +20,7 @@ import {
   ChevronRight,
   Loader2,
   TrendingUp,
+  Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -827,6 +828,33 @@ const SocialOrdersPage: React.FC = () => {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [loadingStats, setLoadingStats] = useState(false);
 
+  // Search filter
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filtered orders
+  const filteredMyOrders = useMemo(() => {
+    if (!searchQuery.trim()) return myOrders;
+    const q = searchQuery.toLowerCase().trim();
+    return myOrders.filter(
+      (o) =>
+        o.customerName?.toLowerCase().includes(q) ||
+        o.customerPhone?.includes(q) ||
+        o.productName?.toLowerCase().includes(q),
+    );
+  }, [myOrders, searchQuery]);
+
+  const filteredAllOrders = useMemo(() => {
+    if (!searchQuery.trim()) return allOrders;
+    const q = searchQuery.toLowerCase().trim();
+    return allOrders.filter(
+      (o) =>
+        o.customerName?.toLowerCase().includes(q) ||
+        o.customerPhone?.includes(q) ||
+        o.productName?.toLowerCase().includes(q) ||
+        o.createdBy?.toLowerCase().includes(q),
+    );
+  }, [allOrders, searchQuery]);
+
   // Determine seller name for admin
   const sellerName = (user?.name as SellerName) ?? '';
 
@@ -911,30 +939,53 @@ const SocialOrdersPage: React.FC = () => {
       {/* ── Admin View ───────────────────────────────────── */}
       {!isSuperAdmin && (
         <>
-          {/* Tab Switcher */}
-          <div className="flex gap-1 p-1 bg-gray-100 rounded-xl w-fit">
-            {([
-              { id: 'my-orders', label: 'My Orders', icon: ShoppingBag },
-              { id: 'create', label: 'Create New Order', icon: Plus },
-            ] as { id: AdminTab; label: string; icon: React.ElementType }[]).map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => setAdminTab(id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  adminTab === id
-                    ? 'bg-white text-purple-700 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </button>
-            ))}
+          {/* Tab Switcher + Search Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex gap-1 p-1 bg-gray-100 rounded-xl w-fit">
+              {([
+                { id: 'my-orders', label: 'My Orders', icon: ShoppingBag },
+                { id: 'create', label: 'Create New Order', icon: Plus },
+              ] as { id: AdminTab; label: string; icon: React.ElementType }[]).map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => setAdminTab(id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    adminTab === id
+                      ? 'bg-white text-purple-700 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {adminTab === 'my-orders' && (
+              <div className="relative w-full sm:w-80">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-purple-400" />
+                <Input
+                  type="text"
+                  placeholder="Search by customer name or phone..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 pr-8 bg-white border-purple-200 focus:border-purple-400 rounded-xl text-sm"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {adminTab === 'my-orders' && (
             <OrdersTable
-              orders={myOrders}
+              orders={filteredMyOrders}
               loading={loadingOrders}
               showSeller={false}
               isSuperAdmin={false}
@@ -956,30 +1007,53 @@ const SocialOrdersPage: React.FC = () => {
       {/* ── Super Admin View ─────────────────────────────── */}
       {isSuperAdmin && (
         <>
-          {/* Tab Switcher */}
-          <div className="flex gap-1 p-1 bg-gray-100 rounded-xl w-fit">
-            {([
-              { id: 'all-orders', label: 'All Orders', icon: ShoppingBag },
-              { id: 'stats', label: 'Seller Statistics', icon: BarChart3 },
-            ] as { id: SuperAdminTab; label: string; icon: React.ElementType }[]).map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => setSuperTab(id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  superTab === id
-                    ? 'bg-white text-purple-700 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </button>
-            ))}
+          {/* Tab Switcher + Search Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex gap-1 p-1 bg-gray-100 rounded-xl w-fit">
+              {([
+                { id: 'all-orders', label: 'All Orders', icon: ShoppingBag },
+                { id: 'stats', label: 'Seller Statistics', icon: BarChart3 },
+              ] as { id: SuperAdminTab; label: string; icon: React.ElementType }[]).map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => setSuperTab(id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    superTab === id
+                      ? 'bg-white text-purple-700 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {superTab === 'all-orders' && (
+              <div className="relative w-full sm:w-80">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-purple-400" />
+                <Input
+                  type="text"
+                  placeholder="Search by customer name or phone..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 pr-8 bg-white border-purple-200 focus:border-purple-400 rounded-xl text-sm"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {superTab === 'all-orders' && (
             <OrdersTable
-              orders={allOrders}
+              orders={filteredAllOrders}
               loading={loadingOrders}
               showSeller={true}
               isSuperAdmin={true}
