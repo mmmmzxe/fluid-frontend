@@ -16,6 +16,7 @@ import {
   Image as ImageIcon,
   Upload,
   X,
+  Check,
   ChevronRight,
   Loader2,
   TrendingUp,
@@ -403,10 +404,51 @@ interface OrdersTableProps {
   orders: SocialOrder[];
   loading: boolean;
   showSeller?: boolean;
+  isSuperAdmin?: boolean;
   onView: (id: string) => void;
+  onStatusChange?: (id: string, status: 'confirmed' | 'cancelled') => void;
 }
 
-function OrdersTable({ orders, loading, showSeller = false, onView }: OrdersTableProps) {
+function StatusBadge({ status }: { status: SocialOrder['status'] }) {
+  const s = status || 'pending';
+  if (s === 'confirmed') {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+        <Check className="h-3 w-3" />
+        Confirmed
+      </span>
+    );
+  }
+  if (s === 'cancelled') {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+        <X className="h-3 w-3" />
+        Cancelled
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+      <Loader2 className="h-3 w-3 animate-spin text-amber-500" />
+      Pending
+    </span>
+  );
+}
+
+function OrdersTable({ orders, loading, showSeller = false, isSuperAdmin = false, onView, onStatusChange }: OrdersTableProps) {
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  const handleStatus = async (e: React.MouseEvent, id: string, status: 'confirmed' | 'cancelled') => {
+    e.stopPropagation();
+    if (!onStatusChange) return;
+    setUpdatingId(id);
+    try {
+      await onStatusChange(id, status);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
@@ -441,8 +483,9 @@ function OrdersTable({ orders, loading, showSeller = false, onView }: OrdersTabl
                 <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Created By</th>
               )}
               <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
               <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
-              <th className="py-3.5 px-4"></th>
+              <th className="py-3.5 px-4 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50 bg-white">
@@ -494,21 +537,51 @@ function OrdersTable({ orders, loading, showSeller = false, onView }: OrdersTabl
                   </div>
                 </td>
                 <td className="py-4 px-4">
+                  <StatusBadge status={order.status} />
+                </td>
+                <td className="py-4 px-4">
                   <span className="font-semibold text-gray-800 text-sm">
                     {(order.price * order.quantity).toLocaleString()} EGP
                   </span>
                 </td>
                 <td className="py-4 px-4">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                    onClick={(e) => { e.stopPropagation(); onView(order._id); }}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    View
-                    <ChevronRight className="h-3 w-3 ml-0.5" />
-                  </Button>
+                  <div className="flex items-center justify-end gap-1.5">
+                    {isSuperAdmin && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={updatingId === order._id || order.status === 'confirmed'}
+                          className="h-8 px-2.5 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-800 disabled:opacity-40"
+                          onClick={(e) => handleStatus(e, order._id, 'confirmed')}
+                          title="Confirm Order"
+                        >
+                          <Check className="h-3.5 w-3.5 mr-1" />
+                          Confirm
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={updatingId === order._id || order.status === 'cancelled'}
+                          className="h-8 px-2.5 bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 hover:text-rose-800 disabled:opacity-40"
+                          onClick={(e) => handleStatus(e, order._id, 'cancelled')}
+                          title="Cancel Order"
+                        >
+                          <X className="h-3.5 w-3.5 mr-1" />
+                          Cancel
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                      onClick={(e) => { e.stopPropagation(); onView(order._id); }}
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      View
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -661,6 +734,16 @@ const SocialOrdersPage: React.FC = () => {
 
   const handleView = (id: string) => navigate(`/admin/social-orders/${id}`);
 
+  const handleStatusChange = async (id: string, status: 'confirmed' | 'cancelled') => {
+    try {
+      await socialOrderApi.updateStatus(id, status);
+      toast.success(`Order ${status === 'confirmed' ? 'confirmed' : 'cancelled'} successfully!`);
+      loadAllOrders();
+    } catch {
+      toast.error(`Failed to update order status`);
+    }
+  };
+
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
@@ -717,6 +800,7 @@ const SocialOrdersPage: React.FC = () => {
               orders={myOrders}
               loading={loadingOrders}
               showSeller={false}
+              isSuperAdmin={false}
               onView={handleView}
             />
           )}
@@ -761,7 +845,9 @@ const SocialOrdersPage: React.FC = () => {
               orders={allOrders}
               loading={loadingOrders}
               showSeller={true}
+              isSuperAdmin={true}
               onView={handleView}
+              onStatusChange={handleStatusChange}
             />
           )}
           {superTab === 'stats' && (
@@ -771,6 +857,7 @@ const SocialOrdersPage: React.FC = () => {
       )}
     </div>
   );
+
 };
 
 export default SocialOrdersPage;

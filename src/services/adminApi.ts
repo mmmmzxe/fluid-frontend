@@ -731,6 +731,7 @@ export interface SocialOrder {
   _id: string;
   createdBy: 'Fatma' | 'Mariam' | 'Zeinab';
   createdByUserId: string | { _id: string; name: string; email: string };
+  status: 'pending' | 'confirmed' | 'cancelled';
   productName: string;
   productImage?: { secure_url: string; public_id: string };
   price: number;
@@ -791,6 +792,13 @@ export const socialOrderApi = {
     const raw = response.data as any;
     return { message: raw?.message || 'Done', data: raw?.data ?? raw };
   },
+
+  /** SuperAdmin: update order status to confirmed or cancelled */
+  updateStatus: async (id: string, status: 'confirmed' | 'cancelled'): Promise<ApiResponse<SocialOrder>> => {
+    const response = await api.patch(`/social-orders/${id}/status`, { status });
+    return response.data;
+  },
 };
+
 
 export default api;

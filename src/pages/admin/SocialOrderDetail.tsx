@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppSelector } from '@/hooks/useRedux';
 import { socialOrderApi, SocialOrder } from '@/services/adminApi';
+import { toast } from 'sonner';
 import {
   ArrowLeft,
   Package,
@@ -19,6 +20,8 @@ import {
   FileText,
   Building,
   Lock,
+  Check,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -65,20 +68,38 @@ const SocialOrderDetail: React.FC = () => {
   const [order, setOrder] = useState<SocialOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+
+  const fetchOrder = async () => {
+    if (!id) return;
+    try {
+      const res = await socialOrderApi.getById(id);
+      setOrder(res.data);
+    } catch (err: any) {
+      setError(err?.message || 'Failed to load order');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!id) return;
-    (async () => {
-      try {
-        const res = await socialOrderApi.getById(id);
-        setOrder(res.data);
-      } catch (err: any) {
-        setError(err?.message || 'Failed to load order');
-      } finally {
-        setLoading(false);
-      }
-    })();
+    fetchOrder();
   }, [id]);
+
+  const handleUpdateStatus = async (status: 'confirmed' | 'cancelled') => {
+    if (!id) return;
+    setUpdatingStatus(true);
+    try {
+      const res = await socialOrderApi.updateStatus(id, status);
+      setOrder(res.data);
+      toast.success(`Order ${status === 'confirmed' ? 'confirmed' : 'cancelled'} successfully!`);
+    } catch {
+      toast.error('Failed to update status');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
 
   if (loading) {
     return (
@@ -132,23 +153,69 @@ const SocialOrderDetail: React.FC = () => {
       </div>
 
       {/* Meta bar */}
-      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-purple-100 bg-gradient-to-r from-purple-50 to-blue-50 px-5 py-4">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-purple-500" />
-          <span className="text-sm text-gray-600">Created <span className="font-semibold text-gray-800">{formatDate(order.createdAt)}</span></span>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-purple-100 bg-gradient-to-r from-purple-50 to-blue-50 px-5 py-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-purple-500" />
+            <span className="text-sm text-gray-600">Created <span className="font-semibold text-gray-800">{formatDate(order.createdAt)}</span></span>
+          </div>
+          <div className="h-4 w-px bg-purple-200" />
+          <div className="flex items-center gap-2">
+            <User className="h-4 w-4 text-purple-500" />
+            <span className="text-sm text-gray-600">By <span className="font-semibold text-purple-700">{order.createdBy}</span></span>
+          </div>
+          {isSuperAdmin && typeof order.createdByUserId === 'object' && (
+            <>
+              <div className="h-4 w-px bg-purple-200" />
+              <span className="text-xs text-gray-500">{(order.createdByUserId as any).email}</span>
+            </>
+          )}
         </div>
-        <div className="h-4 w-px bg-purple-200" />
-        <div className="flex items-center gap-2">
-          <User className="h-4 w-4 text-purple-500" />
-          <span className="text-sm text-gray-600">By <span className="font-semibold text-purple-700">{order.createdBy}</span></span>
+
+        {/* Status Badge */}
+        <div>
+          {order.status === 'confirmed' && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
+              <Check className="h-3.5 w-3.5" /> Confirmed
+            </span>
+          )}
+          {order.status === 'cancelled' && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">
+              <X className="h-3.5 w-3.5" /> Cancelled
+            </span>
+          )}
+          {(!order.status || order.status === 'pending') && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-600" /> Pending
+            </span>
+          )}
         </div>
-        {isSuperAdmin && typeof order.createdByUserId === 'object' && (
-          <>
-            <div className="h-4 w-px bg-purple-200" />
-            <span className="text-xs text-gray-500">{(order.createdByUserId as any).email}</span>
-          </>
-        )}
       </div>
+
+      {/* SuperAdmin Action Buttons */}
+      {isSuperAdmin && (
+        <div className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-gray-100 shadow-sm">
+          <span className="text-sm font-semibold text-gray-700">Order Actions:</span>
+          <Button
+            disabled={updatingStatus || order.status === 'confirmed'}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm"
+            onClick={() => handleUpdateStatus('confirmed')}
+          >
+            <Check className="mr-1.5 h-4 w-4" />
+            Confirm Order
+          </Button>
+          <Button
+            variant="outline"
+            disabled={updatingStatus || order.status === 'cancelled'}
+            className="border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:text-rose-800 rounded-xl"
+            onClick={() => handleUpdateStatus('cancelled')}
+          >
+            <X className="mr-1.5 h-4 w-4" />
+            Cancel Order
+          </Button>
+        </div>
+      )}
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* ── Product Card ──────────────────────────────────── */}
