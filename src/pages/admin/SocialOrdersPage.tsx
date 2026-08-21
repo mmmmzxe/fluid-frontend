@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const SELLER_NAMES = ['Fatma', 'Mariam', 'Zeinab'] as const;
+const SELLER_NAMES = ['Fatma', 'Mariam', 'Zeinab', 'Sara'] as const;
 type SellerName = typeof SELLER_NAMES[number];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
