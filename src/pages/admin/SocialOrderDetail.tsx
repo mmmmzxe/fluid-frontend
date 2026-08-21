@@ -104,7 +104,10 @@ const SocialOrderDetail: React.FC = () => {
   });
   const [editImageFile, setEditImageFile] = useState<File | null>(null);
   const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+  const [editDepositFile, setEditDepositFile] = useState<File | null>(null);
+  const [editDepositPreview, setEditDepositPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const depositInputRef = useRef<HTMLInputElement>(null);
 
   const fetchOrder = async () => {
     if (!id) return;
@@ -128,6 +131,7 @@ const SocialOrderDetail: React.FC = () => {
     setEditForm({
       productName: order.productName || '',
       price: String(order.price || ''),
+      deposit: String(order.deposit || ''),
       color: order.color || '',
       size: order.size || '',
       quantity: String(order.quantity || 1),
@@ -140,6 +144,8 @@ const SocialOrderDetail: React.FC = () => {
     });
     setEditImagePreview(order.productImage?.secure_url || null);
     setEditImageFile(null);
+    setEditDepositPreview(order.depositImage?.secure_url || null);
+    setEditDepositFile(null);
     setIsEditOpen(true);
   };
 
@@ -165,6 +171,7 @@ const SocialOrderDetail: React.FC = () => {
       const fd = new FormData();
       fd.append('productName', editForm.productName);
       fd.append('price', editForm.price);
+      if (editForm.deposit) fd.append('deposit', editForm.deposit);
       fd.append('quantity', editForm.quantity || '1');
       if (editForm.color) fd.append('color', editForm.color);
       if (editForm.size) fd.append('size', editForm.size);
@@ -175,6 +182,7 @@ const SocialOrderDetail: React.FC = () => {
       fd.append('city', editForm.city);
       if (editForm.deliveryNotes) fd.append('deliveryNotes', editForm.deliveryNotes);
       if (editImageFile) fd.append('productImage', editImageFile);
+      if (editDepositFile) fd.append('depositImage', editDepositFile);
 
       const res = await socialOrderApi.update(id, fd);
       setOrder(res.data);
@@ -358,16 +366,37 @@ const SocialOrderDetail: React.FC = () => {
             )}
 
             <InfoRow icon={Tag} label="Product Name" value={order.productName} iconColor="text-purple-400" />
-            <InfoRow icon={Hash} label="Price" value={`${order.price.toLocaleString()} EGP`} iconColor="text-purple-400" />
+            <InfoRow icon={Hash} label="Total Price" value={`${order.price.toLocaleString()} EGP`} iconColor="text-purple-400" />
+            {order.deposit !== undefined && order.deposit > 0 && (
+              <>
+                <InfoRow icon={Check} label="Deposit Paid" value={`${order.deposit.toLocaleString()} EGP`} iconColor="text-emerald-500" />
+                <InfoRow icon={Hash} label="Remaining Balance" value={`${Math.max(0, totalPrice - order.deposit).toLocaleString()} EGP`} iconColor="text-amber-500" />
+              </>
+            )}
             <InfoRow icon={Hash} label="Quantity" value={order.quantity} iconColor="text-purple-400" />
             <InfoRow icon={Palette} label="Color" value={order.color} iconColor="text-purple-400" />
             <InfoRow icon={Ruler} label="Size" value={order.size} iconColor="text-purple-400" />
             <InfoRow icon={FileText} label="Product Notes" value={order.productNotes} iconColor="text-purple-400" />
+
+            {/* Deposit Image Receipt */}
+            {order.depositImage?.secure_url && (
+              <div className="pt-3 border-t border-gray-100">
+                <p className="text-xs font-semibold text-emerald-800 uppercase tracking-wide mb-2">Deposit Receipt Image</p>
+                <a href={order.depositImage.secure_url} target="_blank" rel="noreferrer" className="inline-block group">
+                  <img
+                    src={order.depositImage.secure_url}
+                    alt="Deposit Receipt"
+                    className="h-32 w-32 object-cover rounded-xl border border-emerald-200 shadow-sm group-hover:opacity-90 transition-opacity"
+                  />
+                  <span className="text-xs text-blue-600 underline block mt-1">View Full Receipt</span>
+                </a>
+              </div>
+            )}
           </div>
 
           {/* Total */}
           <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-            <span className="text-sm text-gray-500">Total</span>
+            <span className="text-sm text-gray-500">Total Order Amount</span>
             <span className="text-lg font-bold text-purple-700">{totalPrice.toLocaleString()} EGP</span>
           </div>
         </div>
@@ -488,13 +517,24 @@ const SocialOrderDetail: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit-price" className="text-xs font-medium">Price (EGP) *</Label>
+                  <Label htmlFor="edit-price" className="text-xs font-medium">Total Price (EGP) *</Label>
                   <Input
                     id="edit-price"
                     type="number"
                     value={editForm.price}
                     onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
                     required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-deposit" className="text-xs font-medium text-emerald-700">Deposit Amount (EGP) (Optional)</Label>
+                  <Input
+                    id="edit-deposit"
+                    type="number"
+                    placeholder="0.00"
+                    value={editForm.deposit}
+                    onChange={(e) => setEditForm({ ...editForm, deposit: e.target.value })}
+                    className="border-emerald-200"
                   />
                 </div>
                 <div>
@@ -525,6 +565,50 @@ const SocialOrderDetail: React.FC = () => {
                   />
                 </div>
               </div>
+
+              {/* Edit Deposit Receipt Image */}
+              <div>
+                <Label className="text-xs font-medium text-emerald-800 mb-1 block">Deposit Receipt Image (Optional)</Label>
+                {editDepositPreview ? (
+                  <div className="relative inline-block">
+                    <img
+                      src={editDepositPreview}
+                      alt="deposit-preview"
+                      className="h-24 w-24 rounded-lg object-cover border border-emerald-200 shadow-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => { setEditDepositFile(null); setEditDepositPreview(null); }}
+                      className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center rounded-full bg-red-500 text-white"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    className="flex flex-col items-center justify-center gap-1 h-20 w-full rounded-lg border-2 border-dashed border-emerald-200 bg-emerald-50/30 cursor-pointer hover:border-emerald-400"
+                    onClick={() => depositInputRef.current?.click()}
+                  >
+                    <Upload className="h-4 w-4 text-emerald-500" />
+                    <span className="text-xs text-emerald-800">Click to upload deposit receipt image</span>
+                  </div>
+                )}
+                <input
+                  ref={depositInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    setEditDepositFile(f);
+                    const r = new FileReader();
+                    r.onload = () => setEditDepositPreview(r.result as string);
+                    r.readAsDataURL(f);
+                  }}
+                />
+              </div>
+
               <div>
                 <Label htmlFor="edit-pnotes" className="text-xs font-medium">Product Notes</Label>
                 <Textarea

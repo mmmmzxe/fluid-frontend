@@ -743,6 +743,8 @@ export interface SocialOrder {
   editHistory?: EditHistoryItem[];
   productName: string;
   productImage?: { secure_url: string; public_id: string };
+  deposit?: number;
+  depositImage?: { secure_url: string; public_id: string };
   price: number;
   color?: string;
   size?: string;

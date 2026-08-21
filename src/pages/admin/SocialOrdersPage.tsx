@@ -62,6 +62,7 @@ interface CreateFormProps {
 const EMPTY_FORM = {
   productName: '',
   price: '',
+  deposit: '',
   color: '',
   size: '',
   quantity: '1',
@@ -78,8 +79,11 @@ function CreateOrderForm({ sellerName, isSuperAdmin, onCreated }: CreateFormProp
   const [selectedSeller, setSelectedSeller] = useState<SellerName | ''>(sellerName);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [depositFile, setDepositFile] = useState<File | null>(null);
+  const [depositPreview, setDepositPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const depositInputRef = useRef<HTMLInputElement>(null);
 
   // Keep seller locked for admin
   useEffect(() => {
@@ -95,10 +99,25 @@ function CreateOrderForm({ sellerName, isSuperAdmin, onCreated }: CreateFormProp
     reader.readAsDataURL(file);
   };
 
+  const handleDepositImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setDepositFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setDepositPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
   const removeImage = () => {
     setImageFile(null);
     setImagePreview(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removeDepositImage = () => {
+    setDepositFile(null);
+    setDepositPreview(null);
+    if (depositInputRef.current) depositInputRef.current.value = '';
   };
 
   const handleChange = (field: keyof typeof EMPTY_FORM, value: string) => {
@@ -122,6 +141,7 @@ function CreateOrderForm({ sellerName, isSuperAdmin, onCreated }: CreateFormProp
       fd.append('createdBy', selectedSeller);
       fd.append('productName', form.productName);
       fd.append('price', form.price);
+      if (form.deposit) fd.append('deposit', form.deposit);
       fd.append('quantity', form.quantity || '1');
       if (form.color) fd.append('color', form.color);
       if (form.size) fd.append('size', form.size);
@@ -132,13 +152,17 @@ function CreateOrderForm({ sellerName, isSuperAdmin, onCreated }: CreateFormProp
       fd.append('city', form.city);
       if (form.deliveryNotes) fd.append('deliveryNotes', form.deliveryNotes);
       if (imageFile) fd.append('productImage', imageFile);
+      if (depositFile) fd.append('depositImage', depositFile);
 
       await socialOrderApi.create(fd);
       toast.success('Order created successfully!');
       setForm({ ...EMPTY_FORM });
       setImageFile(null);
       setImagePreview(null);
+      setDepositFile(null);
+      setDepositPreview(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
+      if (depositInputRef.current) depositInputRef.current.value = '';
       onCreated();
     } catch {
       // error handled by axios interceptor
@@ -162,7 +186,7 @@ function CreateOrderForm({ sellerName, isSuperAdmin, onCreated }: CreateFormProp
 
             {/* Image upload */}
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-2 block">Product Image</Label>
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">Product Image (Optional)</Label>
               {imagePreview ? (
                 <div className="relative inline-block">
                   <img
@@ -184,7 +208,7 @@ function CreateOrderForm({ sellerName, isSuperAdmin, onCreated }: CreateFormProp
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <Upload className="h-6 w-6 text-purple-400" />
-                  <span className="text-sm text-gray-500">Click to upload image</span>
+                  <span className="text-sm text-gray-500">Click to upload product image</span>
                   <span className="text-xs text-gray-400">PNG, JPG up to 10MB</span>
                 </div>
               )}
@@ -212,7 +236,7 @@ function CreateOrderForm({ sellerName, isSuperAdmin, onCreated }: CreateFormProp
               </div>
               <div>
                 <Label htmlFor="so-price" className="text-sm font-medium text-gray-700 mb-1 block">
-                  Price (EGP) <span className="text-red-500">*</span>
+                  Total Price (EGP) <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="so-price"
@@ -223,6 +247,21 @@ function CreateOrderForm({ sellerName, isSuperAdmin, onCreated }: CreateFormProp
                   value={form.price}
                   onChange={(e) => handleChange('price', e.target.value)}
                   className="bg-white border-purple-200 focus:border-purple-400 focus:ring-purple-400/20"
+                />
+              </div>
+              <div>
+                <Label htmlFor="so-deposit" className="text-sm font-medium text-emerald-700 mb-1 block">
+                  Deposit Amount (EGP) <span className="text-xs font-normal text-gray-400">(Optional)</span>
+                </Label>
+                <Input
+                  id="so-deposit"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={form.deposit}
+                  onChange={(e) => handleChange('deposit', e.target.value)}
+                  className="bg-white border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20"
                 />
               </div>
               <div>
@@ -260,6 +299,46 @@ function CreateOrderForm({ sellerName, isSuperAdmin, onCreated }: CreateFormProp
                 />
               </div>
             </div>
+
+            {/* Deposit Image Upload */}
+            <div className="pt-2">
+              <Label className="text-sm font-medium text-emerald-800 mb-2 block">
+                Deposit Receipt Image <span className="text-xs font-normal text-gray-400">(Optional)</span>
+              </Label>
+              {depositPreview ? (
+                <div className="relative inline-block">
+                  <img
+                    src={depositPreview}
+                    alt="deposit-preview"
+                    className="h-32 w-32 rounded-xl object-cover border border-emerald-300 shadow-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={removeDepositImage}
+                    className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center rounded-full bg-red-500 text-white shadow hover:bg-red-600 transition-colors"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : (
+                <div
+                  className="flex flex-col items-center justify-center gap-1.5 h-28 w-full rounded-xl border-2 border-dashed border-emerald-200 bg-emerald-50/40 cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/70 transition-all"
+                  onClick={() => depositInputRef.current?.click()}
+                >
+                  <Upload className="h-5 w-5 text-emerald-500" />
+                  <span className="text-xs font-medium text-emerald-800">Upload Deposit Receipt Image</span>
+                  <span className="text-[10px] text-gray-400">PNG, JPG up to 10MB</span>
+                </div>
+              )}
+              <input
+                ref={depositInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleDepositImageChange}
+              />
+            </div>
+
             <div>
               <Label htmlFor="so-productNotes" className="text-sm font-medium text-gray-700 mb-1 block">Product Notes</Label>
               <Textarea
