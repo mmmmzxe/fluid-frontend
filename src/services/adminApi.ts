@@ -735,21 +735,41 @@ export interface EditHistoryItem {
   previousState?: Record<string, any>;
 }
 
+// ─── Social order sub-types ───────────────────────────────────────────────────
+
+export interface SocialVariant {
+  color?: string;
+  size?: string;
+  quantity: number;
+}
+
+export interface SocialProduct {
+  productName: string;
+  productImage?: { secure_url: string; public_id: string };
+  price: number;
+  productNotes?: string;
+  variants: SocialVariant[];
+}
+
 export interface SocialOrder {
   _id: string;
   createdBy: 'Fatma' | 'Mariam' | 'Zeinab' | 'Sara';
   createdByUserId: string | { _id: string; name: string; email: string };
   status: 'pending' | 'confirmed' | 'cancelled';
   editHistory?: EditHistoryItem[];
-  productName: string;
+  // ── New multi-product array ──────────────────────────────────────────────────
+  products?: SocialProduct[];
+  // ── Legacy flat fields (backward compat for old orders) ─────────────────────
+  productName?: string;
   productImage?: { secure_url: string; public_id: string };
   deposit?: number;
   depositImage?: { secure_url: string; public_id: string };
-  price: number;
+  price?: number;
   color?: string;
   size?: string;
-  quantity: number;
+  quantity?: number;
   productNotes?: string;
+  // ── Customer / Delivery ──────────────────────────────────────────────────────
   customerName: string;
   customerPhone: string;
   customerAddress: string;
@@ -758,6 +778,7 @@ export interface SocialOrder {
   createdAt: string;
   updatedAt: string;
 }
+
 
 export interface SellerStat {
   seller: string;
