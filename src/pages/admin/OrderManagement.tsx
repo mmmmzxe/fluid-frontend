@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Package, Truck, CheckCircle, XCircle, ShoppingCart, DollarSign } from 'lucide-react';
+import { Eye, Package, Truck, CheckCircle, XCircle, ShoppingCart, DollarSign, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 import DataTable, { Column } from '@/components/admin/DataTable';
 import OrderDetails from '@/components/admin/OrderDetails';
@@ -87,6 +87,8 @@ const OrderManagement: React.FC = () => {
     switch (status) {
       case 'pending':
         return 'warning';
+      case 'pending_deposit':
+        return 'purple';
       case 'placed':
         return 'info';
       case 'on_way':
@@ -100,10 +102,24 @@ const OrderManagement: React.FC = () => {
     }
   };
 
+  const getStatusLabel = (status: string): string => {
+    switch (status) {
+      case 'pending': return 'Pending';
+      case 'pending_deposit': return 'Pending Deposit';
+      case 'placed': return 'Placed';
+      case 'on_way': return 'On Way';
+      case 'delivered': return 'Delivered';
+      case 'cancelled': return 'Cancelled';
+      default: return status;
+    }
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending':
         return <Package className="h-4 w-4" />;
+      case 'pending_deposit':
+        return <DollarSign className="h-4 w-4" />;
       case 'placed':
         return <Package className="h-4 w-4" />;
       case 'on_way':
@@ -175,13 +191,34 @@ const OrderManagement: React.FC = () => {
     {
       key: 'status',
       title: 'Status',
-      render: (value) => (
-        <EnhancedBadge variant={getStatusVariant(value)} glow>
-          <span className="flex items-center gap-1">
-            {getStatusIcon(value)}
-            {value.charAt(0).toUpperCase() + value.slice(1).replace('_', ' ')}
-          </span>
-        </EnhancedBadge>
+      render: (value, row) => (
+        <div className="flex flex-col gap-1">
+          <EnhancedBadge variant={getStatusVariant(value)} glow>
+            <span className="flex items-center gap-1">
+              {getStatusIcon(value)}
+              {getStatusLabel(value)}
+            </span>
+          </EnhancedBadge>
+          {/* WhatsApp confirmation badges */}
+          {row.whatsappConfirmation?.confirmedAt && (
+            <span
+              className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700 border border-green-200"
+              title={`Confirmed via WhatsApp on ${new Date(row.whatsappConfirmation.confirmedAt).toLocaleString()}`}
+            >
+              <MessageSquare className="h-2.5 w-2.5" />
+              WA Confirmed
+            </span>
+          )}
+          {row.depositConfirmation?.depositConfirmed && (
+            <span
+              className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200"
+              title={`Deposit confirmed via WhatsApp on ${new Date(row.depositConfirmation.confirmedAt).toLocaleString()}`}
+            >
+              <MessageSquare className="h-2.5 w-2.5" />
+              WA Deposit ✓
+            </span>
+          )}
+        </div>
       ),
     },
     {
@@ -204,6 +241,7 @@ const OrderManagement: React.FC = () => {
       options: [
         { value: '', label: 'All Status' },
         { value: 'pending', label: 'Pending' },
+        { value: 'pending_deposit', label: 'Pending Deposit (WA)' },
         { value: 'placed', label: 'Placed' },
         { value: 'on_way', label: 'On Way' },
         { value: 'delivered', label: 'Delivered' },

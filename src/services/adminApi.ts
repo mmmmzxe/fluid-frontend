@@ -114,9 +114,23 @@ export interface Product {
   updatedAt: string;
 }
 
+export interface WhatsAppConfirmation {
+  confirmedVia: 'whatsapp';
+  confirmedAt: string;
+  whatsappPhone: string;
+  whatsappMessageId: string;
+}
+
+export interface DepositConfirmation {
+  depositConfirmed: boolean;
+  confirmedVia: 'whatsapp';
+  confirmedAt: string;
+  whatsappMessageId: string;
+}
+
 export interface Order {
   _id: string;
-  status: 'pending' | 'placed' | 'on_way' | 'delivered' | 'cancelled';
+  status: 'pending' | 'pending_deposit' | 'placed' | 'on_way' | 'delivered' | 'cancelled';
   products: Array<{
     name?: string;
     productId: string;
@@ -151,7 +165,12 @@ export interface Order {
   email?: string;
   deposit?: number;
   depositReceipt?: { secure_url: string; public_id: string };
+
+  // ── WhatsApp integration ─────────────────────────────────────────────────
+  whatsappConfirmation?: WhatsAppConfirmation;
+  depositConfirmation?: DepositConfirmation;
 }
+
 
 export interface CartItem {
   product: Product;
