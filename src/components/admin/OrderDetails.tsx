@@ -346,6 +346,45 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
             </CardContent>
           </Card>
 
+          {/* ── Cancelled via WhatsApp ──────────────────────────────────── */}
+          {order.status === 'cancelled' && (order as any).whatsappConfirmation?.cancelledVia === 'whatsapp' && (
+            <Card className="border-red-200 bg-gradient-to-br from-red-50/60 via-white to-red-50/30 shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center justify-between text-base">
+                  <span className="flex items-center gap-2 text-red-900 font-semibold">
+                    <XCircle className="h-5 w-5 text-red-500" />
+                    Cancelled via WhatsApp
+                  </span>
+                  <Badge className="bg-red-100 text-red-800 border-red-300 font-medium">
+                    Customer Cancelled
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <div className="bg-white/90 p-3 rounded-lg border border-red-100">
+                  <div className="text-xs text-muted-foreground font-medium mb-1">Cancellation Details</div>
+                  {(order as any).whatsappConfirmation?.cancelledAt && (
+                    <div className="text-xs text-gray-500">
+                      Cancelled at: <span className="font-medium text-gray-700">
+                        {new Date((order as any).whatsappConfirmation.cancelledAt).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                  {(order as any).whatsappConfirmation?.whatsappPhone && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      WhatsApp: <span className="font-mono font-medium text-gray-700">
+                        {(order as any).whatsappConfirmation.whatsappPhone}
+                      </span>
+                    </div>
+                  )}
+                  <div className="text-xs text-red-500 font-medium mt-1.5">
+                    Customer replied ❌ <span className="font-arabic">إلغاء</span> / 2 on WhatsApp
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
