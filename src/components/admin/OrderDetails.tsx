@@ -19,9 +19,10 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 // [EDIT] Import new icons for payment method
-import { Package, Truck, CheckCircle, XCircle, User, MapPin, CreditCard, Wallet, Printer, Plus } from 'lucide-react';
+import { Package, Truck, CheckCircle, XCircle, User, MapPin, CreditCard, Wallet, Printer, Plus, MessageSquare, DollarSign, ExternalLink } from 'lucide-react';
 import { Order, productApi, Product, orderApi } from '@/services/adminApi';
 import { printInvoice } from '@/utils/printInvoice';
+import { normalizeImageUrl } from '@/lib/utils';
 import { toast } from 'sonner';
 
 interface OrderDetailsProps {
@@ -102,6 +103,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'pending_deposit': return 'bg-purple-100 text-purple-800 border-purple-300';
       case 'placed': return 'bg-blue-100 text-blue-800';
       case 'on_way': return 'bg-purple-100 text-purple-800';
       case 'delivered': return 'bg-green-100 text-green-800';
@@ -113,6 +115,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending': return <Package className="h-4 w-4" />;
+      case 'pending_deposit': return <DollarSign className="h-4 w-4" />;
       case 'placed': return <Package className="h-4 w-4" />;
       case 'on_way': return <Truck className="h-4 w-4" />;
       case 'delivered': return <CheckCircle className="h-4 w-4" />;
@@ -271,6 +274,78 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
             </Card>
           </div>
 
+          {/* ── WhatsApp Confirmation & Deposit Status ─────────────────── */}
+          <Card className="border-green-200 bg-gradient-to-br from-green-50/50 via-white to-emerald-50/30 shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center justify-between text-base">
+                <span className="flex items-center gap-2 text-green-900 font-semibold">
+                  <MessageSquare className="h-5 w-5 text-green-600" />
+                  WhatsApp Tracking & Confirmation
+                </span>
+                {order.whatsappConfirmation?.confirmedAt ? (
+                  <Badge className="bg-green-100 text-green-800 border-green-300 font-medium">
+                    Order Confirmed via WA
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-yellow-700 bg-yellow-50 border-yellow-200">
+                    Awaiting WA Reply
+                  </Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="bg-white/90 p-3 rounded-lg border border-green-100 shadow-xs">
+                  <div className="text-xs text-muted-foreground font-medium mb-1">Order Confirmation</div>
+                  {order.whatsappConfirmation?.confirmedAt ? (
+                    <div>
+                      <div className="font-semibold text-green-700 flex items-center gap-1.5 text-sm">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        Confirmed by Customer
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {new Date(order.whatsappConfirmation.confirmedAt).toLocaleString()}
+                      </div>
+                      {order.whatsappConfirmation.whatsappPhone && (
+                        <div className="text-xs text-gray-600 mt-0.5">
+                          Phone: <span className="font-mono font-medium">{order.whatsappConfirmation.whatsappPhone}</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-500 italic flex items-center gap-1">
+                      <span className="h-2 w-2 rounded-full bg-yellow-400 animate-pulse" />
+                      Pending confirmation response
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-white/90 p-3 rounded-lg border border-green-100 shadow-xs">
+                  <div className="text-xs text-muted-foreground font-medium mb-1">Deposit Confirmation</div>
+                  {order.depositConfirmation?.depositConfirmed ? (
+                    <div>
+                      <div className="font-semibold text-emerald-700 flex items-center gap-1.5 text-sm">
+                        <CheckCircle className="h-4 w-4 text-emerald-600" />
+                        Deposit Confirmed
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {new Date(order.depositConfirmation.confirmedAt).toLocaleString()}
+                      </div>
+                      <div className="text-xs text-emerald-600 font-medium mt-0.5">
+                        Receipt verified via WhatsApp
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-500 italic flex items-center gap-1">
+                      <span className="h-2 w-2 rounded-full bg-gray-300" />
+                      Deposit receipt not received yet
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -301,20 +376,37 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
 
               {order.depositReceipt?.secure_url && (
                 <div className="pt-4 border-t border-gray-100">
-                  <div className="font-medium mb-3 flex items-center gap-2">
-                    <Printer className="h-4 w-4" />
-                    Deposit Receipt
+                  <div className="font-medium mb-3 flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <Printer className="h-4 w-4" />
+                      Deposit Receipt Screenshot
+                      {order.depositConfirmation?.confirmedVia === 'whatsapp' && (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700 border border-green-200">
+                          <MessageSquare className="h-3 w-3" />
+                          Received via WhatsApp
+                        </span>
+                      )}
+                    </span>
+                    <a
+                      href={normalizeImageUrl(order.depositReceipt.secure_url)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Open Full Image
+                    </a>
                   </div>
                   <div className="relative group rounded-lg overflow-hidden border bg-gray-50 flex items-center justify-center p-2">
                     <img 
-                      src={order.depositReceipt.secure_url} 
+                      src={normalizeImageUrl(order.depositReceipt.secure_url)} 
                       alt="Deposit Receipt" 
-                      className="max-h-64 object-contain rounded-md shadow-sm"
-                      onClick={() => window.open(order.depositReceipt?.secure_url, '_blank')}
-                      style={{ cursor: 'pointer' }}
+                      className="max-h-72 object-contain rounded-md shadow-sm cursor-pointer transition-transform duration-200 group-hover:scale-[1.01]"
+                      onClick={() => window.open(normalizeImageUrl(order.depositReceipt?.secure_url), '_blank')}
                     />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                      <span className="text-white font-medium bg-black/50 px-3 py-1 rounded-full text-xs backdrop-blur-sm">
+                      <span className="text-white font-medium bg-black/60 px-3 py-1.5 rounded-full text-xs backdrop-blur-sm flex items-center gap-1">
+                        <ExternalLink className="h-3.5 w-3.5" />
                         Click to enlarge
                       </span>
                     </div>
