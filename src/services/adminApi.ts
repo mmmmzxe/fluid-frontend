@@ -862,5 +862,33 @@ export const socialOrderApi = {
   },
 };
 
+export interface WhatsAppSettingsData {
+  accountUniqueId: string;
+  apiSecret: string;
+  apiBaseUrl: string;
+  webhookSecret: string;
+  botPhone: string;
+  instapayPhone: string;
+  vodafonePhone: string;
+  isEnabled: boolean;
+  autoSendOrderConfirmation: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export const whatsappSettingsApi = {
+  getSettings: async (): Promise<ApiResponse<WhatsAppSettingsData>> => {
+    const response = await api.get('/whatsapp/settings');
+    return response.data;
+  },
+  updateSettings: async (data: Partial<WhatsAppSettingsData>): Promise<ApiResponse<WhatsAppSettingsData>> => {
+    const response = await api.put('/whatsapp/settings', data);
+    return response.data;
+  },
+  testMessage: async (recipient: string, message?: string): Promise<ApiResponse<any>> => {
+    const response = await api.post('/whatsapp/test', { recipient, message });
+    return response.data;
+  },
+};
 
 export default api;

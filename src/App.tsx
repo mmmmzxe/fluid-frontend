@@ -44,6 +44,7 @@ import ProductCare from "./pages/ProductCare";
 import Sitemap from "./pages/Sitemap";
 import SocialOrdersPage from "./pages/admin/SocialOrdersPage";
 import SocialOrderDetail from "./pages/admin/SocialOrderDetail";
+import WhatsAppSettingsManagement from "./pages/admin/WhatsAppSettingsManagement";
 
 const queryClient = new QueryClient();
 
@@ -103,6 +104,7 @@ const App = () => (
                 <Route path="support" element={<SupportManagement />} />
                 <Route path="shipping" element={<ShippingManagement />} />
                 <Route path="announcements" element={<AnnouncementManagement />} />
+                <Route path="whatsapp" element={<WhatsAppSettingsManagement />} />
                 <Route path="profile" element={<AdminProfile />} />
                 <Route path="social-orders" element={<SocialOrdersPage />} />
                 <Route path="social-orders/:id" element={<SocialOrderDetail />} />
