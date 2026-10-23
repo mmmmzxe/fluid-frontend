@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, Package, Truck, CheckCircle, XCircle, ShoppingCart, DollarSign, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 import DataTable, { Column } from '@/components/admin/DataTable';
@@ -22,7 +23,33 @@ const OrderManagement: React.FC = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
+  const [batchSubmitting, setBatchSubmitting] = useState(false);
   const { dialogState, confirm, closeDialog } = useConfirmDialog();
+
+  const handleBatchSubmitToFlextock = async () => {
+    if (selectedOrderIds.length === 0) return;
+    try {
+      setBatchSubmitting(true);
+      const res = await orderApi.bulkSubmitFlextock(selectedOrderIds);
+      const results = res.data || [];
+      const successful = results.filter((r) => r.status === 'success').length;
+      const failed = results.filter((r) => r.status === 'failed').length;
+
+      if (failed === 0) {
+        toast.success(`All ${successful} orders submitted to Flextock successfully!`);
+      } else {
+        toast.warning(`${successful} orders submitted, ${failed} failed.`);
+      }
+
+      setSelectedOrderIds([]);
+      fetchOrders();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to submit selected orders to Flextock');
+    } finally {
+      setBatchSubmitting(false);
+    }
+  };
 
   const fetchOrders = async () => {
     try {
@@ -147,7 +174,57 @@ const OrderManagement: React.FC = () => {
     return matchesSearch && matchesStatus;
   }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
+  const paginatedOrders = filteredOrders.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
+
+  const isAllPageSelected =
+    paginatedOrders.length > 0 &&
+    paginatedOrders.every((o) => selectedOrderIds.includes(o._id));
+
+  const isSomePageSelected =
+    paginatedOrders.some((o) => selectedOrderIds.includes(o._id)) && !isAllPageSelected;
+
+  const toggleSelectAllPage = () => {
+    if (isAllPageSelected) {
+      const idsToRemove = new Set(paginatedOrders.map((o) => o._id));
+      setSelectedOrderIds((prev) => prev.filter((id) => !idsToRemove.has(id)));
+    } else {
+      const idsToAdd = paginatedOrders.map((o) => o._id);
+      setSelectedOrderIds((prev) => Array.from(new Set([...prev, ...idsToAdd])));
+    }
+  };
+
   const columns: Column<Order>[] = [
+    {
+      key: 'select' as any,
+      title: (
+        <div className="flex items-center justify-center pl-1" onClick={(e) => e.stopPropagation()}>
+          <Checkbox
+            checked={isAllPageSelected ? true : isSomePageSelected ? 'indeterminate' : false}
+            onCheckedChange={toggleSelectAllPage}
+            aria-label="Select all orders on this page"
+          />
+        </div>
+      ),
+      render: (_, row: Order) => (
+        <div className="flex items-center justify-center pl-1" onClick={(e) => e.stopPropagation()}>
+          <Checkbox
+            checked={selectedOrderIds.includes(row._id)}
+            onCheckedChange={(checked) => {
+              if (checked) {
+                setSelectedOrderIds((prev) => [...prev, row._id]);
+              } else {
+                setSelectedOrderIds((prev) => prev.filter((id) => id !== row._id));
+              }
+            }}
+            aria-label={`Select order ${row._id}`}
+          />
+        </div>
+      ),
+      width: '44px',
+    },
     {
       key: '_id',
       title: 'Order ID',
@@ -222,17 +299,46 @@ const OrderManagement: React.FC = () => {
       ),
     },
     {
+      key: 'flextockSubmission' as any,
+      title: 'Flextock',
+      render: (_, row: Order) => {
+        const sub = row.flextockSubmission;
+        if (sub?.status === 'submitted') {
+          return (
+            <span
+              className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200"
+              title={`Flextock Code: ${sub.flextockOrderCode || 'Submitted'}`}
+            >
+              <Truck className="h-3 w-3 text-blue-600" />
+              {sub.flextockOrderCode ? sub.flextockOrderCode.slice(0, 14) : 'Submitted'}
+            </span>
+          );
+        }
+        if (sub?.status === 'failed') {
+          return (
+            <span
+              className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200"
+              title={sub.lastError || 'Submission failed'}
+            >
+              <XCircle className="h-3 w-3 text-rose-500" />
+              Failed
+            </span>
+          );
+        }
+        return (
+          <span className="text-xs text-gray-400">
+            {row.status === 'placed' || row.status === 'on_way' ? 'Pending' : '—'}
+          </span>
+        );
+      },
+    },
+    {
       key: 'createdAt',
       title: 'Date',
       render: (value) => new Date(value).toLocaleDateString(),
       sortable: true,
     },
   ];
-
-  const paginatedOrders = filteredOrders.slice(
-    (page - 1) * pageSize,
-    page * pageSize
-  );
 
   const statusFilters = [
     {
@@ -253,9 +359,22 @@ const OrderManagement: React.FC = () => {
 
   const actions = [
     {
-      label: 'Mark as Placed',
+      label: 'Confirm / Mark Placed',
       onClick: (order: Order) => handleStatusUpdate(order, 'placed'),
       icon: <Package className="h-4 w-4" />,
+    },
+    {
+      label: 'Submit to Flextock',
+      onClick: async (order: Order) => {
+        try {
+          await orderApi.retryFlextock(order._id);
+          toast.success('Submitted to Flextock successfully');
+          fetchOrders();
+        } catch (error: any) {
+          toast.error(error?.response?.data?.message || 'Failed to submit to Flextock');
+        }
+      },
+      icon: <Truck className="h-4 w-4" />,
     },
     {
       label: 'Mark as On Way',
@@ -319,6 +438,46 @@ const OrderManagement: React.FC = () => {
           loading={loading}
         />
       </div>
+
+      {/* Batch Action Toolbar for Flextock */}
+      {selectedOrderIds.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-xl border border-white/20 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-md shadow-inner flex-shrink-0">
+              <Truck className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <p className="font-bold text-sm">
+                {selectedOrderIds.length} {selectedOrderIds.length === 1 ? 'order' : 'orders'} selected
+              </p>
+              <p className="text-xs text-blue-100">
+                Submit selected orders directly to Flextock fulfillment
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              size="sm"
+              disabled={batchSubmitting}
+              onClick={handleBatchSubmitToFlextock}
+              className="bg-white text-blue-700 hover:bg-blue-50 font-bold shadow-md h-9 px-4 rounded-xl text-xs"
+            >
+              <Truck className={`mr-1.5 h-4 w-4 ${batchSubmitting ? 'animate-bounce' : ''}`} />
+              {batchSubmitting ? 'Submitting to Flextock...' : `Submit ${selectedOrderIds.length} to Flextock`}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={batchSubmitting}
+              onClick={() => setSelectedOrderIds([])}
+              className="text-white hover:bg-white/20 hover:text-white h-9 px-3 rounded-xl text-xs"
+            >
+              Clear Selection
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Card>
         <CardHeader>

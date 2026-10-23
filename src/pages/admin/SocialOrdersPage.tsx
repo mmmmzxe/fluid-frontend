@@ -21,8 +21,11 @@ import {
   Trash2,
   PlusCircle,
   Minus,
+  Truck,
+  AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -603,6 +606,7 @@ interface OrdersTableProps {
   isSuperAdmin?: boolean;
   onView: (id: string) => void;
   onStatusChange?: (id: string, status: 'confirmed' | 'cancelled') => void;
+  onRefresh?: () => void;
 }
 
 function StatusBadge({ status }: { status: SocialOrder['status'] }) {
@@ -627,6 +631,37 @@ function StatusBadge({ status }: { status: SocialOrder['status'] }) {
     </span>
   );
 }
+
+function FlextockBadge({ submission }: { submission?: SocialOrder['flextockSubmission'] }) {
+  if (submission?.status === 'submitted') {
+    return (
+      <span
+        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200"
+        title={`Flextock Code: ${submission.flextockOrderCode || 'Submitted'}`}
+      >
+        <Truck className="h-3 w-3 text-blue-600" />
+        {submission.flextockOrderCode ? submission.flextockOrderCode.slice(0, 14) : 'Submitted'}
+      </span>
+    );
+  }
+  if (submission?.status === 'failed') {
+    return (
+      <span
+        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200"
+        title={submission.lastError || 'Submission failed'}
+      >
+        <AlertCircle className="h-3 w-3 text-rose-500" />
+        Failed
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs text-gray-400 bg-gray-50 border border-gray-100">
+      —
+    </span>
+  );
+}
+
 
 /** Get a display summary of an order's products */
 function getProductSummary(order: SocialOrder): { name: string; thumb?: string; extraCount: number } {
@@ -663,8 +698,44 @@ function getTotalPrice(order: SocialOrder): number {
   return (order.price ?? 0) * (order.quantity ?? 1);
 }
 
-function OrdersTable({ orders, loading, showSeller = false, isSuperAdmin = false, onView, onStatusChange }: OrdersTableProps) {
+function OrdersTable({ orders, loading, showSeller = false, isSuperAdmin = false, onView, onStatusChange, onRefresh }: OrdersTableProps) {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkSubmitting, setBulkSubmitting] = useState(false);
+
+  const isAllSelected = orders.length > 0 && orders.every((o) => selectedIds.includes(o._id));
+  const isSomeSelected = orders.some((o) => selectedIds.includes(o._id)) && !isAllSelected;
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(orders.map((o) => o._id));
+    }
+  };
+
+  const handleBulkSubmitFlextock = async () => {
+    if (selectedIds.length === 0) return;
+    setBulkSubmitting(true);
+    try {
+      const res = await socialOrderApi.bulkSubmitFlextock(selectedIds);
+      const results = res.data || [];
+      const submittedCount = results.filter((r) => r.status === 'submitted').length;
+      const failedCount = results.filter((r) => r.status === 'failed').length;
+      if (submittedCount > 0) {
+        toast.success(`Successfully submitted ${submittedCount} order(s) to Flextock!`);
+      }
+      if (failedCount > 0) {
+        toast.error(`${failedCount} order(s) failed Flextock submission.`);
+      }
+      setSelectedIds([]);
+      onRefresh?.();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to submit orders to Flextock');
+    } finally {
+      setBulkSubmitting(false);
+    }
+  };
 
   const handleStatus = async (e: React.MouseEvent, id: string, status: 'confirmed' | 'cancelled') => {
     e.stopPropagation();
@@ -695,35 +766,101 @@ function OrdersTable({ orders, loading, showSeller = false, isSuperAdmin = false
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-gradient-to-r from-purple-50 to-blue-50 border-b border-gray-100">
-              <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order</th>
-              <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Products</th>
-              <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
-              {showSeller && (<th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Seller</th>)}
-              <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
-              <th className="py-3.5 px-4 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50 bg-white">
-            {orders.map((order, i) => {
-              const summary = getProductSummary(order);
-              const totalQty = getTotalQty(order);
-              const totalPrice = getTotalPrice(order);
-              const productCount = order.products?.length ?? 1;
+    <div className="space-y-4">
+      {/* Batch Action Toolbar for Flextock */}
+      {selectedIds.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-xl border border-white/20 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-md shadow-inner flex-shrink-0">
+              <Truck className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <p className="font-bold text-sm">
+                {selectedIds.length} {selectedIds.length === 1 ? 'order' : 'orders'} selected
+              </p>
+              <p className="text-xs text-blue-100">
+                Submit selected orders directly to Flextock fulfillment
+              </p>
+            </div>
+          </div>
 
-              return (
-                <tr
-                  key={order._id}
-                  className="hover:bg-purple-50/30 transition-colors cursor-pointer group"
-                  onClick={() => onView(order._id)}
-                >
-                  <td className="py-4 px-4">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              size="sm"
+              disabled={bulkSubmitting}
+              onClick={handleBulkSubmitFlextock}
+              className="bg-white text-blue-700 hover:bg-blue-50 font-bold shadow-md h-9 px-4 rounded-xl text-xs"
+            >
+              <Truck className={`mr-1.5 h-4 w-4 ${bulkSubmitting ? 'animate-bounce' : ''}`} />
+              {bulkSubmitting ? 'Submitting to Flextock...' : `Submit ${selectedIds.length} to Flextock`}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={bulkSubmitting}
+              onClick={() => setSelectedIds([])}
+              className="text-white hover:bg-white/20 hover:text-white h-9 px-3 rounded-xl text-xs"
+            >
+              Clear Selection
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className="overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gradient-to-r from-purple-50 to-blue-50 border-b border-gray-100">
+                <th className="w-10 py-3.5 px-4 text-center">
+                  <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={isAllSelected ? true : isSomeSelected ? 'indeterminate' : false}
+                      onCheckedChange={toggleSelectAll}
+                      aria-label="Select all orders"
+                    />
+                  </div>
+                </th>
+                <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order</th>
+                <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Products</th>
+                <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
+                {showSeller && (<th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Seller</th>)}
+                <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Flextock</th>
+                <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
+                <th className="py-3.5 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50 bg-white">
+              {orders.map((order, i) => {
+                const summary = getProductSummary(order);
+                const totalQty = getTotalQty(order);
+                const totalPrice = getTotalPrice(order);
+                const productCount = order.products?.length ?? 1;
+
+                return (
+                  <tr
+                    key={order._id}
+                    className="hover:bg-purple-50/30 transition-colors cursor-pointer group"
+                    onClick={() => onView(order._id)}
+                  >
+                    <td className="py-4 px-4 text-center" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-center">
+                        <Checkbox
+                          checked={selectedIds.includes(order._id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedIds((prev) => [...prev, order._id]);
+                            } else {
+                              setSelectedIds((prev) => prev.filter((id) => id !== order._id));
+                            }
+                          }}
+                          aria-label={`Select order ${order._id}`}
+                        />
+                      </div>
+                    </td>
+                    <td className="py-4 px-4">
                     <span className="font-semibold text-purple-700 text-sm">{orderSerial(order, i)}</span>
                   </td>
                   <td className="py-4 px-4">
@@ -762,6 +899,7 @@ function OrdersTable({ orders, loading, showSeller = false, isSuperAdmin = false
                     </div>
                   </td>
                   <td className="py-4 px-4"><StatusBadge status={order.status} /></td>
+                  <td className="py-4 px-4"><FlextockBadge submission={order.flextockSubmission} /></td>
                   <td className="py-4 px-4">
                     <span className="font-semibold text-gray-800 text-sm">
                       {totalPrice.toLocaleString()} EGP
@@ -798,6 +936,7 @@ function OrdersTable({ orders, loading, showSeller = false, isSuperAdmin = false
           </tbody>
         </table>
       </div>
+    </div>
     </div>
   );
 }
@@ -1019,7 +1158,7 @@ const SocialOrdersPage: React.FC = () => {
 
           {adminTab === 'my-orders' && (
             <OrdersTable orders={filteredMyOrders} loading={loadingOrders} showSeller={false}
-              isSuperAdmin={false} onView={handleView} />
+              isSuperAdmin={false} onView={handleView} onRefresh={loadMyOrders} />
           )}
           {adminTab === 'create' && (
             <div className="w-full">
@@ -1050,7 +1189,7 @@ const SocialOrdersPage: React.FC = () => {
 
           {superTab === 'all-orders' && (
             <OrdersTable orders={filteredAllOrders} loading={loadingOrders} showSeller={true}
-              isSuperAdmin={true} onView={handleView} onStatusChange={handleStatusChange} />
+              isSuperAdmin={true} onView={handleView} onStatusChange={handleStatusChange} onRefresh={loadAllOrders} />
           )}
           {superTab === 'stats' && (<SellerStatsView stats={stats} loading={loadingStats} />)}
         </>

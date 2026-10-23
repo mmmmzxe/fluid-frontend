@@ -36,7 +36,7 @@ import {
 
 export interface Column<T> {
   key: keyof T | string;
-  title: string;
+  title: string | React.ReactNode;
   render?: (value: any, row: T) => React.ReactNode;
   sortable?: boolean;
   width?: string;

@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 // [EDIT] Import new icons for payment method
-import { Package, Truck, CheckCircle, XCircle, User, MapPin, CreditCard, Wallet, Printer, Plus, MessageSquare, DollarSign, ExternalLink } from 'lucide-react';
+import { Package, Truck, CheckCircle, XCircle, User, MapPin, CreditCard, Wallet, Printer, Plus, MessageSquare, DollarSign, ExternalLink, RefreshCw, AlertCircle } from 'lucide-react';
 import { Order, productApi, Product, orderApi } from '@/services/adminApi';
 import { printInvoice } from '@/utils/printInvoice';
 import { normalizeImageUrl } from '@/lib/utils';
@@ -45,6 +45,34 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
   const [deposit, setDeposit] = useState<number>(order.deposit || 0);
   const [depositInput, setDepositInput] = useState<string>(order.deposit?.toString() || '0');
   const [savingDeposit, setSavingDeposit] = useState(false);
+  const [retryingFlextock, setRetryingFlextock] = useState(false);
+  const [syncingFlextock, setSyncingFlextock] = useState(false);
+
+  const handleRetryFlextock = async () => {
+    setRetryingFlextock(true);
+    try {
+      await orderApi.retryFlextock(order._id);
+      toast.success('Submitted to Flextock successfully');
+      if (onUpdate) onUpdate();
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Failed to submit to Flextock');
+    } finally {
+      setRetryingFlextock(false);
+    }
+  };
+
+  const handleSyncFlextock = async () => {
+    setSyncingFlextock(true);
+    try {
+      await orderApi.syncFlextock(order._id);
+      toast.success('Flextock status synced successfully');
+      if (onUpdate) onUpdate();
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Failed to sync with Flextock');
+    } finally {
+      setSyncingFlextock(false);
+    }
+  };
 
   useEffect(() => {
     setDeposit(order.deposit || 0);
@@ -559,6 +587,106 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                       <span>L.E{(Number(order.finalPrice ?? 0) - deposit).toFixed(2)}</span>
                     </div>
                   </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* ── Flextock Fulfillment Card ────────────────────────────────────── */}
+          <Card className="border-blue-200 bg-gradient-to-br from-blue-50/70 via-indigo-50/30 to-white shadow-sm overflow-hidden">
+            <CardHeader className="pb-3 border-b border-blue-100/60">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <CardTitle className="flex items-center gap-2.5 text-base text-gray-900">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
+                    <Truck className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <span className="font-bold">Flextock Fulfillment</span>
+                    <span className="block text-xs text-muted-foreground font-normal">
+                      Automated courier dispatch & delivery tracking
+                    </span>
+                  </div>
+                </CardTitle>
+
+                <div>
+                  {order.flextockSubmission?.status === 'submitted' && (
+                    <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold text-xs py-1 px-3">
+                      <CheckCircle className="h-3.5 w-3.5 mr-1 text-emerald-600" /> Submitted to Flextock
+                    </Badge>
+                  )}
+                  {order.flextockSubmission?.status === 'failed' && (
+                    <Badge className="bg-rose-100 text-rose-800 border-rose-300 font-semibold text-xs py-1 px-3">
+                      <AlertCircle className="h-3.5 w-3.5 mr-1 text-rose-600" /> Submission Failed
+                    </Badge>
+                  )}
+                  {(!order.flextockSubmission || order.flextockSubmission?.status === 'not_submitted') && (
+                    <Badge className="bg-amber-50 text-amber-800 border-amber-300 font-medium text-xs py-1 px-3">
+                      {order.status === 'placed' || order.status === 'on_way' ? 'Pending Submission' : 'Not Submitted'}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                <div className="bg-white/80 p-3 rounded-lg border border-blue-100">
+                  <span className="text-xs text-muted-foreground font-medium block">Flextock Order Code</span>
+                  <span className="font-mono font-bold text-gray-800">
+                    {order.flextockSubmission?.flextockOrderCode || `EXC-${order._id}`}
+                  </span>
+                </div>
+
+                <div className="bg-white/80 p-3 rounded-lg border border-blue-100">
+                  <span className="text-xs text-muted-foreground font-medium block">Submission Status</span>
+                  <span className="font-semibold text-gray-800 capitalize">
+                    {order.flextockSubmission?.status?.replace('_', ' ') || 'Not Submitted'}
+                  </span>
+                </div>
+
+                <div className="bg-white/80 p-3 rounded-lg border border-blue-100">
+                  <span className="text-xs text-muted-foreground font-medium block">Attempts</span>
+                  <span className="font-semibold text-gray-800">
+                    {order.flextockSubmission?.attempts || 0} attempt(s)
+                  </span>
+                </div>
+              </div>
+
+              {order.flextockSubmission?.lastStatusNote && (
+                <div className="bg-blue-100/70 p-3 rounded-lg border border-blue-200 text-xs text-blue-900">
+                  <span className="font-bold block mb-0.5">Tracking Update:</span>
+                  {order.flextockSubmission.lastStatusNote}
+                </div>
+              )}
+
+              {order.flextockSubmission?.lastError && (
+                <div className="bg-rose-50 p-3 rounded-lg border border-rose-200 text-xs text-rose-800">
+                  <span className="font-bold block mb-0.5">Last Error:</span>
+                  {order.flextockSubmission.lastError}
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center gap-2 pt-2">
+                <Button
+                  size="sm"
+                  disabled={retryingFlextock}
+                  onClick={handleRetryFlextock}
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs"
+                >
+                  <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${retryingFlextock ? 'animate-spin' : ''}`} />
+                  {order.flextockSubmission?.status === 'submitted' ? 'Re-Submit to Flextock' : 'Submit to Flextock'}
+                </Button>
+
+                {order.flextockSubmission?.status === 'submitted' && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={syncingFlextock}
+                    onClick={handleSyncFlextock}
+                    className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50 text-xs rounded-lg"
+                  >
+                    <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${syncingFlextock ? 'animate-spin' : ''}`} />
+                    {syncingFlextock ? 'Syncing...' : 'Sync Courier Status'}
+                  </Button>
                 )}
               </div>
             </CardContent>

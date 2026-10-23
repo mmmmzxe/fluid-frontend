@@ -169,6 +169,9 @@ export interface Order {
   // ── WhatsApp integration ─────────────────────────────────────────────────
   whatsappConfirmation?: WhatsAppConfirmation;
   depositConfirmation?: DepositConfirmation;
+
+  // ── Flextock integration ─────────────────────────────────────────────────
+  flextockSubmission?: FlextockSubmission;
 }
 
 
@@ -512,6 +515,21 @@ export const orderApi = {
     const response = await api.patch(`/order/${id}/cancelWithoutLogin`);
     return response.data;
   },
+
+  retryFlextock: async (id: string): Promise<ApiResponse<Order>> => {
+    const response = await api.post(`/order/${id}/retry-flextock`);
+    return response.data;
+  },
+
+  syncFlextock: async (id: string): Promise<ApiResponse<Order>> => {
+    const response = await api.post(`/order/${id}/sync-flextock`);
+    return response.data;
+  },
+
+  bulkSubmitFlextock: async (orderIds: string[]): Promise<ApiResponse<{ id: string; status: string; error?: string }[]>> => {
+    const response = await api.post('/order/bulk-submit-flextock', { orderIds });
+    return response.data;
+  },
 };
 
 // Cart API
@@ -770,6 +788,16 @@ export interface SocialProduct {
   variants: SocialVariant[];
 }
 
+export interface FlextockSubmission {
+  status: 'not_submitted' | 'submitted' | 'failed';
+  submittedAt?: string;
+  flextockOrderCode?: string;
+  lastError?: string;
+  attempts: number;
+  lastStatusNote?: string;
+  lastSyncedAt?: string;
+}
+
 export interface SocialOrder {
   _id: string;
   createdBy: 'Fatma' | 'Mariam' | 'Zeinab' | 'Sara';
@@ -794,6 +822,8 @@ export interface SocialOrder {
   customerAddress: string;
   city: string;
   deliveryNotes?: string;
+  // ── Flextock Tracking ────────────────────────────────────────────────────────
+  flextockSubmission?: FlextockSubmission;
   createdAt: string;
   updatedAt: string;
 }
@@ -858,6 +888,24 @@ export const socialOrderApi = {
   /** SuperAdmin: update order status to confirmed or cancelled */
   updateStatus: async (id: string, status: 'confirmed' | 'cancelled'): Promise<ApiResponse<SocialOrder>> => {
     const response = await api.patch(`/social-orders/${id}/status`, { status });
+    return response.data;
+  },
+
+  /** SuperAdmin: retry submitting an order to Flextock */
+  retryFlextock: async (id: string): Promise<ApiResponse<SocialOrder>> => {
+    const response = await api.post(`/social-orders/${id}/retry-flextock`);
+    return response.data;
+  },
+
+  /** SuperAdmin: sync order tracking status from Flextock */
+  syncFlextock: async (id: string): Promise<ApiResponse<SocialOrder>> => {
+    const response = await api.post(`/social-orders/${id}/sync-flextock`);
+    return response.data;
+  },
+
+  /** SuperAdmin: bulk submit selected social orders to Flextock */
+  bulkSubmitFlextock: async (orderIds: string[]): Promise<ApiResponse<{ id: string; status: string; error?: string }[]>> => {
+    const response = await api.post('/social-orders/bulk-submit-flextock', { orderIds });
     return response.data;
   },
 };

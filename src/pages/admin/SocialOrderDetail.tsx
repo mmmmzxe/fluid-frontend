@@ -28,6 +28,8 @@ import {
   PlusCircle,
   Trash2,
   Minus,
+  Truck,
+  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -244,6 +246,8 @@ const SocialOrderDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [retryingFlextock, setRetryingFlextock] = useState(false);
+  const [syncingFlextock, setSyncingFlextock] = useState(false);
 
   // Edit Modal
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -309,6 +313,40 @@ const SocialOrderDetail: React.FC = () => {
       toast.success(`Order ${status === 'confirmed' ? 'confirmed' : 'cancelled'} successfully!`);
     } catch { toast.error('Failed to update status'); }
     finally { setUpdatingStatus(false); }
+  };
+
+  const handleRetryFlextock = async () => {
+    if (!id) return;
+    setRetryingFlextock(true);
+    try {
+      const res = await socialOrderApi.retryFlextock(id);
+      setOrder(res.data);
+      if (res.data?.flextockSubmission?.status === 'submitted') {
+        toast.success(`Submitted to Flextock: ${res.data.flextockSubmission.flextockOrderCode}`);
+      } else if (res.data?.flextockSubmission?.status === 'failed') {
+        toast.error(`Flextock submission failed: ${res.data.flextockSubmission.lastError || 'Unknown error'}`);
+      } else {
+        toast.info('Flextock submission attempted');
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to submit to Flextock');
+    } finally {
+      setRetryingFlextock(false);
+    }
+  };
+
+  const handleSyncFlextock = async () => {
+    if (!id) return;
+    setSyncingFlextock(true);
+    try {
+      const res = await socialOrderApi.syncFlextock(id);
+      setOrder(res.data);
+      toast.success('Flextock status synced successfully!');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to sync with Flextock');
+    } finally {
+      setSyncingFlextock(false);
+    }
   };
 
   const handleEditSubmit = async (e: React.FormEvent) => {
@@ -496,6 +534,106 @@ const SocialOrderDetail: React.FC = () => {
           </Button>
         </div>
       )}
+
+      {/* ── Flextock Fulfillment Card ────────────────────────────────────── */}
+      <div className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50/70 via-indigo-50/30 to-white p-5 shadow-sm space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm flex-shrink-0">
+              <Truck className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-gray-900 text-base">Flextock Fulfillment</h3>
+                {order.flextockSubmission?.status === 'submitted' && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    <Check className="h-3 w-3" /> Submitted
+                  </span>
+                )}
+                {order.flextockSubmission?.status === 'failed' && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-200">
+                    <AlertCircle className="h-3 w-3" /> Submission Failed
+                  </span>
+                )}
+                {(!order.flextockSubmission || order.flextockSubmission?.status === 'not_submitted') && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                    {order.status === 'confirmed' ? 'Pending Submission' : 'Awaiting Order Confirmation'}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {order.flextockSubmission?.status === 'submitted'
+                  ? `External order code: ${order.flextockSubmission.flextockOrderCode}`
+                  : 'Automatic fulfillment dispatch via Flextock API on order confirmation'}
+              </p>
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {isSuperAdmin && order.flextockSubmission?.status === 'submitted' && (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={syncingFlextock}
+                onClick={handleSyncFlextock}
+                className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-800 rounded-xl text-xs h-8"
+              >
+                <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${syncingFlextock ? 'animate-spin' : ''}`} />
+                {syncingFlextock ? 'Syncing...' : 'Sync Status'}
+              </Button>
+            )}
+
+            {isSuperAdmin && order.status === 'confirmed' && order.flextockSubmission?.status !== 'submitted' && (
+              <Button
+                size="sm"
+                disabled={retryingFlextock}
+                onClick={handleRetryFlextock}
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs h-8 shadow-sm"
+              >
+                <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${retryingFlextock ? 'animate-spin' : ''}`} />
+                {retryingFlextock ? 'Submitting to Flextock...' : 'Submit to Flextock'}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Detailed submission info when available */}
+        {(order.flextockSubmission?.flextockOrderCode || order.flextockSubmission?.lastError || order.flextockSubmission?.lastStatusNote) && (
+          <div className="pt-2 border-t border-blue-100/60 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+            {order.flextockSubmission.flextockOrderCode && (
+              <div>
+                <span className="text-gray-400 block font-medium">FLEXTOCK ORDER CODE</span>
+                <span className="font-mono font-semibold text-gray-800">{order.flextockSubmission.flextockOrderCode}</span>
+              </div>
+            )}
+            {order.flextockSubmission.submittedAt && (
+              <div>
+                <span className="text-gray-400 block font-medium">SUBMITTED AT</span>
+                <span className="text-gray-700">{formatDate(order.flextockSubmission.submittedAt)}</span>
+              </div>
+            )}
+            {order.flextockSubmission.attempts > 0 && (
+              <div>
+                <span className="text-gray-400 block font-medium">SUBMISSION ATTEMPTS</span>
+                <span className="text-gray-700">{order.flextockSubmission.attempts} attempt(s)</span>
+              </div>
+            )}
+            {order.flextockSubmission.lastStatusNote && (
+              <div className="sm:col-span-2 md:col-span-3 bg-blue-100/50 p-2.5 rounded-lg border border-blue-200/50">
+                <span className="text-blue-900 font-medium block">Tracking Update:</span>
+                <span className="text-blue-800">{order.flextockSubmission.lastStatusNote}</span>
+              </div>
+            )}
+            {order.flextockSubmission.lastError && (
+              <div className="sm:col-span-2 md:col-span-3 bg-rose-50 p-2.5 rounded-lg border border-rose-200">
+                <span className="text-rose-900 font-medium block">Error Details:</span>
+                <span className="text-rose-700">{order.flextockSubmission.lastError}</span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* ── Products Card ──────────────────────────────────── */}
