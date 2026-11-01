@@ -109,7 +109,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
         title: "WhatsApp Settings",
         url: "/admin/whatsapp",
         icon: MessageSquare,
-        roles: ["superAdmin", "admin"],
+        roles: ["superAdmin"],
       },
       {
         title: "Social Media Orders",
@@ -162,10 +162,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
                       tooltip={item.title}
                       className={`
                         transition-all duration-200 ease-in-out rounded-lg h-10
-                        ${
-                          isActive
-                            ? "bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-purple-700 font-medium shadow-sm border border-purple-100"
-                            : "text-muted-foreground hover:text-foreground hover:bg-white/60"
+                        ${isActive
+                          ? "bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-purple-700 font-medium shadow-sm border border-purple-100"
+                          : "text-muted-foreground hover:text-foreground hover:bg-white/60"
                         }
                       `}
                     >
