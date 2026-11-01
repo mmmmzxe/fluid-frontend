@@ -311,7 +311,7 @@ function ProductCard({ product, index, canRemove, onChange, onRemove }: ProductC
 interface CreateFormProps {
   sellerName: SellerName | '';
   isSuperAdmin: boolean;
-  onCreated: () => void;
+  onCreated: (order?: SocialOrder) => void;
 }
 
 function CreateOrderForm({ sellerName, isSuperAdmin, onCreated }: CreateFormProps) {
@@ -408,10 +408,10 @@ function CreateOrderForm({ sellerName, isSuperAdmin, onCreated }: CreateFormProp
         if (p.imageFile) fd.append(`productImage_${i}`, p.imageFile);
       });
 
-      await socialOrderApi.create(fd);
+      const { data: createdOrder } = await socialOrderApi.create(fd);
       toast.success('Order created successfully!');
       resetForm();
-      onCreated();
+      onCreated(createdOrder);
     } catch {
       // error handled by axios interceptor
     } finally {
@@ -768,7 +768,7 @@ function OrdersTable({ orders, loading, showSeller = false, isSuperAdmin = false
   return (
     <div className="space-y-4">
       {/* Batch Action Toolbar for Flextock */}
-      {selectedIds.length > 0 && (
+      {isSuperAdmin && selectedIds.length > 0 && (
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-xl border border-white/20 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-md shadow-inner flex-shrink-0">
@@ -812,15 +812,17 @@ function OrdersTable({ orders, loading, showSeller = false, isSuperAdmin = false
           <table className="w-full">
             <thead>
               <tr className="bg-gradient-to-r from-purple-50 to-blue-50 border-b border-gray-100">
-                <th className="w-10 py-3.5 px-4 text-center">
-                  <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-                    <Checkbox
-                      checked={isAllSelected ? true : isSomeSelected ? 'indeterminate' : false}
-                      onCheckedChange={toggleSelectAll}
-                      aria-label="Select all orders"
-                    />
-                  </div>
-                </th>
+                {isSuperAdmin && (
+                  <th className="w-10 py-3.5 px-4 text-center">
+                    <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        checked={isAllSelected ? true : isSomeSelected ? 'indeterminate' : false}
+                        onCheckedChange={toggleSelectAll}
+                        aria-label="Select all orders"
+                      />
+                    </div>
+                  </th>
+                )}
                 <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order</th>
                 <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Products</th>
                 <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
@@ -845,21 +847,23 @@ function OrdersTable({ orders, loading, showSeller = false, isSuperAdmin = false
                     className="hover:bg-purple-50/30 transition-colors cursor-pointer group"
                     onClick={() => onView(order._id)}
                   >
-                    <td className="py-4 px-4 text-center" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-center">
-                        <Checkbox
-                          checked={selectedIds.includes(order._id)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setSelectedIds((prev) => [...prev, order._id]);
-                            } else {
-                              setSelectedIds((prev) => prev.filter((id) => id !== order._id));
-                            }
-                          }}
-                          aria-label={`Select order ${order._id}`}
-                        />
-                      </div>
-                    </td>
+                    {isSuperAdmin && (
+                      <td className="py-4 px-4 text-center" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-center">
+                          <Checkbox
+                            checked={selectedIds.includes(order._id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedIds((prev) => [...prev, order._id]);
+                              } else {
+                                setSelectedIds((prev) => prev.filter((id) => id !== order._id));
+                              }
+                            }}
+                            aria-label={`Select order ${order._id}`}
+                          />
+                        </div>
+                      </td>
+                    )}
                     <td className="py-4 px-4">
                     <span className="font-semibold text-purple-700 text-sm">{orderSerial(order, i)}</span>
                   </td>
@@ -1163,7 +1167,15 @@ const SocialOrdersPage: React.FC = () => {
           {adminTab === 'create' && (
             <div className="w-full">
               <CreateOrderForm sellerName={sellerName} isSuperAdmin={false}
-                onCreated={() => { setAdminTab('my-orders'); loadMyOrders(); }} />
+                onCreated={(order) => {
+                  // Older deployed APIs may reply with an empty object. Use the
+                  // POST result when available, but always load the server list.
+                  if (order?._id) {
+                    setMyOrders((current) => [order, ...current.filter((item) => item._id !== order._id)]);
+                  }
+                  setAdminTab('my-orders');
+                  loadMyOrders();
+                }} />
             </div>
           )}
         </>

@@ -856,7 +856,11 @@ export const socialOrderApi = {
 
   /** SuperAdmin: get all orders from all sellers */
   getAll: async (): Promise<ApiResponse<SocialOrder[]>> => {
-    const response = await api.get('/social-orders');
+    // Never reuse an ETag response for an order list after an order is created.
+    const response = await api.get('/social-orders', {
+      headers: { 'Cache-Control': 'no-store', Pragma: 'no-cache' },
+      params: { _: Date.now() },
+    });
     const raw = response.data as any;
     const list: SocialOrder[] = Array.isArray(raw?.data) ? raw.data : [];
     return { message: raw?.message || 'Done', data: list };
@@ -864,7 +868,10 @@ export const socialOrderApi = {
 
   /** Admin seller: get only their own orders */
   getMyOrders: async (): Promise<ApiResponse<SocialOrder[]>> => {
-    const response = await api.get('/social-orders/my-orders');
+    const response = await api.get('/social-orders/my-orders', {
+      headers: { 'Cache-Control': 'no-store', Pragma: 'no-cache' },
+      params: { _: Date.now() },
+    });
     const raw = response.data as any;
     const list: SocialOrder[] = Array.isArray(raw?.data) ? raw.data : [];
     return { message: raw?.message || 'Done', data: list };
