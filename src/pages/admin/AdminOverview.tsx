@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import EnhancedStatsCard from '@/components/admin/EnhancedStatsCard';
@@ -14,68 +14,15 @@ import {
   Plus,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { analyticsApi, OverTimePoint } from '@/services/analytics';
 import { useAppSelector } from '@/hooks/useRedux';
+import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
 
 const AdminOverview: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAppSelector((state) => state.user);
   const role = user?.role || 'user';
 
-  const [ordersSeries, setOrdersSeries] = useState<OverTimePoint[] | null>(null);
-  const [salesSeries, setSalesSeries] = useState<OverTimePoint[] | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Dynamic date range - last 30 days
-  const params = useMemo(() => {
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 30);
-
-    return {
-      startDate: startDate.toISOString().split('T')[0],
-      endDate: endDate.toISOString().split('T')[0],
-      interval: 'day' as const,
-    };
-  }, []);
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      // Skip analytics fetch for admin role to avoid invalid token errors
-      if (role === 'admin') {
-        return;
-      }
-      try {
-        setLoading(true);
-        setError(null);
-        const [ordersRes, salesRes] = await Promise.all([
-          analyticsApi.getOrdersOverTime(params),
-          analyticsApi.getSalesOverTime(params),
-        ]);
-        if (!mounted) return;
-        setOrdersSeries(ordersRes?.data || []);
-        setSalesSeries(salesRes?.data || []);
-      } catch (e: any) {
-        if (!mounted) return;
-        setError(e?.message || 'Failed to load analytics');
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    })();
-    return () => { mounted = false; };
-  }, [params, role]);
-
-  const totalOrders = useMemo(() => {
-    if (!ordersSeries) return 0;
-    return ordersSeries.reduce((sum, p) => sum + (Number(p.value) || 0), 0);
-  }, [ordersSeries]);
-
-  const totalRevenue = useMemo(() => {
-    if (!salesSeries) return 0;
-    return salesSeries.reduce((sum, p) => sum + (Number(p.value) || 0), 0);
-  }, [salesSeries]);
+  const { loading, totalOrders, totalRevenue } = useDashboardAnalytics(role === 'superAdmin');
 
   return (
     <div className="space-y-4 md:space-y-8">

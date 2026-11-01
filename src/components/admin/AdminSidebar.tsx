@@ -1,4 +1,3 @@
-import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -15,26 +14,18 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
-  Package,
-  ShoppingCart,
-  Users,
-  FolderOpen,
-  HeadphonesIcon,
-  Truck,
-  Settings,
   LogOut,
   User,
-  Megaphone,
-  Share2,
-  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch } from "@/hooks/useRedux";
 import { logout } from "@/store/slices/userSlice";
 import { useNavigate } from "react-router-dom";
+import { getAdminNavigation, isAdminNavigationActive } from '@/features/admin/navigation';
+import type { AdminRole } from '@/lib/adminSession';
 
 interface AdminSidebarProps {
-  userRole: "superAdmin" | "admin";
+  userRole: AdminRole;
 }
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
@@ -48,81 +39,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
     navigate("/login");
   };
 
-  // Define menu items based on role
-  const getMenuItems = () => {
-    const allItems = [
-      {
-        title: "Dashboard",
-        url: "/admin",
-        icon: LayoutDashboard,
-        roles: ["superAdmin"],
-      },
-      {
-        title: "Categories",
-        url: "/admin/categories",
-        icon: FolderOpen,
-        roles: ["superAdmin"],
-      },
-      {
-        title: "Products",
-        url: "/admin/products",
-        icon: Package,
-        roles: ["superAdmin"],
-      },
-      {
-        title: "Orders",
-        url: "/admin/orders",
-        icon: ShoppingCart,
-        roles: ["superAdmin"],
-      },
-      {
-        title: "Users",
-        url: "/admin/users",
-        icon: Users,
-        roles: ["superAdmin"],
-      },
-      {
-        title: "SubCategories",
-        url: "/admin/subcategories",
-        icon: FolderOpen,
-        roles: ["superAdmin"],
-      },
-      {
-        title: "Support",
-        url: "/admin/support",
-        icon: HeadphonesIcon,
-        roles: ["superAdmin"],
-      },
-      {
-        title: "Shipping",
-        url: "/admin/shipping",
-        icon: Truck,
-        roles: ["superAdmin"],
-      },
-      {
-        title: "Announcements",
-        url: "/admin/announcements",
-        icon: Megaphone,
-        roles: ["superAdmin"],
-      },
-      {
-        title: "WhatsApp Settings",
-        url: "/admin/whatsapp",
-        icon: MessageSquare,
-        roles: ["superAdmin"],
-      },
-      {
-        title: "Social Media Orders",
-        url: "/admin/social-orders",
-        icon: Share2,
-        roles: ["superAdmin", "admin"],
-      },
-    ];
-
-    return allItems.filter((item) => item.roles.includes(userRole));
-  };
-
-  const menuItems = getMenuItems();
+  const menuItems = getAdminNavigation(userRole);
 
   return (
     <Sidebar variant="inset" className="border-r-0 bg-transparent">
@@ -151,9 +68,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ userRole }) => {
           <SidebarGroupContent>
             <SidebarMenu className="px-2 space-y-1">
               {menuItems.map((item) => {
-                const isActive =
-                  location.pathname === item.url ||
-                  location.pathname.startsWith(`${item.url}/`);
+                const isActive = isAdminNavigationActive(location.pathname, item);
                 return (
                   <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton

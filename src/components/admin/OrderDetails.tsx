@@ -51,8 +51,15 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
   const handleRetryFlextock = async () => {
     setRetryingFlextock(true);
     try {
-      await orderApi.retryFlextock(order._id);
-      toast.success('Submitted to Flextock successfully');
+      const res = await orderApi.retryFlextock(order._id);
+      const updatedOrder = (res as any)?.data || res;
+      if (updatedOrder?.flextockSubmission?.status === 'submitted') {
+        toast.success(`Submitted to Flextock: ${updatedOrder.flextockSubmission.flextockOrderCode || `EXC-${order._id}`}`);
+      } else if (updatedOrder?.flextockSubmission?.status === 'failed') {
+        toast.error(`Flextock submission failed: ${updatedOrder.flextockSubmission.lastError || 'Unknown error'}`);
+      } else {
+        toast.success('Submitted to Flextock successfully');
+      }
       if (onUpdate) onUpdate();
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Failed to submit to Flextock');
@@ -662,6 +669,11 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                 <div className="bg-rose-50 p-3 rounded-lg border border-rose-200 text-xs text-rose-800">
                   <span className="font-bold block mb-0.5">Last Error:</span>
                   {order.flextockSubmission.lastError}
+                  {/already exists/i.test(order.flextockSubmission.lastError) && (
+                    <span className="block mt-1 text-blue-700 font-medium">
+                      💡 Order was already created in Flextock. Click <strong>Sync Courier Status</strong> or <strong>Submit to Flextock</strong> to update.
+                    </span>
+                  )}
                 </div>
               )}
 
@@ -676,7 +688,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                   {order.flextockSubmission?.status === 'submitted' ? 'Re-Submit to Flextock' : 'Submit to Flextock'}
                 </Button>
 
-                {order.flextockSubmission?.status === 'submitted' && (
+                {(order.flextockSubmission?.status === 'submitted' || order.flextockSubmission?.flextockOrderCode) && (
                   <Button
                     size="sm"
                     variant="outline"
